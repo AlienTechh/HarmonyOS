@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyanogenMod 10 (Android 4.x) Emulator</title>
+    <title>Galaxy S3 Neo Hardware Emulator</title>
     <style>
         * {
             box-sizing: border-box;
@@ -15,7 +15,7 @@
         }
 
         body {
-            background: #121212;
+            background: #1a1a1a;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -23,67 +23,112 @@
             color: #fff;
         }
 
-        /* Retro Android 4.x Era Phone Frame (Thicker bezels, classic touch keys) */
-        .phone-frame {
+        /* GALAXY S3 NEO PHYSICAL CHASSIS 
+           Famous "Nature UX" pebble shape: heavily rounded corners, glossy hyperglaze look
+        */
+        .s3-neo-frame {
             width: 360px;
             height: 680px;
-            background: #1a1a1a;
-            border: 4px solid #333;
-            border-radius: 28px;
+            background: #f7f9fa; /* Marble White Edition */
+            border-radius: 55px; /* Distinct organic rounded curves */
             position: relative;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
-            overflow: hidden;
+            box-shadow: 
+                inset 0 0 4px rgba(0,0,0,0.1),
+                0 0 0 3px #d1d5db, /* Faux chrome metallic bezel ring */
+                0 20px 50px rgba(0, 0, 0, 0.6);
             display: flex;
             flex-direction: column;
+            padding: 55px 22px 65px 22px; /* Authentic bezel distributions */
         }
 
-        /* Retro Speaker Ear Piece */
-        .ear-piece {
+        /* Top Bezel Hardware Elements */
+        .top-bezel-assembly {
             position: absolute;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 4px;
-            background: #444;
-            border-radius: 2px;
-            z-index: 100;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 55px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* Android 4.x Holo-style Status Bar */
+        /* Metallic Speaker Mesh */
+        .ear-speaker {
+            width: 55px;
+            height: 6px;
+            background: #b0b5bc;
+            border-radius: 3px;
+            border: 1px solid #9aa0a6;
+            box-shadow: inset 0 1px 1px rgba(0,0,0,0.2);
+        }
+
+        /* Front Facing Sensors */
+        .sensor-group {
+            position: absolute;
+            left: 65px;
+            display: flex;
+            gap: 6px;
+        }
+        .sensor-dot {
+            width: 6px;
+            height: 6px;
+            background: #333;
+            border-radius: 50%;
+            opacity: 0.7;
+        }
+        .camera-lens {
+            position: absolute;
+            right: 65px;
+            width: 10px;
+            height: 10px;
+            background: #222;
+            border: 1px solid #ccd1d9;
+            border-radius: 50%;
+        }
+
+        /* 4.8-inch Super AMOLED Glass Screen Frame */
+        .display-screen {
+            flex: 1;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #000; /* Crisp screen matrix masking boundary */
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        /* Status Bar (Styled Neutral Gray) */
         .status-bar {
-            height: 26px;
-            padding: 4px 12px 0 12px;
+            height: 24px;
+            padding: 4px 10px 0 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 11px;
-            font-weight: normal;
-            color: #33b5e5; /* Classic Holo Blue */
-            z-index: 90;
+            color: #aaa;
             position: absolute;
-            top: 30px;
+            top: 0;
             width: 100%;
-            pointer-events: none;
-            opacity: 0;
+            z-index: 90;
             background: #000000;
+            opacity: 0;
         }
+        .status-bar.visible { opacity: 1; }
 
-        .status-bar.visible {
-            opacity: 1;
+        /* Wallpaper */
+        .wallpaper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, #153448 0%, #071017 100%);
+            z-index: 1;
+            opacity: 0;
         }
+        .wallpaper.visible { opacity: 1; }
 
-        /* Screen Canvas Container matching old aspect ratios */
-        .screen {
-            margin-top: 30px;
-            margin-bottom: 50px;
-            flex: 1;
-            position: relative;
-            background: #000;
-            overflow: hidden;
-        }
-
-        /* CyanogenMod Cid Boot Screen */
+        /* Boot Screen - Static 2012 Old School Style */
         .boot-screen {
             position: absolute;
             top: 0;
@@ -97,89 +142,40 @@
             justify-content: center;
             align-items: center;
             opacity: 1;
-            transition: opacity 0.8s ease;
+            transition: opacity 0.4s ease;
         }
-
         .boot-screen.fade-out {
             opacity: 0;
             pointer-events: none;
         }
-
-        .boot-logo-cid {
-            width: 70px;
-            height: 70px;
-            border: 4px solid #33b5e5;
-            border-radius: 20px;
-            position: relative;
-            animation: pulseCid 1.5s ease-in-out infinite alternate;
-            margin-bottom: 20px;
-        }
-
-        .boot-logo-cid::before, .boot-logo-cid::after {
-            content: '';
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: #33b5e5;
-            border-radius: 50%;
-            top: 25px;
-        }
-        .boot-logo-cid::before { left: 15px; }
-        .boot-logo-cid::after { right: 15px; }
-
-        @keyframes pulseCid {
-            0% { transform: scale(0.9); opacity: 0.6; box-shadow: 0 0 10px rgba(51, 181, 229, 0.3); }
-            100% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 25px rgba(51, 181, 229, 0.8); }
-        }
-
-        .boot-title {
-            font-size: 14px;
+        .boot-text-main {
+            font-size: 20px;
             font-weight: bold;
-            color: #33b5e5;
-            letter-spacing: 3px;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+        .boot-text-sub {
+            font-size: 11px;
+            color: #888;
+            margin-top: 5px;
         }
 
-        /* Classic Holo Teal Phase Wallpaper */
-        .wallpaper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 80% 20%, #102e3c 0%, #050d14 100%);
-            z-index: 1;
-            opacity: 0;
-        }
-
-        .wallpaper::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 80%, rgba(51, 181, 229, 0.25) 0%, transparent 60%);
-        }
-
-        .wallpaper.visible {
-            opacity: 1;
-        }
-
-        /* Launcher Grid */
+        /* Launcher Home Screen Content */
         .home-screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            padding: 30px 16px 20px 16px;
+            padding: 35px 14px 14px 14px;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             grid-auto-rows: max-content;
-            gap: 20px;
+            gap: 16px;
             z-index: 10;
             opacity: 0;
             pointer-events: none;
         }
-
         .home-screen.visible {
             opacity: 1;
             pointer-events: auto;
@@ -191,34 +187,30 @@
             align-items: center;
             cursor: pointer;
         }
-
-        /* Square Icon Framework */
         .icon-shape {
-            width: 48px;
-            height: 48px;
+            width: 46px;
+            height: 46px;
             border-radius: 12px;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(to bottom, #2d3238, #15171a);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: linear-gradient(to bottom, #3a3f47, #1e2226);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        .icon-shape.settings svg {
-            width: 26px;
-            height: 26px;
-            fill: #33b5e5; 
+        .icon-shape svg {
+            width: 24px;
+            height: 24px;
+            fill: #aaa;
         }
-
         .app-label {
-            margin-top: 6px;
+            margin-top: 5px;
             font-size: 11px;
             text-align: center;
             color: #fff;
             text-shadow: 0 1px 2px #000;
         }
 
-        /* Android 4.x Holo Zoom-In Animation Config */
+        /* App Interface Layer (No Scroll Layout) */
         .settings-app {
             position: absolute;
             top: 0;
@@ -230,135 +222,142 @@
             z-index: 50;
             opacity: 0;
             pointer-events: none;
-            
-            /* ICS/JB Style Center Window Scale Trigger */
             transform: scale(0.6);
-            transition: transform 0.5s cubic-bezier(0.1, 0.9, 0.2, 1), 
-                        opacity 0.4s ease-out;
-            
+            transition: transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.3s ease-out;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
-
         .settings-app.open {
             opacity: 1;
             pointer-events: auto;
             transform: scale(1);
         }
-
-        /* Holo Header Divider */
         .settings-header {
-            padding: 12px 16px 6px 16px;
-            border-bottom: 2px solid #33b5e5;
+            padding: 12px 14px 6px 14px;
+            border-bottom: 2px solid #444;
             margin-bottom: 4px;
         }
-
         .settings-header h1 {
-            font-size: 18px;
-            font-weight: 300;
-            color: #33b5e5;
+            font-size: 16px;
+            font-weight: normal;
+            color: #eee;
             text-transform: uppercase;
         }
-
         .settings-content {
             flex: 1;
-            overflow-y: auto;
+            overflow: hidden;
         }
-
         .settings-category {
-            padding: 10px 16px 4px 16px;
+            padding: 10px 14px 4px 14px;
             font-size: 11px;
             font-weight: bold;
-            color: #33b5e5;
+            color: #888;
             text-transform: uppercase;
         }
-
         .settings-item {
-            padding: 14px 16px;
+            padding: 12px 14px;
             display: flex;
             align-items: center;
             border-bottom: 1px solid #141414;
         }
-
         .settings-item:active {
-            background: rgba(51, 181, 229, 0.2);
+            background: rgba(255, 255, 255, 0.08);
         }
+        .settings-title { font-size: 13px; }
+        .settings-subtitle { font-size: 11px; color: #666; margin-top: 1px; }
 
-        .settings-title {
-            font-size: 14px;
-        }
-
-        .settings-subtitle {
-            font-size: 11px;
-            color: #888;
-            margin-top: 1px;
-        }
-
-        /* Retro Capacitive Touch Keys Hardware Strip */
-        .hardware-buttons {
+        /* BOTTOM BEZEL HARDWARE ASSEMBLY 
+           Classic tactile physical home key flanked by two invisible touch targets
+        */
+        .bottom-bezel-assembly {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 50px;
-            background: #111;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 100;
-            border-top: 1px solid #222;
-            padding: 0 20px;
-        }
-
-        .hw-btn {
+            height: 65px;
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 50px;
+            padding: 0 30px;
+        }
+
+        /* Capacitive touch key zones */
+        .capacitive-btn {
+            width: 60px;
             height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
         }
-
-        .hw-btn svg {
+        /* Hidden icons by default, glowing softly on interaction without blue tints */
+        .capacitive-btn svg {
             width: 20px;
             height: 20px;
-            fill: #555;
-            transition: fill 0.1s;
+            fill: #d1d5db; 
+            opacity: 0.15;
+            transition: opacity 0.1s;
+        }
+        .capacitive-btn:active svg {
+            opacity: 0.9;
         }
 
-        .hw-btn:active svg {
-            fill: #33b5e5; /* Lights up blue on touch */
+        /* Physical Tactile Home Button (S3 signature rounded pill button) */
+        .physical-home-button {
+            width: 95px;
+            height: 28px;
+            background: #f7f9fa;
+            border: 2px solid #ccd1d9;
+            border-radius: 14px;
+            box-shadow: 
+                0 1px 2px rgba(0,0,0,0.1),
+                inset 0 1px 0 #fff;
+            cursor: pointer;
+            margin: 0 auto;
+            transition: transform 0.05s, background-color 0.05s;
+        }
+        .physical-home-button:active {
+            background-color: #e6e9ed;
+            transform: scale(0.97);
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
         }
     </style>
 </head>
 <body>
 
-    <div class="phone-frame">
-        <div class="ear-piece"></div>
-
-        <div class="status-bar" id="statusBar">
-            <span id="clock">12:00 PM</span>
-            <div style="display: flex; gap: 6px; align-items: center;">
-                <span>3G</span>
-                <span>100%</span>
+    <div class="s3-neo-frame">
+        
+        <div class="top-bezel-assembly">
+            <div class="sensor-group">
+                <div class="sensor-dot"></div>
+                <div class="sensor-dot"></div>
             </div>
+            <div class="ear-speaker"></div>
+            <div class="camera-lens"></div>
         </div>
 
-        <div class="screen">
+        <div class="display-screen">
+            
+            <div id="bootScreen" class="boot-screen">
+                <div class="boot-text-main">SAMSUNG</div>
+                <div class="boot-text-sub">Galaxy SⅢ Neo</div>
+            </div>
+
+            <div class="status-bar" id="statusBar">
+                <span id="clock">12:00 PM</span>
+                <div style="display: flex; gap: 4px; align-items: center;">
+                    <span>3G</span>
+                    <span>100%</span>
+                </div>
+            </div>
+
             <div id="wallpaper" class="wallpaper"></div>
 
-            <div id="bootScreen" class="boot-screen">
-                <div class="boot-logo-cid"></div>
-                <div class="boot-title">CyanogenMod</div>
-            </div>
-            
             <div class="home-screen" id="homeScreen">
                 <div class="app-icon" onclick="openSettings()">
-                    <div class="icon-shape settings">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3-1.57-3-3.5s1.07-3.5 3-3.5 3 1.57 3 3.5-1.07 3.5-3 3.5z"/>
-                        </svg>
+                    <div class="icon-shape">
+                        <svg viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3-1.57-3-3.5s1.07-3.5 3-3.5 3 1.57 3 3.5-1.07 3.5-3 3.5z"/></svg>
                     </div>
                     <div class="app-label">Settings</div>
                 </div>
@@ -368,46 +367,38 @@
                 <div class="settings-header">
                     <h1>Settings</h1>
                 </div>
-                
                 <div class="settings-content">
                     <div class="settings-category">Wireless & Networks</div>
-                    <div class="settings-item">
-                        <div class="settings-title">Wi-Fi</div>
-                    </div>
-                    <div class="settings-item">
-                        <div class="settings-title">Bluetooth</div>
-                    </div>
-
-                    <div class="settings-category">Device</div>
-                    <div class="settings-item">
-                        <div class="settings-title">Display</div>
-                    </div>
-                    <div class="settings-item">
-                        <div class="settings-title">Storage</div>
-                    </div>
-
-                    <div class="settings-category">System</div>
+                    <div class="settings-item"><div class="settings-title">Wi-Fi</div></div>
+                    <div class="settings-item"><div class="settings-title">Bluetooth</div></div>
+                    
+                    <div class="settings-category">Device Options</div>
+                    <div class="settings-item"><div class="settings-title">Display & Sound</div></div>
+                    
+                    <div class="settings-category">System Information</div>
                     <div class="settings-item">
                         <div>
-                            <div class="settings-title">About Phone</div>
-                            <div class="settings-subtitle">Android 4.1.2 (CyanogenMod 10)</div>
+                            <div class="settings-title">About Device</div>
+                            <div class="settings-subtitle">Model: GT-I9301I (Android 4.4.2)</div>
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
 
-        <div class="hardware-buttons">
-            <div class="hw-btn" onclick="closeSettings()">
+        <div class="bottom-bezel-assembly">
+            <div class="capacitive-btn">
+                <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+            </div>
+            
+            <div class="physical-home-button" onclick="closeSettings()"></div>
+            
+            <div class="capacitive-btn" onclick="closeSettings()">
                 <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
             </div>
-            <div class="hw-btn" onclick="closeSettings()">
-                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-            </div>
-            <div class="hw-btn">
-                <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
-            </div>
         </div>
+
     </div>
 
     <script>
@@ -417,7 +408,7 @@
         const statusBar = document.getElementById('statusBar');
         const settingsApp = document.getElementById('settingsApp');
 
-        // Loader Loop Trigger
+        // Initial Boot sequence mapping rules
         window.addEventListener('load', () => {
             setTimeout(() => {
                 bootScreen.classList.add('fade-out');
@@ -425,18 +416,12 @@
                     wallpaper.classList.add('visible');
                     homeScreen.classList.add('visible');
                     statusBar.classList.add('visible');
-                }, 300);
+                }, 200);
             }, 2500);
         });
 
-        // Genuine Android 4.x Scale Fade Animation Engine Execution Links
-        function openSettings() {
-            settingsApp.classList.add('open');
-        }
-
-        function closeSettings() {
-            settingsApp.classList.remove('open');
-        }
+        function openSettings() { settingsApp.classList.add('open'); }
+        function closeSettings() { settingsApp.classList.remove('open'); }
 
         function updateClock() {
             const now = new Date();
