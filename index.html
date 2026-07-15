@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>HarmonyOS Fluid Emulator</title>
     <style>
         /* CSS Variables & System Colors */
@@ -21,12 +21,16 @@
 
         /* Prevent double-tap zoom, blue highlights, and scrolling on the entire document */
         html, body {
-            touch-action: manipulation;
+            touch-action: none;
             -webkit-tap-highlight-color: transparent;
             overflow: hidden;
             position: fixed;
             width: 100%;
             height: 100%;
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         * {
@@ -37,16 +41,7 @@
             user-select: none;
             -webkit-user-select: none;
             -webkit-user-drag: none;
-            /* Disable native tap highlights globally */
             -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: #121212;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
         }
 
         /* Ultra-compact Premium Phone Frame */
@@ -74,7 +69,6 @@
             color: #ffffff;
             box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
             background-color: #050508;
-            /* Contain perspective for zoom animation origin */
             perspective: 800px;
         }
 
@@ -256,10 +250,10 @@
             display: flex;
             flex-direction: column;
             
-            /* Initial State: Mimics scaling out directly from the app icon coordinates */
+            /* Initial State: Scale out from the App Icon coordinate */
             opacity: 0;
             transform: translate(0, 0) scale(0.1);
-            transform-origin: 0 0; /* Updated dynamically via JavaScript on launch */
+            transform-origin: 0 0;
             pointer-events: none;
             transition: var(--smooth-app);
         }
@@ -267,17 +261,17 @@
         /* UI State when Open */
         .settings-panel.open {
             opacity: 1;
-            transform: translate(0px, 0px) scale(1) !important; /* Forces layout cover */
+            transform: translate(0px, 0px) scale(1) !important;
             pointer-events: auto;
         }
 
         /* System Background Interaction during App open state */
         .screen.app-active .wallpaper-container {
-            transform: scale(1.1); /* Zoom wallpaper in */
+            transform: scale(1.1);
         }
 
         .screen.app-active .desktop {
-            transform: scale(0.94); /* Zoom apps and widgets down into the background */
+            transform: scale(0.94);
             opacity: 0;
             pointer-events: none;
         }
@@ -329,11 +323,13 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 22px;
+            height: 32px; /* Taller touch surface for easy mobile swiping */
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 40;
+            /* CRITICAL: Disables native scroll/zoom behavior on this handle */
+            touch-action: none;
             cursor: grab;
         }
 
@@ -343,10 +339,11 @@
 
         .gesture-line {
             width: 80px;
-            height: 3.5px;
+            height: 4px;
             border-radius: 2px;
             background-color: rgba(255, 255, 255, 0.6);
             transition: background-color 0.3s;
+            pointer-events: none; /* Let touches pass through directly to the container */
         }
 
         /* Darken swipe line when settings window is active */
@@ -377,7 +374,7 @@
                 <div class="widget-area">
                     <div class="service-widget">
                         <div class="widget-title">HarmonyOS Next</div>
-                        <div class="widget-body">ArkUI Coordinate Zoom</div>
+                        <div class="widget-body">Mobile-Optimized Swipes</div>
                     </div>
                 </div>
 
@@ -504,34 +501,60 @@
         const settingsAppIcon = document.getElementById('settingsAppIcon');
 
         function openSettings(element) {
-            // Get exact layout coordinates of the app icon relative to the screen boundaries
             const screenRect = phoneScreen.getBoundingClientRect();
             const iconRect = element.getBoundingClientRect();
 
-            // Find center offsets of the clicked app icon relative to the mobile view screen wrapper
+            // Coordinate calculations for precise origin scaling
             const originX = (iconRect.left + iconRect.width / 2) - screenRect.left;
             const originY = (iconRect.top + iconRect.height / 2) - screenRect.top;
 
-            // Set the transform origin of the Settings view to start directly from the icon coordinate
             settingsPanel.style.transformOrigin = `${originX}px ${originY}px`;
-            
-            // Set scale to match the tiny visual size of the app icon during transitions
             settingsPanel.style.transform = `translate(0px, 0px) scale(${iconRect.width / screenRect.width})`;
 
-            // Force layout reflow before triggering animations
-            void settingsPanel.offsetWidth;
+            void settingsPanel.offsetWidth; // Force Reflow
 
-            // Add classes to animate transition styles
             phoneScreen.classList.add('app-active');
             settingsPanel.classList.add('open');
         }
 
-        // Swipe Gesture Handling (Mouse + touch pointer actions)
+        /* FIXED GESTURE SYSTEM FOR MOBILE WEBKIT (TOUCH EVENTS):
+           We listen to touch events directly and use preventDefault() to override 
+           all default safari/chrome scrolling/pan behaviors.
+        */
         let startY = 0;
         let isSwiping = false;
 
-        navBar.addEventListener('pointerdown', (e) => {
+        // Touch start logic
+        navBar.addEventListener('touchstart', (e) => {
             if (settingsPanel.classList.contains('open')) {
+                // Prevent browser defaults (scrolling, zooming, elastical rebounds)
+                if (e.cancelable) e.preventDefault();
+                startY = e.touches[0].clientY;
+                isSwiping = true;
+            }
+        }, { passive: false });
+
+        // Touch drag logic
+        navBar.addEventListener('touchmove', (e) => {
+            if (!isSwiping) return;
+            if (e.cancelable) e.preventDefault();
+
+            let currentY = e.touches[0].clientY;
+            let diffY = startY - currentY; // Distance of swipe UPWARD
+
+            // If swiped UP more than 30px, dismiss app
+            if (diffY > 30) {
+                closeSettings();
+                isSwiping = false; // Reset
+            }
+        }, { passive: false });
+
+        navBar.addEventListener('touchend', () => { isSwiping = false; });
+        navBar.addEventListener('touchcancel', () => { isSwiping = false; });
+
+        /* Mouse/Desktop Pointer Fallbacks */
+        navBar.addEventListener('pointerdown', (e) => {
+            if (settingsPanel.classList.contains('open') && e.pointerType !== 'touch') {
                 startY = e.clientY;
                 isSwiping = true;
                 navBar.setPointerCapture(e.pointerId);
@@ -539,33 +562,24 @@
         });
 
         navBar.addEventListener('pointermove', (e) => {
-            if (!isSwiping) return;
+            if (!isSwiping || e.pointerType === 'touch') return;
             let currentY = e.clientY;
             let diffY = startY - currentY;
-
-            // Swipe Upwards triggers close
             if (diffY > 30) {
                 closeSettings();
-                resetSwipe();
+                isSwiping = false;
             }
         });
 
-        navBar.addEventListener('pointerup', resetSwipe);
-        navBar.addEventListener('pointercancel', resetSwipe);
-
-        function resetSwipe() {
-            isSwiping = false;
-        }
+        navBar.addEventListener('pointerup', () => { isSwiping = false; });
 
         function closeSettings() {
-            // Fetch layout positions dynamically to scale down back into original app spot
             const screenRect = phoneScreen.getBoundingClientRect();
             const iconRect = settingsAppIcon.getBoundingClientRect();
 
             const originX = (iconRect.left + iconRect.width / 2) - screenRect.left;
             const originY = (iconRect.top + iconRect.height / 2) - screenRect.top;
 
-            // Update transform variables to trace window scale backward into settings app coordinates
             settingsPanel.style.transformOrigin = `${originX}px ${originY}px`;
             settingsPanel.classList.remove('open');
             settingsPanel.style.transform = `translate(0px, 0px) scale(${iconRect.width / screenRect.width})`;
@@ -573,7 +587,7 @@
             phoneScreen.classList.remove('app-active');
         }
 
-        // Prevent double tap gestures zooming inside the web viewport
+        // Global safeguard blocking all double taps from scaling viewport
         document.addEventListener('dblclick', (e) => {
             e.preventDefault();
         }, { passive: false });
