@@ -12,8 +12,8 @@
             --hw-text-muted: #8a8a8f;
             --hw-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             
-            /* Slower, premium easing curves (1.2s) for deep smoothness testing */
-            --smooth-app: transform 1.2s cubic-bezier(0.15, 1, 0.2, 1), opacity 1s cubic-bezier(0.15, 1, 0.2, 1);
+            /* Removed opacity from transitions completely - purely solid transform mapping */
+            --smooth-app: transform 1.2s cubic-bezier(0.15, 1, 0.2, 1);
             --smooth-desktop: transform 1.2s cubic-bezier(0.15, 1, 0.2, 1), opacity 1s cubic-bezier(0.15, 1, 0.2, 1);
         }
 
@@ -176,15 +176,17 @@
             padding-top: 32px;
             display: flex;
             flex-direction: column;
-            opacity: 0;
-            transform: scale(0.1);
+            
+            /* Kept completely opaque, visibility managed purely via pointer-events & scale hiding */
+            opacity: 0; 
+            transform: scale(0.01);
             pointer-events: none;
             transition: var(--smooth-app);
-            will-change: transform, opacity;
+            will-change: transform;
         }
 
         .app-panel.open {
-            opacity: 1;
+            opacity: 1 !important;
             transform: scale(1) !important;
             pointer-events: auto;
         }
@@ -341,7 +343,6 @@
             "Files": `<div class="content-group"><div class="content-item"><span>Internal Disk</span><span class="content-value">128GB / 512GB Free &gt;</span></div><div class="content-item"><span>Downloads Cache</span><span class="content-value">Cleaned &gt;</span></div></div>`
         };
 
-        // Capture current mid-animation style snapshot instantly to prevent state jumps
         function freezeCurrentState() {
             const computedStyle = window.getComputedStyle(globalAppPanel);
             const matrix = computedStyle.transform;
@@ -351,30 +352,25 @@
             if (matrix && matrix !== 'none') {
                 globalAppPanel.style.transform = matrix;
             }
-            
-            globalAppPanel.style.opacity = computedStyle.opacity;
-            void globalAppPanel.offsetHeight; // force paint state sync
+            void globalAppPanel.offsetHeight; 
         }
 
         function openApplication(element) {
-            // Used onpointerdown to completely bypass mobile touch latency delays
             if (isAppWindowTargetOpen && lastOpenedIconElement === element) {
-                // If user spam clicks the SAME app while closing, immediately trap and reverse it
+                // Instantly re-route back up if spammed while dropping down
                 freezeCurrentState();
                 isAppWindowTargetOpen = true;
-                
+                globalAppPanel.style.opacity = '1';
                 globalAppPanel.style.transformOrigin = globalAppPanel.dataset.lastOrigin || 'center center';
                 
                 requestAnimationFrame(() => {
                     globalAppPanel.style.transition = '';
-                    globalAppPanel.style.opacity = '1';
                     globalAppPanel.classList.add('open');
                     phoneScreen.classList.add('app-active');
                 });
                 return;
             }
 
-            // Interrupt any previous app's animation state immediately
             freezeCurrentState();
 
             lastOpenedIconElement = element;
@@ -392,19 +388,19 @@
             const originStyle = `${originX}px ${originY}px`;
             
             globalAppPanel.style.transformOrigin = originStyle;
-            globalAppPanel.dataset.lastOrigin = originStyle; // cache origin coordinates
+            globalAppPanel.dataset.lastOrigin = originStyle;
 
-            // Set dynamic initial starting scale relative to parent frame size
             const initialScale = iconRect.width / screenRect.width;
+            
+            // Instantly make it 100% visible and opaque right from the starting coordinates
+            globalAppPanel.style.opacity = '1';
             globalAppPanel.style.transform = `scale(${initialScale})`;
-            globalAppPanel.style.opacity = '0';
 
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     globalAppPanel.style.transition = '';
                     phoneScreen.classList.add('app-active');
                     globalAppPanel.classList.add('open');
-                    globalAppPanel.style.opacity = '1';
                     globalAppPanel.style.transform = 'scale(1)';
                 });
             });
@@ -430,8 +426,12 @@
 
             requestAnimationFrame(() => {
                 globalAppPanel.style.transition = '';
-                globalAppPanel.style.opacity = '0';
                 globalAppPanel.style.transform = `scale(${targetScale})`;
+                
+                // Hide panel window completely layout-wise ONLY once scale hits zero limit
+                setTimeout(() => {
+                    if(!isAppWindowTargetOpen) globalAppPanel.style.opacity = '0';
+                }, 1150);
             });
         }
 
@@ -449,7 +449,7 @@
             if (!isSwiping) return;
             let currentY = e.clientY;
             let diffY = startY - currentY;
-            if (diffY > 15) { // Ultra-low swipe threshold for instantaneous response
+            if (diffY > 15) { 
                 closeActiveApplication();
                 isSwiping = false;
                 navBar.releasePointerCapture(e.pointerId);
