@@ -11,9 +11,10 @@
             --hw-text-dark: #1a1a1a;
             --hw-text-muted: #8a8a8f;
             --hw-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            /* Using ease-out cubic for snappy, natural interruptible physics */
-            --smooth-app: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            --smooth-desktop: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            
+            /* Slower, premium easing curves (1.2s) for deep smoothness testing */
+            --smooth-app: transform 1.2s cubic-bezier(0.15, 1, 0.2, 1), opacity 1s cubic-bezier(0.15, 1, 0.2, 1);
+            --smooth-desktop: transform 1.2s cubic-bezier(0.15, 1, 0.2, 1), opacity 1s cubic-bezier(0.15, 1, 0.2, 1);
         }
 
         html, body {
@@ -125,7 +126,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: transform 0.1s ease;
+            transition: transform 0.15s ease;
         }
 
         .app-icon-wrapper:active { transform: scale(0.92); }
@@ -182,7 +183,6 @@
             will-change: transform, opacity;
         }
 
-        /* Active classes */
         .app-panel.open {
             opacity: 1;
             transform: scale(1) !important;
@@ -246,49 +246,49 @@
                     </div>
 
                     <div class="home-screen">
-                        <div class="app-icon-wrapper" data-app-name="Settings" onclick="openApplication(this)">
+                        <div class="app-icon-wrapper" data-app-name="Settings" onpointerdown="openApplication(this)">
                             <div class="app-icon settings-icon">
                                 <svg viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3-1.57-3-3.5s1.07-3.5 3-3.5 3 1.57 3 3.5-1.07 3.5-3 3.5z"/></svg>
                             </div>
                             <span class="app-label">Settings</span>
                         </div>
 
-                        <div class="app-icon-wrapper" data-app-name="Gallery" onclick="openApplication(this)">
+                        <div class="app-icon-wrapper" data-app-name="Gallery" onpointerdown="openApplication(this)">
                             <div class="app-icon dummy-icon-blue"><svg class="dummy-svg" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></div>
                             <span class="app-label">Gallery</span>
                         </div>
 
-                        <div class="app-icon-wrapper" data-app-name="Music" onclick="openApplication(this)">
+                        <div class="app-icon-wrapper" data-app-name="Music" onpointerdown="openApplication(this)">
                             <div class="app-icon dummy-icon-orange"><svg class="dummy-svg" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg></div>
                             <span class="app-label">Music</span>
                         </div>
 
-                        <div class="app-icon-wrapper" data-app-name="Market" onclick="openApplication(this)">
+                        <div class="app-icon-wrapper" data-app-name="Market" onpointerdown="openApplication(this)">
                             <div class="app-icon dummy-icon-green"><svg class="dummy-svg" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.1 0 2-.89 2-2V8c0-1.11-.89-2-2-2zM6 0h-4V4h4v2z"/></svg></div>
                             <span class="app-label">Market</span>
                         </div>
 
-                        <div class="app-icon-wrapper" data-app-name="Browser" onclick="openApplication(this)">
+                        <div class="app-icon-wrapper" data-app-name="Browser" onpointerdown="openApplication(this)">
                             <div class="app-icon dummy-icon-blue"><svg class="dummy-svg" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 14H4v-4h11v4zm0-5H4V9h11v4zm5 5h-4V9h4v9z"/></svg></div>
                             <span class="app-label">Browser</span>
                         </div>
 
-                        <div class="app-icon-wrapper" data-app-name="Phone" onclick="openApplication(this)">
+                        <div class="app-icon-wrapper" data-app-name="Phone" onpointerdown="openApplication(this)">
                             <div class="app-icon dummy-icon-green"><svg class="dummy-svg" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>
                             <span class="app-label">Phone</span>
                         </div>
 
-                        <div class="app-icon-wrapper" data-app-name="Messages" onclick="openApplication(this)">
+                        <div class="app-icon-wrapper" data-app-name="Messages" onpointerdown="openApplication(this)">
                             <div class="app-icon dummy-icon-blue"><svg class="dummy-svg" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div>
                             <span class="app-label">Messages</span>
                         </div>
 
-                        <div class="app-icon-wrapper" data-app-name="Camera" onclick="openApplication(this)">
+                        <div class="app-icon-wrapper" data-app-name="Camera" onpointerdown="openApplication(this)">
                             <div class="app-icon dummy-icon-orange"><svg class="dummy-svg" viewBox="0 0 24 24"><path d="M12 12m-3.2 0a3.2 3.2 0 1 0 6.4 0a3.2 3.2 0 1 0 -6.4 0M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9z"/></svg></div>
                             <span class="app-label">Camera</span>
                         </div>
 
-                        <div class="app-icon-wrapper" data-app-name="Files" onclick="openApplication(this)">
+                        <div class="app-icon-wrapper" data-app-name="Files" onpointerdown="openApplication(this)">
                             <div class="app-icon dummy-icon-green"><svg class="dummy-svg" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg></div>
                             <span class="app-label">Files</span>
                         </div>
@@ -327,7 +327,7 @@
         const navBar = document.getElementById('navBar');
         
         let lastOpenedIconElement = null;
-        let isOpening = false;
+        let isAppWindowTargetOpen = false;
 
         const appDatabaseContent = {
             "Settings": `<div class="content-group"><div class="content-item"><span>Wi-Fi Network</span><span class="content-value">Connected &gt;</span></div><div class="content-item"><span>Bluetooth Mode</span><span class="content-value">Searching &gt;</span></div></div><div class="content-group"><div class="content-item"><span>System Version</span><span class="content-value">HarmonyOS Next v5.0</span></div></div>`,
@@ -341,20 +341,44 @@
             "Files": `<div class="content-group"><div class="content-item"><span>Internal Disk</span><span class="content-value">128GB / 512GB Free &gt;</span></div><div class="content-item"><span>Downloads Cache</span><span class="content-value">Cleaned &gt;</span></div></div>`
         };
 
-        function openApplication(element) {
-            // If already opened or currently opening the SAME app, do nothing
-            if (isOpening && lastOpenedIconElement === element) return;
-
-            // Interrupt any previous animation immediately
-            globalAppPanel.style.transition = 'none';
-            globalAppPanel.classList.remove('open');
-            phoneScreen.classList.remove('app-active');
+        // Capture current mid-animation style snapshot instantly to prevent state jumps
+        function freezeCurrentState() {
+            const computedStyle = window.getComputedStyle(globalAppPanel);
+            const matrix = computedStyle.transform;
             
-            // Force reflow to instantly register the animation state reset
-            void globalAppPanel.offsetHeight;
+            globalAppPanel.style.transition = 'none';
+            
+            if (matrix && matrix !== 'none') {
+                globalAppPanel.style.transform = matrix;
+            }
+            
+            globalAppPanel.style.opacity = computedStyle.opacity;
+            void globalAppPanel.offsetHeight; // force paint state sync
+        }
+
+        function openApplication(element) {
+            // Used onpointerdown to completely bypass mobile touch latency delays
+            if (isAppWindowTargetOpen && lastOpenedIconElement === element) {
+                // If user spam clicks the SAME app while closing, immediately trap and reverse it
+                freezeCurrentState();
+                isAppWindowTargetOpen = true;
+                
+                globalAppPanel.style.transformOrigin = globalAppPanel.dataset.lastOrigin || 'center center';
+                
+                requestAnimationFrame(() => {
+                    globalAppPanel.style.transition = '';
+                    globalAppPanel.style.opacity = '1';
+                    globalAppPanel.classList.add('open');
+                    phoneScreen.classList.add('app-active');
+                });
+                return;
+            }
+
+            // Interrupt any previous app's animation state immediately
+            freezeCurrentState();
 
             lastOpenedIconElement = element;
-            isOpening = true;
+            isAppWindowTargetOpen = true;
 
             const appName = element.getAttribute('data-app-name');
             globalAppTitle.textContent = appName;
@@ -365,23 +389,32 @@
 
             const originX = (iconRect.left + iconRect.width / 2) - screenRect.left;
             const originY = (iconRect.top + iconRect.height / 2) - screenRect.top;
+            const originStyle = `${originX}px ${originY}px`;
+            
+            globalAppPanel.style.transformOrigin = originStyle;
+            globalAppPanel.dataset.lastOrigin = originStyle; // cache origin coordinates
 
-            globalAppPanel.style.transformOrigin = `${originX}px ${originY}px`;
-            globalAppPanel.style.transform = `scale(${iconRect.width / screenRect.width})`;
+            // Set dynamic initial starting scale relative to parent frame size
+            const initialScale = iconRect.width / screenRect.width;
+            globalAppPanel.style.transform = `scale(${initialScale})`;
+            globalAppPanel.style.opacity = '0';
 
-            // Queue up transition reactivation smoothly via animation frames
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     globalAppPanel.style.transition = '';
                     phoneScreen.classList.add('app-active');
                     globalAppPanel.classList.add('open');
+                    globalAppPanel.style.opacity = '1';
+                    globalAppPanel.style.transform = 'scale(1)';
                 });
             });
         }
 
         function closeActiveApplication() {
             if (!lastOpenedIconElement) return;
-            isOpening = false;
+            isAppWindowTargetOpen = false;
+
+            freezeCurrentState();
 
             const screenRect = phoneScreen.getBoundingClientRect();
             const iconRect = lastOpenedIconElement.getBoundingClientRect();
@@ -391,16 +424,21 @@
 
             globalAppPanel.style.transformOrigin = `${originX}px ${originY}px`;
             globalAppPanel.classList.remove('open');
-            globalAppPanel.style.transform = `scale(${iconRect.width / screenRect.width})`;
-            
             phoneScreen.classList.remove('app-active');
+
+            const targetScale = iconRect.width / screenRect.width;
+
+            requestAnimationFrame(() => {
+                globalAppPanel.style.transition = '';
+                globalAppPanel.style.opacity = '0';
+                globalAppPanel.style.transform = `scale(${targetScale})`;
+            });
         }
 
         let startY = 0;
         let isSwiping = false;
 
         navBar.addEventListener('pointerdown', (e) => {
-            // Allows home gesture swipe execution to be responsive mid-open
             startY = e.clientY;
             isSwiping = true;
             navBar.setPointerCapture(e.pointerId);
@@ -411,7 +449,7 @@
             if (!isSwiping) return;
             let currentY = e.clientY;
             let diffY = startY - currentY;
-            if (diffY > 20) {
+            if (diffY > 15) { // Ultra-low swipe threshold for instantaneous response
                 closeActiveApplication();
                 isSwiping = false;
                 navBar.releasePointerCapture(e.pointerId);
