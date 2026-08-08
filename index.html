@@ -67,16 +67,16 @@
         /* --- SINGLE DOT PUNCH HOLE --- */
         .punch-hole-dot {
             position: absolute;
-            top: 10px;
+            top: 7px;
             left: 50%;
             transform: translateX(-50%);
-            width: 13px;
-            height: 13px;
+            width: 12px;
+            height: 12px;
             background-color: #000000;
             border-radius: 50%;
             z-index: 100;
-            box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.15),
-                        0 0 1px rgba(0, 0, 0, 0.8);
+            box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.2),
+                        0 0 2px rgba(0, 0, 0, 0.9);
             pointer-events: none;
             display: flex;
             justify-content: center;
@@ -85,11 +85,120 @@
 
         .punch-hole-dot::after {
             content: '';
-            width: 5px;
-            height: 5px;
-            background-color: #090c15;
+            width: 4px;
+            height: 4px;
+            background-color: #0b101d;
             border-radius: 50%;
-            box-shadow: inset 0 0 1.5px rgba(255, 255, 255, 0.2);
+            box-shadow: inset 0 0 1.5px rgba(255, 255, 255, 0.3);
+        }
+
+        /* --- ALWAYS VISIBLE GLOBAL STATUS BAR --- */
+        .status-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 28px;
+            padding: 4px 14px 0 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: -0.1px;
+            width: 100%;
+            z-index: 50; /* Always stays on top of open apps */
+            transition: color 0.3s ease;
+        }
+
+        .status-left { 
+            display: flex; 
+            align-items: center; 
+        }
+
+        .clock-badge {
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 1.5px 8px;
+            border-radius: 12px;
+            border: 0.5px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .clock-badge::before {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background-color: #30d158;
+            border-radius: 50%;
+            box-shadow: 0 0 5px #30d158;
+        }
+
+        .status-icons { 
+            display: flex; 
+            align-items: center; 
+            gap: 5px; 
+            color: #ffffff;
+            transition: color 0.3s ease;
+        }
+
+        .status-svg {
+            width: 13px;
+            height: 13px;
+            fill: currentColor;
+        }
+
+        .icon-tag {
+            font-size: 8px;
+            font-weight: 800;
+            background: rgba(255, 255, 255, 0.18);
+            padding: 1px 3px;
+            border-radius: 3px;
+            color: currentColor;
+            transition: background 0.3s ease;
+        }
+
+        .battery-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 1.5px 5px;
+            border-radius: 8px;
+            border: 0.5px solid rgba(255, 255, 255, 0.18);
+            font-size: 9px;
+            font-weight: 700;
+            color: currentColor;
+            transition: all 0.3s ease;
+        }
+
+        /* LIGHT MODE STATUS BAR WHEN APP IS ACTIVE */
+        .screen.app-active .status-bar .status-icons {
+            color: #1a1a1a;
+        }
+
+        .screen.app-active .status-bar .clock-badge {
+            background: rgba(255, 255, 255, 0.65);
+            border: 0.5px solid rgba(0, 0, 0, 0.1);
+            color: #1a1a1a;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .screen.app-active .status-bar .icon-tag {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        .screen.app-active .status-bar .battery-pill {
+            background: rgba(0, 0, 0, 0.06);
+            border: 0.5px solid rgba(0, 0, 0, 0.12);
         }
 
         .wallpaper-container {
@@ -117,31 +226,17 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            padding-top: 28px;
             padding-bottom: 40px; 
             transform: scale(1);
             opacity: 1;
             transition: var(--smooth-desktop);
         }
 
-        .status-bar {
-            height: 36px;
-            padding: 0 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 10.5px;
-            font-weight: 600;
-            letter-spacing: -0.1px;
-            width: 100%;
-            padding-top: 4px;
-        }
-
-        .status-left { display: flex; align-items: center; }
-        .status-icons { display: flex; gap: 5px; }
-        .scrollable-apps-area { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+        .scrollable-apps-area { flex: 1; display: flex; flex-direction: column; gap: 10px; }
 
         .home-screen {
-            padding: 16px 14px 4px 14px;
+            padding: 12px 14px 4px 14px;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             grid-gap: 20px 8px;
@@ -259,7 +354,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 40;
+            z-index: 60;
             touch-action: none;
             cursor: pointer;
         }
@@ -283,15 +378,25 @@
             
             <div class="punch-hole-dot"></div>
 
+            <div class="status-bar">
+                <div class="status-left">
+                    <div class="clock-badge"><span id="clock">10:08</span></div>
+                </div>
+                <div class="status-icons">
+                    <span class="icon-tag">5G+</span>
+                    <svg class="status-svg" viewBox="0 0 24 24"><path d="M2 22h20V2L2 22zm18-2H6.83L20 6.83V20z"/></svg>
+                    <svg class="status-svg" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.3c3.84 0 7.33 1.43 10 3.82l-10 10-10-10c2.67-2.39 6.16-3.82 10-3.82z"/></svg>
+                    <div class="battery-pill">
+                        <svg class="status-svg" style="width: 10px; height: 10px;" viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+                        <span>98%</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="wallpaper-container"></div>
 
             <div class="desktop" id="desktopContainer">
                 <div class="scrollable-apps-area">
-                    <div class="status-bar">
-                        <div class="status-left"><span id="clock">10:08</span></div>
-                        <div class="status-icons"><span>📶 5G</span><span>🔋 95%</span></div>
-                    </div>
-
                     <div class="home-screen">
                         <div class="app-icon-wrapper" data-app-name="Settings" onpointerdown="openApplication(this)">
                             <div class="app-icon settings-icon">
