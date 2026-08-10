@@ -1,1 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZonOS Emulator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
+    body {
+      background-color: #1a1a1a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* Outer Phone Frame */
+    .phone-frame {
+      width: 360px;
+      height: 740px;
+      background-color: #000;
+      border-radius: 48px;
+      padding: 12px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 2px #333;
+      position: relative;
+    }
+
+    /* Screen Area */
+    .screen {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%);
+      border-radius: 36px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Status Bar */
+    .status-bar {
+      height: 40px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 10;
+    }
+
+    /* Home Screen Grid */
+    .home-screen {
+      flex: 1;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-auto-rows: max-content;
+      gap: 20px;
+    }
+
+    /* App Icon Component */
+    .app-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .icon-box {
+      width: 60px;
+      height: 60px;
+      background-color: #8e8e93;
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transition: transform 0.1s ease;
+    }
+
+    .app-icon:active .icon-box {
+      transform: scale(0.92);
+    }
+
+    .icon-box svg {
+      width: 34px;
+      height: 34px;
+      fill: #fff;
+    }
+
+    .app-label {
+      color: #fff;
+      font-size: 12px;
+      font-weight: 500;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    /* App Window (Settings) */
+    .app-window {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #f2f2f7;
+      z-index: 20;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.1, 0.9, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-window.open {
+      transform: translateY(0);
+    }
+
+    .app-header {
+      padding: 50px 20px 10px 20px;
+      background-color: #fff;
+      border-bottom: 1px solid #e5e5ea;
+    }
+
+    .app-header h1 {
+      font-size: 28px;
+      color: #000;
+    }
+
+    .app-body {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .setting-item {
+      background: #fff;
+      padding: 14px 16px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 16px;
+      color: #000;
+    }
+
+    /* Bottom Home Indicator Bar */
+    .home-bar-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 30;
+      cursor: pointer;
+      touch-action: none;
+    }
+
+    .home-bar {
+      width: 130px;
+      height: 5px;
+      background-color: #ffffff;
+      border-radius: 3px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.2s;
+    }
+
+    .app-window.open ~ .home-bar-container .home-bar {
+      background-color: #000000;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="phone-frame">
+    <div class="screen">
+      
+      <div class="status-bar">
+        <span>9:41</span>
+        <span>ZonOS</span>
+        <span>100%</span>
+      </div>
+
+      <div class="home-screen">
+        <div class="app-icon" id="open-settings">
+          <div class="icon-box">
+            <svg viewBox="0 0 24 24">
+              <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+            </svg>
+          </div>
+          <span class="app-label">Settings</span>
+        </div>
+      </div>
+
+      <div class="app-window" id="settings-app">
+        <div class="app-header">
+          <h1>Settings</h1>
+        </div>
+        <div class="app-body">
+          <div class="setting-item">
+            <span>Wi-Fi</span>
+            <span style="color: #8e8e93;">ZonOS_5G</span>
+          </div>
+          <div class="setting-item">
+            <span>Bluetooth</span>
+            <span style="color: #8e8e93;">On</span>
+          </div>
+          <div class="setting-item">
+            <span>Display & Brightness</span>
+            <span style="color: #8e8e93;">Auto</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-bar-container" id="home-bar-container">
+        <div class="home-bar"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const settingsIcon = document.getElementById('open-settings');
+    const settingsApp = document.getElementById('settings-app');
+    const homeBarContainer = document.getElementById('home-bar-container');
+
+    // Open Settings App
+    settingsIcon.addEventListener('click', () => {
+      settingsApp.classList.add('open');
+    });
+
+    // Swipe Up Detection on Home Bar
+    let startY = 0;
+    let isDragging = false;
+
+    function handleStart(y) {
+      startY = y;
+      isDragging = true;
+    }
+
+    function handleMove(y) {
+      if (!isDragging) return;
+      const deltaY = startY - y;
+      
+      // Close app if swiped up by more than 30 pixels
+      if (deltaY > 30 && settingsApp.classList.contains('open')) {
+        settingsApp.classList.remove('open');
+        isDragging = false;
+      }
+    }
+
+    function handleEnd() {
+      isDragging = false;
+    }
+
+    // Touch events for mobile/responsive testing
+    homeBarContainer.addEventListener('touchstart', (e) => handleStart(e.touches[0].clientY));
+    homeBarContainer.addEventListener('touchmove', (e) => handleMove(e.touches[0].clientY));
+    homeBarContainer.addEventListener('touchend', handleEnd);
+
+    // Mouse events for desktop testing (click & drag up)
+    homeBarContainer.addEventListener('mousedown', (e) => handleStart(e.clientY));
+    window.addEventListener('mousemove', (e) => handleMove(e.clientY));
+    window.addEventListener('mouseup', handleEnd);
+  </script>
+</body>
+</html>
