@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ZonOS Emulator</title>
   <style>
-    /* Remove highlights, callouts, and disable selection across all elements */
+    /* Remove text selection, touch delays, highlights, and callouts */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -14,10 +14,11 @@
       -webkit-user-select: none;
       -webkit-touch-callout: none;
       -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation; /* Prevents double-tap zoom natively without delay */
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
-    /* Prevent document scrolling completely */
+    /* Prevent page scrolling */
     html, body {
       width: 100%;
       height: 100%;
@@ -26,7 +27,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      touch-action: none;
     }
 
     /* Outer Phone Frame */
@@ -40,11 +40,11 @@
       position: relative;
     }
 
-    /* Screen Area with Mountain Wallpaper */
+    /* Screen Area with Snowy Mountain Wallpaper */
     .screen {
       width: 100%;
       height: 100%;
-      background: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
+      background: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
       border-radius: 36px;
       position: relative;
       overflow: hidden;
@@ -128,9 +128,9 @@
       opacity: 0;
       pointer-events: none;
       transform: scale(0.1);
-      transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), 
-                  opacity 0.25s ease, 
-                  border-radius 0.38s ease;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                  opacity 0.2s ease, 
+                  border-radius 0.3s ease;
     }
 
     .app-window.open {
@@ -256,7 +256,7 @@
     const homeBarContainer = document.getElementById('home-bar-container');
     const screen = document.getElementById('screen');
 
-    // Dynamically set transform origin to match the Settings Icon position
+    // Dynamically calculate origin from Settings icon
     function updateTransformOrigin() {
       const iconRect = settingsIconBox.getBoundingClientRect();
       const screenRect = screen.getBoundingClientRect();
@@ -267,24 +267,13 @@
       settingsApp.style.transformOrigin = `${originX}px ${originY}px`;
     }
 
-    // Open Settings App (Zoom from Icon)
-    settingsIcon.addEventListener('click', () => {
+    // Open Settings App immediately on tap/click
+    settingsIcon.addEventListener('pointerdown', (e) => {
       updateTransformOrigin();
       settingsApp.classList.add('open');
     });
 
-    // Disable Double Tap Zoom globally via JS as extra protection
-    let lastTouchTime = 0;
-    document.addEventListener('touchend', (e) => {
-      const currentTime = new Date().getTime();
-      const timeDiff = currentTime - lastTouchTime;
-      if (timeDiff < 300 && timeDiff > 0) {
-        e.preventDefault();
-      }
-      lastTouchTime = currentTime;
-    }, false);
-
-    // Swipe Up Detection from Home Bar (Shrinks app back to Icon)
+    // Swipe Up Detection from Home Bar to Close
     let startY = 0;
     let isDragging = false;
 
@@ -297,7 +286,7 @@
       if (!isDragging) return;
       const deltaY = startY - y;
       
-      if (deltaY > 30 && settingsApp.classList.contains('open')) {
+      if (deltaY > 25 && settingsApp.classList.contains('open')) {
         settingsApp.classList.remove('open');
         isDragging = false;
       }
@@ -307,12 +296,12 @@
       isDragging = false;
     }
 
-    // Touch events for mobile testing
+    // Touch events
     homeBarContainer.addEventListener('touchstart', (e) => handleStart(e.touches[0].clientY), { passive: true });
     homeBarContainer.addEventListener('touchmove', (e) => handleMove(e.touches[0].clientY), { passive: true });
     homeBarContainer.addEventListener('touchend', handleEnd);
 
-    // Mouse events for desktop testing
+    // Mouse events
     homeBarContainer.addEventListener('mousedown', (e) => handleStart(e.clientY));
     window.addEventListener('mousemove', (e) => handleMove(e.clientY));
     window.addEventListener('mouseup', handleEnd);
