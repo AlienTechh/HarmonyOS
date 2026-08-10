@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ZonOS Emulator</title>
   <style>
-    /* Remove text selection, touch delays, highlights, and callouts */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -14,11 +13,10 @@
       -webkit-user-select: none;
       -webkit-touch-callout: none;
       -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation; /* Prevents double-tap zoom natively without delay */
+      touch-action: manipulation;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
-    /* Prevent page scrolling */
     html, body {
       width: 100%;
       height: 100%;
@@ -40,11 +38,11 @@
       position: relative;
     }
 
-    /* Screen Area with Snowy Mountain Wallpaper */
+    /* Screen Area with Sunny Day Mountain Wallpaper */
     .screen {
       width: 100%;
       height: 100%;
-      background: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
+      background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
       border-radius: 36px;
       position: relative;
       overflow: hidden;
@@ -115,7 +113,7 @@
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
     }
 
-    /* App Window with App-Icon Zoom Animation */
+    /* App Window with Normalized Zoom Speed */
     .app-window {
       position: absolute;
       top: 0;
@@ -127,10 +125,11 @@
       border-radius: 36px;
       opacity: 0;
       pointer-events: none;
-      transform: scale(0.1);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
-                  opacity 0.2s ease, 
-                  border-radius 0.3s ease;
+      transform: scale(0.08);
+      /* Normalized smooth app zoom animation */
+      transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
+                  opacity 0.3s ease, 
+                  border-radius 0.4s ease;
     }
 
     .app-window.open {
@@ -256,7 +255,7 @@
     const homeBarContainer = document.getElementById('home-bar-container');
     const screen = document.getElementById('screen');
 
-    // Dynamically calculate origin from Settings icon
+    // Calculate position for smooth zoom origin
     function updateTransformOrigin() {
       const iconRect = settingsIconBox.getBoundingClientRect();
       const screenRect = screen.getBoundingClientRect();
@@ -267,13 +266,13 @@
       settingsApp.style.transformOrigin = `${originX}px ${originY}px`;
     }
 
-    // Open Settings App immediately on tap/click
-    settingsIcon.addEventListener('pointerdown', (e) => {
+    // Open Settings App
+    settingsIcon.addEventListener('pointerdown', () => {
       updateTransformOrigin();
       settingsApp.classList.add('open');
     });
 
-    // Swipe Up Detection from Home Bar to Close
+    // Swipe Up Detection from Home Bar
     let startY = 0;
     let isDragging = false;
 
