@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ZonOS Emulator</title>
+  <title>Phone Emulator</title>
   <style>
     * {
       box-sizing: border-box;
@@ -14,7 +14,7 @@
       -webkit-touch-callout: none;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     html, body {
@@ -29,54 +29,155 @@
 
     /* Outer Phone Frame */
     .phone-frame {
-      width: 360px;
-      height: 740px;
+      width: 320px;
+      height: 650px;
       background-color: #000;
-      border-radius: 48px;
-      padding: 12px;
+      border-radius: 44px;
+      padding: 10px;
       box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 0 2px #2a2a2a;
       position: relative;
+    }
+
+    /* Physical Power Button */
+    .power-btn {
+      position: absolute;
+      right: -5px;
+      top: 140px;
+      width: 5px;
+      height: 50px;
+      background: linear-gradient(to bottom, #3a3a3a, #1a1a1a);
+      border-radius: 0 3px 3px 0;
+      cursor: pointer;
+      box-shadow: 1px 0 3px rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+    .power-btn:active {
+      transform: scaleX(0.7);
     }
 
     /* Screen Area */
     .screen {
       width: 100%;
       height: 100%;
-      border-radius: 36px;
+      border-radius: 34px;
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      background-color: #000;
     }
 
-    /* Dedicated Background Wallpaper Layer */
+    /* Morning Snowy Mountain Wallpaper Layer */
     .wallpaper {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
+      background: url('https://images.unsplash.com/photo-1517021897933-0e0319cfbc28?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
       transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), filter 0.4s ease;
       z-index: 1;
     }
 
-    /* Wallpaper Zooms In when an App is Opened */
     .screen.app-active .wallpaper {
       transform: scale(1.15);
       filter: brightness(0.75);
     }
 
+    /* Middle Punch Hole Camera Cutout */
+    .punch-hole {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 12px;
+      height: 12px;
+      background-color: #000;
+      border-radius: 50%;
+      z-index: 600;
+      box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.2);
+    }
+
+    /* Screen Off Overlay */
+    .screen-off-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      z-index: 700;
+      display: none;
+    }
+    .screen.off .screen-off-overlay {
+      display: block;
+    }
+
+    /* Opaque Lockscreen Overlay (Covers Homescreen Completely) */
+    .lockscreen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 50px 20px 30px 20px;
+      color: #fff;
+      background: url('https://images.unsplash.com/photo-1517021897933-0e0319cfbc28?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
+      transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+      touch-action: none;
+    }
+
+    .lockscreen.unlocked {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .lock-clock {
+      font-size: 58px;
+      font-weight: 200;
+      letter-spacing: -1px;
+      line-height: 1;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    }
+
+    .lock-date {
+      font-size: 15px;
+      font-weight: 500;
+      margin-top: 6px;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.4);
+    }
+
+    .lock-hint {
+      font-size: 12px;
+      font-weight: 500;
+      opacity: 0.9;
+      margin-bottom: 8px;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-6px); }
+      60% { transform: translateY(-3px); }
+    }
+
     /* Top Status Bar */
     .status-bar {
-      height: 40px;
+      height: 36px;
       width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0 24px;
+      padding: 0 20px;
       color: #fff;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       z-index: 100;
       position: absolute;
@@ -104,8 +205,8 @@
       flex: 1;
       display: flex;
       width: 200%;
-      height: calc(100% - 72px);
-      margin-top: 40px;
+      height: calc(100% - 60px);
+      margin-top: 36px;
       transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
       touch-action: pan-y;
     }
@@ -113,26 +214,26 @@
     .home-page {
       width: 50%;
       height: 100%;
-      padding: 24px;
+      padding: 20px 18px;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       grid-auto-rows: max-content;
-      gap: 20px;
+      gap: 16px;
     }
 
     .page-dots {
       position: absolute;
-      bottom: 35px;
+      bottom: 28px;
       width: 100%;
       display: flex;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       z-index: 10;
     }
 
     .dot {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
       background-color: rgba(255, 255, 255, 0.4);
       border-radius: 50%;
       transition: background-color 0.3s ease, transform 0.3s ease;
@@ -147,18 +248,18 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       cursor: pointer;
     }
 
     .icon-box {
-      width: 60px;
-      height: 60px;
-      border-radius: 16px;
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
       display: flex;
       justify-content: center;
       align-items: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       transition: transform 0.15s ease;
     }
 
@@ -168,8 +269,8 @@
     .icon-clock    { background: linear-gradient(135deg, #1d1d1f, #000000); }
 
     .app-icon:active .icon-box { transform: scale(0.9); }
-    .icon-box svg { width: 32px; height: 32px; fill: #fff; }
-    .app-label { color: #fff; font-size: 12px; font-weight: 500; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8); }
+    .icon-box svg { width: 28px; height: 28px; fill: #fff; }
+    .app-label { color: #fff; font-size: 11px; font-weight: 500; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8); }
 
     /* Opaque App Window */
     .app-window {
@@ -181,7 +282,7 @@
       background-color: #f2f2f7;
       opacity: 1;
       z-index: 20;
-      border-radius: 36px;
+      border-radius: 34px;
       pointer-events: none;
       transform: scale(0);
       transition: transform 0.32s cubic-bezier(0.25, 1, 0.5, 1), border-radius 0.32s ease;
@@ -193,11 +294,11 @@
     .app-window.open {
       pointer-events: auto;
       transform: scale(1);
-      border-radius: 36px;
+      border-radius: 34px;
     }
 
     .app-header {
-      padding: 50px 20px 10px 20px;
+      padding: 44px 16px 8px 16px;
       background-color: #fff;
       border-bottom: 1px solid #e5e5ea;
       display: flex;
@@ -205,34 +306,34 @@
       align-items: flex-end;
     }
 
-    .app-header h1 { font-size: 26px; color: #000; }
+    .app-header h1 { font-size: 22px; color: #000; }
 
     .app-body {
-      padding: 20px;
+      padding: 16px;
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       overflow-y: auto;
     }
 
     /* Settings UI */
     .setting-item {
       background: #fff;
-      padding: 14px 16px;
+      padding: 12px 14px;
       border-radius: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 16px;
+      font-size: 15px;
       color: #000;
     }
 
     .toggle {
-      width: 44px;
-      height: 26px;
+      width: 40px;
+      height: 24px;
       background: #e9e9ea;
-      border-radius: 13px;
+      border-radius: 12px;
       position: relative;
       cursor: pointer;
       transition: background 0.2s;
@@ -241,8 +342,8 @@
     .toggle.active { background: #34c759; }
 
     .toggle-handle {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       background: #fff;
       border-radius: 50%;
       position: absolute;
@@ -252,7 +353,7 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
 
-    .toggle.active .toggle-handle { transform: translateX(18px); }
+    .toggle.active .toggle-handle { transform: translateX(16px); }
 
     /* Camera UI */
     #camera-app { background-color: #000; }
@@ -261,12 +362,12 @@
     
     .rec-timer {
       position: absolute;
-      top: 50px;
+      top: 44px;
       background: rgba(255, 59, 48, 0.85);
       color: #fff;
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 14px;
+      padding: 4px 10px;
+      border-radius: 10px;
+      font-size: 13px;
       font-weight: 600;
       display: none;
       align-items: center;
@@ -274,21 +375,21 @@
       z-index: 5;
     }
 
-    .rec-dot { width: 8px; height: 8px; background: #fff; border-radius: 50%; animation: blink 1s infinite; }
+    .rec-dot { width: 7px; height: 7px; background: #fff; border-radius: 50%; animation: blink 1s infinite; }
     @keyframes blink { 50% { opacity: 0; } }
 
     .mode-selector {
-      height: 30px;
+      height: 28px;
       background: #000;
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 20px;
+      gap: 16px;
     }
 
     .mode-btn {
       color: #8e8e93;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       letter-spacing: 1px;
@@ -297,19 +398,19 @@
     .mode-btn.active { color: #ffcc00; }
 
     .camera-controls { 
-      height: 100px; 
+      height: 90px; 
       background: #000; 
       display: flex; 
       justify-content: space-around; 
       align-items: center; 
-      padding: 0 20px;
+      padding: 0 16px;
     }
 
     .shutter-btn { 
-      width: 65px; 
-      height: 65px; 
+      width: 58px; 
+      height: 58px; 
       border-radius: 50%; 
-      border: 4px solid #fff; 
+      border: 3px solid #fff; 
       background: transparent; 
       display: flex; 
       justify-content: center; 
@@ -318,19 +419,19 @@
     }
 
     .shutter-inner { 
-      width: 50px; 
-      height: 50px; 
+      width: 46px; 
+      height: 46px; 
       border-radius: 50%; 
       background: #fff; 
       transition: all 0.2s;
     }
 
     .mode-video .shutter-inner { background: #ff3b30; }
-    .mode-video.recording .shutter-inner { border-radius: 8px; width: 28px; height: 28px; }
+    .mode-video.recording .shutter-inner { border-radius: 6px; width: 24px; height: 24px; }
 
     .cam-flip-btn {
-      width: 44px;
-      height: 44px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.2);
       display: flex;
@@ -339,17 +440,17 @@
       cursor: pointer;
     }
 
-    .cam-flip-btn svg { width: 24px; height: 24px; fill: #fff; }
+    .cam-flip-btn svg { width: 22px; height: 22px; fill: #fff; }
 
     /* Photos UI */
-    .photos-actions { display: flex; gap: 10px; align-items: center; }
-    .action-btn { color: #007aff; font-size: 15px; font-weight: 600; background: none; border: none; cursor: pointer; }
+    .photos-actions { display: flex; gap: 8px; align-items: center; }
+    .action-btn { color: #007aff; font-size: 14px; font-weight: 600; background: none; border: none; cursor: pointer; }
     .action-btn.delete { color: #ff3b30; }
 
     .photo-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
+      gap: 5px;
     }
 
     .photo-wrapper {
@@ -363,22 +464,22 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 6px;
       transition: transform 0.15s ease, opacity 0.15s ease;
     }
 
     .video-badge {
       position: absolute;
-      bottom: 6px;
-      left: 6px;
+      bottom: 4px;
+      left: 4px;
       background: rgba(0, 0, 0, 0.6);
       color: #fff;
-      font-size: 10px;
-      padding: 2px 6px;
+      font-size: 9px;
+      padding: 2px 4px;
       border-radius: 4px;
       display: flex;
       align-items: center;
-      gap: 3px;
+      gap: 2px;
       font-weight: 600;
     }
 
@@ -390,10 +491,10 @@
 
     .select-check {
       position: absolute;
-      top: 6px;
-      right: 6px;
-      width: 20px;
-      height: 20px;
+      top: 4px;
+      right: 4px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       border: 2px solid #fff;
       background: rgba(0,0,0,0.3);
@@ -406,15 +507,15 @@
     }
 
     .trash-section {
-      margin-top: 20px;
-      padding-top: 15px;
+      margin-top: 16px;
+      padding-top: 12px;
       border-top: 1px solid #e5e5ea;
     }
 
     .trash-title {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -436,34 +537,27 @@
       align-items: center;
     }
 
-    .media-viewer.open {
-      display: flex;
-    }
-
-    .media-viewer-content {
-      max-width: 100%;
-      max-height: 80%;
-      object-fit: contain;
-    }
+    .media-viewer.open { display: flex; }
+    .media-viewer-content { max-width: 100%; max-height: 80%; object-fit: contain; }
 
     .viewer-close-btn {
       position: absolute;
-      top: 50px;
-      right: 20px;
+      top: 44px;
+      right: 16px;
       color: #fff;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
       background: rgba(255, 255, 255, 0.25);
-      padding: 6px 14px;
-      border-radius: 20px;
+      padding: 4px 12px;
+      border-radius: 16px;
       cursor: pointer;
       z-index: 160;
     }
 
     /* Clock UI */
-    .clock-display { font-size: 42px; font-weight: 300; text-align: center; margin: 20px 0; }
-    .stopwatch-controls { display: flex; justify-content: center; gap: 15px; }
-    .btn { padding: 10px 20px; border-radius: 20px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; }
+    .clock-display { font-size: 36px; font-weight: 300; text-align: center; margin: 16px 0; }
+    .stopwatch-controls { display: flex; justify-content: center; gap: 12px; }
+    .btn { padding: 8px 16px; border-radius: 18px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; }
     .btn-start { background: #34c759; color: #fff; }
     .btn-stop { background: #ff3b30; color: #fff; }
     .btn-reset { background: #8e8e93; color: #fff; }
@@ -471,10 +565,10 @@
     /* Bottom Home Bar Container */
     .home-bar-container {
       position: absolute;
-      bottom: 8px;
+      bottom: 3px;
       left: 0;
       width: 100%;
-      height: 20px;
+      height: 18px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -484,10 +578,10 @@
     }
 
     .home-bar {
-      width: 130px;
-      height: 5px;
+      width: 115px;
+      height: 4px;
       background-color: #ffffff;
-      border-radius: 3px;
+      border-radius: 2px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
       transition: background-color 0.2s;
     }
@@ -499,13 +593,26 @@
 <body>
 
   <div class="phone-frame">
+    <div class="power-btn" id="power-btn"></div>
+
     <div class="screen" id="screen">
       
+      <div class="punch-hole"></div>
+
+      <div class="screen-off-overlay" id="screen-off-overlay"></div>
+
+      <div class="lockscreen" id="lockscreen">
+        <div style="text-align: center;">
+          <div class="lock-clock" id="lock-clock">09:41</div>
+          <div class="lock-date" id="lock-date">Tuesday, August 11</div>
+        </div>
+        <div class="lock-hint">Swipe up to open</div>
+      </div>
+
       <div class="wallpaper"></div>
 
       <div class="status-bar" id="status-bar">
         <span id="status-time">9:41</span>
-        <span>ZonOS</span>
         <span>100%</span>
       </div>
 
@@ -582,7 +689,7 @@
           <span class="mode-btn" id="mode-video-btn">VIDEO</span>
         </div>
         <div class="camera-controls" id="camera-controls-bar">
-          <div style="width:44px;"></div>
+          <div style="width:40px;"></div>
           <div class="shutter-btn" id="shutter-btn">
             <div class="shutter-inner"></div>
           </div>
@@ -647,11 +754,71 @@
   <script>
     const pagesWrapper = document.getElementById('pages-wrapper');
     const screen = document.getElementById('screen');
+    const lockscreen = document.getElementById('lockscreen');
     const dot1 = document.getElementById('dot1');
     const dot2 = document.getElementById('dot2');
     const homeBarContainer = document.getElementById('home-bar-container');
     const statusTime = document.getElementById('status-time');
+    const lockClock = document.getElementById('lock-clock');
+    const lockDate = document.getElementById('lock-date');
+    const powerBtn = document.getElementById('power-btn');
     let activeApp = null;
+    let isPoweredOff = false;
+    let isLocked = false;
+
+    // Real-time Clocks
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      statusTime.innerText = timeStr;
+      lockClock.innerText = timeStr;
+
+      const options = { weekday: 'long', month: 'long', day: 'numeric' };
+      lockDate.innerText = now.toLocaleDateString('en-US', options);
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Physical Power Button Logic
+    powerBtn.addEventListener('click', () => {
+      if (!isPoweredOff) {
+        // Turn Screen OFF
+        isPoweredOff = true;
+        screen.classList.add('off');
+        if (isRecording) stopRecording();
+      } else {
+        // Turn Screen ON to LOCKSCREEN
+        isPoweredOff = false;
+        screen.classList.remove('off');
+        isLocked = true;
+        lockscreen.classList.remove('unlocked');
+      }
+    });
+
+    // Slide up on Lockscreen to unlock
+    let lockStartY = 0;
+    let lockIsDragging = false;
+
+    lockscreen.addEventListener('pointerdown', (e) => {
+      lockStartY = e.clientY;
+      lockIsDragging = true;
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (!lockIsDragging) return;
+      const deltaY = lockStartY - e.clientY;
+      if (deltaY > 50) {
+        unlockPhone();
+        lockIsDragging = false;
+      }
+    });
+
+    window.addEventListener('pointerup', () => lockIsDragging = false);
+
+    function unlockPhone() {
+      isLocked = false;
+      lockscreen.classList.add('unlocked');
+    }
 
     // Sound Effects Engine
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -716,17 +883,10 @@
       }
     }
 
-    // Real-time Status Bar Clock
-    function updateClock() {
-      const now = new Date();
-      statusTime.innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
-
-    // App Opener with Background Wallpaper Zoom
+    // App Opener
     document.querySelectorAll('.app-icon').forEach(icon => {
       icon.addEventListener('pointerdown', (e) => {
+        if (isLocked || isPoweredOff) return;
         e.stopPropagation();
         const appId = icon.getAttribute('data-app');
         const targetApp = document.getElementById(appId);
@@ -739,7 +899,7 @@
 
         targetApp.style.transformOrigin = `${originX}px ${originY}px`;
         targetApp.classList.add('open');
-        screen.classList.add('app-active'); // Triggers only wallpaper zoom
+        screen.classList.add('app-active');
         activeApp = targetApp;
 
         if (appId === 'camera-app') {
@@ -915,7 +1075,7 @@
 
     // PHOTOS & RECENTLY DELETED
     let mediaItems = [
-      { type: 'image', src: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80' },
+      { type: 'image', src: 'https://images.unsplash.com/photo-1517021897933-0e0319cfbc28?auto=format&fit=crop&w=800&q=80' },
       { type: 'image', src: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80' },
       { type: 'image', src: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80' }
     ];
@@ -1155,6 +1315,7 @@
     let currentPage = 0, pageStartX = 0, pageIsDragging = false;
 
     pagesWrapper.addEventListener('pointerdown', (e) => {
+      if (isLocked || isPoweredOff) return;
       pageStartX = e.clientX;
       pageIsDragging = true;
     });
@@ -1177,11 +1338,12 @@
       pageIsDragging = false;
     });
 
-    // Smooth App Close Gesture Handler
+    // App Close Gesture Handler
     let barStartY = 0;
     let isBarDragging = false;
 
     function onBarStart(y) {
+      if (isLocked || isPoweredOff) return;
       barStartY = y;
       isBarDragging = true;
     }
@@ -1193,7 +1355,7 @@
       if (deltaY > 15) {
         if (isRecording) stopRecording();
         activeApp.classList.remove('open');
-        screen.classList.remove('app-active'); // Resets wallpaper scale back to 100%
+        screen.classList.remove('app-active');
         mediaViewer.classList.remove('open');
         viewerContainer.innerHTML = '';
         activeApp = null;
