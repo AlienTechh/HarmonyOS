@@ -11,10 +11,16 @@
       padding: 0;
       user-select: none;
       -webkit-user-select: none;
-      -webkit-touch-callout: none;
+      -webkit-touch-callout: none !important;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    img, video {
+      -webkit-user-drag: none;
+      -webkit-touch-callout: none !important;
+      pointer-events: auto;
     }
 
     html, body {
@@ -75,13 +81,13 @@
       width: 100%;
       height: 100%;
       background: url('https://images.unsplash.com/photo-1517021897933-0e0319cfbc28?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
-      transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), filter 0.4s ease;
+      transition: transform 0.4s ease, filter 0.4s ease;
       z-index: 1;
     }
 
     .screen.app-active .wallpaper {
-      transform: scale(1.15);
-      filter: brightness(0.75);
+      transform: scale(1.1);
+      filter: brightness(0.8);
     }
 
     /* Middle Punch Hole Camera Cutout */
@@ -107,13 +113,17 @@
       height: 100%;
       background-color: #000;
       z-index: 700;
-      display: none;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease-in-out;
     }
+    
     .screen.off .screen-off-overlay {
-      display: block;
+      opacity: 1;
+      pointer-events: auto;
     }
 
-    /* Opaque Lockscreen Overlay (Covers Homescreen Completely) */
+    /* Lockscreen Overlay */
     .lockscreen {
       position: absolute;
       top: 0;
@@ -125,10 +135,10 @@
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: 50px 20px 30px 20px;
+      padding: 50px 20px 40px 20px;
       color: #fff;
       background: url('https://images.unsplash.com/photo-1517021897933-0e0319cfbc28?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
-      transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+      transition: transform 0.45s cubic-bezier(0.32, 1, 0.23, 1), opacity 0.35s ease;
       touch-action: none;
     }
 
@@ -153,19 +163,42 @@
       text-shadow: 0 1px 6px rgba(0,0,0,0.4);
     }
 
-    .lock-hint {
-      font-size: 12px;
-      font-weight: 500;
-      opacity: 0.9;
-      margin-bottom: 8px;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.5);
-      animation: bounce 2s infinite;
+    /* Unlock Button at Bottom Middle */
+    .unlock-btn-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
     }
 
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-6px); }
-      60% { transform: translateY(-3px); }
+    .unlock-btn {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 22px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: transform 0.15s ease, background 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .unlock-btn:active {
+      transform: scale(0.94);
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .unlock-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: #fff;
     }
 
     /* Top Status Bar */
@@ -187,8 +220,7 @@
       text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
     }
 
-    .app-window.open ~ .status-bar,
-    .status-bar.dark-text {
+    .app-window.open ~ .status-bar {
       color: #000;
       text-shadow: none;
     }
@@ -198,7 +230,7 @@
       text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
     }
 
-    /* Homescreen Pages Wrapper */
+    /* Homescreen Pages Wrapper with Fly-Down Unlock Effect */
     .pages-wrapper {
       position: relative;
       z-index: 5;
@@ -209,6 +241,18 @@
       margin-top: 36px;
       transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
       touch-action: pan-y;
+    }
+
+    /* Unlock Animation: Apps Fly Down into Place */
+    .screen.locked .pages-wrapper {
+      transform: translateY(-40px);
+      opacity: 0;
+    }
+
+    .screen:not(.locked) .pages-wrapper {
+      transform: translateY(0);
+      opacity: 1;
+      transition: transform 0.45s cubic-bezier(0.32, 1, 0.23, 1), opacity 0.35s ease;
     }
 
     .home-page {
@@ -272,7 +316,7 @@
     .icon-box svg { width: 28px; height: 28px; fill: #fff; }
     .app-label { color: #fff; font-size: 11px; font-weight: 500; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8); }
 
-    /* Opaque App Window */
+    /* App Window Zoom From App Icon Location */
     .app-window {
       position: absolute;
       top: 0;
@@ -280,18 +324,19 @@
       width: 100%;
       height: 100%;
       background-color: #f2f2f7;
-      opacity: 1;
+      opacity: 0;
       z-index: 20;
       border-radius: 34px;
       pointer-events: none;
-      transform: scale(0);
-      transition: transform 0.32s cubic-bezier(0.25, 1, 0.5, 1), border-radius 0.32s ease;
+      transform: scale(0.1);
+      transition: transform 0.35s cubic-bezier(0.32, 1, 0.23, 1), opacity 0.22s ease, border-radius 0.35s ease;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
     .app-window.open {
+      opacity: 1;
       pointer-events: auto;
       transform: scale(1);
       border-radius: 34px;
@@ -595,7 +640,7 @@
   <div class="phone-frame">
     <div class="power-btn" id="power-btn"></div>
 
-    <div class="screen" id="screen">
+    <div class="screen locked" id="screen">
       
       <div class="punch-hole"></div>
 
@@ -606,7 +651,13 @@
           <div class="lock-clock" id="lock-clock">09:41</div>
           <div class="lock-date" id="lock-date">Tuesday, August 11</div>
         </div>
-        <div class="lock-hint">Swipe up to open</div>
+
+        <div class="unlock-btn-container">
+          <button class="unlock-btn" id="unlock-btn">
+            <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            Unlock
+          </button>
+        </div>
       </div>
 
       <div class="wallpaper"></div>
@@ -752,9 +803,13 @@
   <canvas id="photo-canvas" style="display:none;"></canvas>
 
   <script>
+    // Prevent Context Menu on Long-Press
+    window.addEventListener('contextmenu', (e) => e.preventDefault());
+
     const pagesWrapper = document.getElementById('pages-wrapper');
     const screen = document.getElementById('screen');
     const lockscreen = document.getElementById('lockscreen');
+    const unlockBtn = document.getElementById('unlock-btn');
     const dot1 = document.getElementById('dot1');
     const dot2 = document.getElementById('dot2');
     const homeBarContainer = document.getElementById('home-bar-container');
@@ -764,7 +819,7 @@
     const powerBtn = document.getElementById('power-btn');
     let activeApp = null;
     let isPoweredOff = false;
-    let isLocked = false;
+    let isLocked = true;
 
     // Real-time Clocks
     function updateClock() {
@@ -779,27 +834,36 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Physical Power Button Logic
+    // Power Button Logic
     powerBtn.addEventListener('click', () => {
       if (!isPoweredOff) {
-        // Turn Screen OFF
         isPoweredOff = true;
         screen.classList.add('off');
         if (isRecording) stopRecording();
       } else {
-        // Turn Screen ON to LOCKSCREEN
         isPoweredOff = false;
         screen.classList.remove('off');
         isLocked = true;
+        screen.classList.add('locked');
         lockscreen.classList.remove('unlocked');
       }
     });
+
+    // Unlock Actions
+    function unlockPhone() {
+      isLocked = false;
+      screen.classList.remove('locked');
+      lockscreen.classList.add('unlocked');
+    }
+
+    unlockBtn.addEventListener('click', unlockPhone);
 
     // Slide up on Lockscreen to unlock
     let lockStartY = 0;
     let lockIsDragging = false;
 
     lockscreen.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('#unlock-btn')) return;
       lockStartY = e.clientY;
       lockIsDragging = true;
     });
@@ -815,12 +879,7 @@
 
     window.addEventListener('pointerup', () => lockIsDragging = false);
 
-    function unlockPhone() {
-      isLocked = false;
-      lockscreen.classList.add('unlocked');
-    }
-
-    // Sound Effects Engine
+    // Sound Effects
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
     function playCameraSound(type) {
@@ -883,7 +942,7 @@
       }
     }
 
-    // App Opener
+    // App Zoom Animation From App Position
     document.querySelectorAll('.app-icon').forEach(icon => {
       icon.addEventListener('pointerdown', (e) => {
         if (isLocked || isPoweredOff) return;
@@ -892,6 +951,7 @@
         const targetApp = document.getElementById(appId);
         const iconBox = icon.querySelector('.icon-box');
 
+        // Calculate App Center Position relative to screen
         const iconRect = iconBox.getBoundingClientRect();
         const screenRect = screen.getBoundingClientRect();
         const originX = (iconRect.left + iconRect.width / 2) - screenRect.left;
@@ -908,7 +968,7 @@
       });
     });
 
-    // Camera Stream Handling
+    // Camera Stream
     let cameraStream = null;
     let isFlipped = false; 
     let isLaptop = false;
@@ -927,10 +987,11 @@
       }
 
       const constraintsTryOrder = isLaptop ? [
-        { video: true, audio: false }
+        { video: true, audio: true }
       ] : [
-        { video: { facingMode: { exact: isFlipped ? 'environment' : 'user' } }, audio: false },
-        { video: { facingMode: isFlipped ? 'environment' : 'user' }, audio: false },
+        { video: { facingMode: { exact: isFlipped ? 'environment' : 'user' } }, audio: true },
+        { video: { facingMode: isFlipped ? 'environment' : 'user' }, audio: true },
+        { video: true, audio: true },
         { video: true, audio: false }
       ];
 
@@ -975,7 +1036,7 @@
 
     document.getElementById('cam-flip-btn').addEventListener('click', flipCamera);
 
-    // Camera Modes
+    // Camera Controls
     let cameraMode = 'photo';
     let isRecording = false;
     let mediaRecorder = null;
@@ -1113,6 +1174,7 @@
         video.src = item.src;
         video.controls = true;
         video.autoplay = true;
+        video.muted = false;
         video.playsInline = true;
         viewerContainer.appendChild(video);
       }
@@ -1244,15 +1306,19 @@
     });
 
     deleteBtn.addEventListener('click', () => {
-      const remaining = [];
-      mediaItems.forEach((item, idx) => {
-        if (mainSelected.has(idx)) trashItems.push(item);
-        else remaining.push(item);
-      });
-      mediaItems = remaining;
-      isMainSelection = false;
-      mainSelected.clear();
-      renderPhotos();
+      if (mainSelected.size === 0) return;
+      const confirmDelete = confirm(`Are you sure you want to delete ${mainSelected.size} selected item(s)?`);
+      if (confirmDelete) {
+        const remaining = [];
+        mediaItems.forEach((item, idx) => {
+          if (mainSelected.has(idx)) trashItems.push(item);
+          else remaining.push(item);
+        });
+        mediaItems = remaining;
+        isMainSelection = false;
+        mainSelected.clear();
+        renderPhotos();
+      }
     });
 
     cancelTrashBtn.addEventListener('click', () => {
@@ -1262,15 +1328,23 @@
     });
 
     deleteTrashBtn.addEventListener('click', () => {
-      trashItems = trashItems.filter((_, idx) => !trashSelected.has(idx));
-      isTrashSelection = false;
-      trashSelected.clear();
-      renderPhotos();
+      if (trashSelected.size === 0) return;
+      const confirmDelete = confirm(`Are you sure you want to permanently delete ${trashSelected.size} item(s)?`);
+      if (confirmDelete) {
+        trashItems = trashItems.filter((_, idx) => !trashSelected.has(idx));
+        isTrashSelection = false;
+        trashSelected.clear();
+        renderPhotos();
+      }
     });
 
     emptyTrashBtn.addEventListener('click', () => {
-      trashItems = [];
-      renderPhotos();
+      if (trashItems.length === 0) return;
+      const confirmEmpty = confirm("Are you sure you want to permanently delete all items in Recently Deleted?");
+      if (confirmEmpty) {
+        trashItems = [];
+        renderPhotos();
+      }
     });
 
     renderPhotos();
@@ -1311,7 +1385,7 @@
       startBtn.className = 'btn btn-start';
     });
 
-    // Homescreen Swiping
+    // Homescreen Page Swiping
     let currentPage = 0, pageStartX = 0, pageIsDragging = false;
 
     pagesWrapper.addEventListener('pointerdown', (e) => {
@@ -1338,7 +1412,7 @@
       pageIsDragging = false;
     });
 
-    // App Close Gesture Handler
+    // Home Bar Gesture Trigger
     let barStartY = 0;
     let isBarDragging = false;
 
