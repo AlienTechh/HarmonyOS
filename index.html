@@ -42,7 +42,6 @@
     .screen {
       width: 100%;
       height: 100%;
-      background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
       border-radius: 36px;
       position: relative;
       overflow: hidden;
@@ -50,7 +49,25 @@
       flex-direction: column;
     }
 
-    /* Top Status Bar (Always Visible Above Apps) */
+    /* Dedicated Background Wallpaper Layer */
+    .wallpaper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
+      transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), filter 0.4s ease;
+      z-index: 1;
+    }
+
+    /* Wallpaper Zooms In when an App is Opened */
+    .screen.app-active .wallpaper {
+      transform: scale(1.15);
+      filter: brightness(0.75);
+    }
+
+    /* Top Status Bar */
     .status-bar {
       height: 40px;
       width: 100%;
@@ -61,7 +78,7 @@
       color: #fff;
       font-size: 13px;
       font-weight: 600;
-      z-index: 100; /* Priority layer above apps */
+      z-index: 100;
       position: absolute;
       top: 0;
       left: 0;
@@ -82,6 +99,8 @@
 
     /* Homescreen Pages Wrapper */
     .pages-wrapper {
+      position: relative;
+      z-index: 5;
       flex: 1;
       display: flex;
       width: 200%;
@@ -452,10 +471,10 @@
     /* Bottom Home Bar Container */
     .home-bar-container {
       position: absolute;
-      bottom: 0;
+      bottom: 8px;
       left: 0;
       width: 100%;
-      height: 35px;
+      height: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -482,6 +501,8 @@
   <div class="phone-frame">
     <div class="screen" id="screen">
       
+      <div class="wallpaper"></div>
+
       <div class="status-bar" id="status-bar">
         <span id="status-time">9:41</span>
         <span>ZonOS</span>
@@ -494,7 +515,7 @@
           <div class="app-icon" data-app="settings-app">
             <div class="icon-box icon-settings">
               <svg viewBox="0 0 24 24">
-                <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6-3.6z"/>
               </svg>
             </div>
             <span class="app-label">Settings</span>
@@ -632,7 +653,7 @@
     const statusTime = document.getElementById('status-time');
     let activeApp = null;
 
-    // Realistic Synthesized Camera Sound Effects
+    // Sound Effects Engine
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
     function playCameraSound(type) {
@@ -641,7 +662,6 @@
       if (type === 'shutter') {
         const now = audioCtx.currentTime;
         
-        // Click 1 (Mirror)
         const osc1 = audioCtx.createOscillator();
         const gain1 = audioCtx.createGain();
         osc1.type = 'triangle';
@@ -654,7 +674,6 @@
         osc1.start(now);
         osc1.stop(now + 0.04);
 
-        // Click 2 (Shutter Curtain)
         const osc2 = audioCtx.createOscillator();
         const gain2 = audioCtx.createGain();
         osc2.type = 'square';
@@ -705,7 +724,7 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // App Opener
+    // App Opener with Background Wallpaper Zoom
     document.querySelectorAll('.app-icon').forEach(icon => {
       icon.addEventListener('pointerdown', (e) => {
         e.stopPropagation();
@@ -720,6 +739,7 @@
 
         targetApp.style.transformOrigin = `${originX}px ${originY}px`;
         targetApp.classList.add('open');
+        screen.classList.add('app-active'); // Triggers only wallpaper zoom
         activeApp = targetApp;
 
         if (appId === 'camera-app') {
@@ -728,20 +748,28 @@
       });
     });
 
-    // Mobile-Optimized Camera Permission & Stream Engine
+    // Camera Stream Handling
     let cameraStream = null;
-    let isFlipped = false;
+    let isFlipped = false; 
+    let isLaptop = false;
+    let isMirroredLaptop = false;
+
+    const checkIsMobile = () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    isLaptop = !checkIsMobile();
 
     async function initCamera() {
       const feed = document.getElementById('camera-feed');
 
       if (cameraStream && cameraStream.active) {
         feed.srcObject = cameraStream;
+        updateFeedTransform();
         return;
       }
 
-      const constraintsTryOrder = [
-        { video: { facingMode: isFlipped ? 'environment' : 'user' }, audio: true },
+      const constraintsTryOrder = isLaptop ? [
+        { video: true, audio: false }
+      ] : [
+        { video: { facingMode: { exact: isFlipped ? 'environment' : 'user' } }, audio: false },
         { video: { facingMode: isFlipped ? 'environment' : 'user' }, audio: false },
         { video: true, audio: false }
       ];
@@ -751,41 +779,43 @@
           cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
           feed.srcObject = cameraStream;
           feed.setAttribute('playsinline', 'true');
+          updateFeedTransform();
           await feed.play();
           return;
         } catch (err) {
-          console.warn('Constraint failed, trying fallback...', err);
+          console.warn('Fallback constraint triggered...', err);
         }
       }
 
-      alert('Camera access failed. Please ensure you are serving this page via HTTPS and camera permissions are allowed in your browser settings.');
+      alert('Camera access failed. Ensure permissions are allowed.');
+    }
+
+    function updateFeedTransform() {
+      const feed = document.getElementById('camera-feed');
+      if (isLaptop) {
+        feed.style.transform = isMirroredLaptop ? 'scaleX(-1)' : 'scaleX(1)';
+      } else {
+        feed.style.transform = !isFlipped ? 'scaleX(-1)' : 'scaleX(1)';
+      }
     }
 
     async function flipCamera() {
-      isFlipped = !isFlipped;
-      const feed = document.getElementById('camera-feed');
-
-      if (cameraStream) {
-        const videoTrack = cameraStream.getVideoTracks()[0];
-        if (videoTrack && videoTrack.applyConstraints) {
-          try {
-            await videoTrack.applyConstraints({
-              facingMode: isFlipped ? 'environment' : 'user'
-            });
-            feed.style.transform = isFlipped ? 'scaleX(1)' : 'scaleX(-1)';
-            return;
-          } catch (e) {
-            // Fallback to CSS flip if constraint fails
-          }
+      if (isLaptop) {
+        isMirroredLaptop = !isMirroredLaptop;
+        updateFeedTransform();
+      } else {
+        isFlipped = !isFlipped;
+        if (cameraStream) {
+          cameraStream.getTracks().forEach(track => track.stop());
+          cameraStream = null;
         }
+        await initCamera();
       }
-
-      feed.style.transform = isFlipped ? 'scaleX(-1)' : 'scaleX(1)';
     }
 
     document.getElementById('cam-flip-btn').addEventListener('click', flipCamera);
 
-    // Camera Modes (Photo / Video)
+    // Camera Modes
     let cameraMode = 'photo';
     let isRecording = false;
     let mediaRecorder = null;
@@ -833,7 +863,8 @@
       canvas.height = video.videoHeight || 300;
       const ctx = canvas.getContext('2d');
       
-      if (isFlipped) {
+      const shouldMirror = isLaptop ? isMirroredLaptop : !isFlipped;
+      if (shouldMirror) {
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
       }
@@ -882,7 +913,7 @@
       renderPhotos();
     }
 
-    // PHOTOS, RECENTLY DELETED & MEDIA PREVIEW VIEWER
+    // PHOTOS & RECENTLY DELETED
     let mediaItems = [
       { type: 'image', src: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80' },
       { type: 'image', src: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80' },
@@ -934,7 +965,6 @@
     });
 
     function renderPhotos() {
-      // Main Photos Grid
       photoGrid.innerHTML = '';
       mediaItems.forEach((item, idx) => {
         const wrap = document.createElement('div');
@@ -981,7 +1011,6 @@
         photoGrid.appendChild(wrap);
       });
 
-      // Recently Deleted Trash Grid
       trashGrid.innerHTML = '';
       trashItems.forEach((item, idx) => {
         const wrap = document.createElement('div');
@@ -1164,6 +1193,7 @@
       if (deltaY > 15) {
         if (isRecording) stopRecording();
         activeApp.classList.remove('open');
+        screen.classList.remove('app-active'); // Resets wallpaper scale back to 100%
         mediaViewer.classList.remove('open');
         viewerContainer.innerHTML = '';
         activeApp = null;
