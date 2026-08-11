@@ -728,30 +728,58 @@
       });
     });
 
-    // Seamless Camera & Permission Engine
+    // Mobile-Optimized Camera Permission & Stream Engine
     let cameraStream = null;
     let isFlipped = false;
 
     async function initCamera() {
       const feed = document.getElementById('camera-feed');
+
       if (cameraStream && cameraStream.active) {
         feed.srcObject = cameraStream;
         return;
       }
-      try {
-        cameraStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'user' },
-          audio: true
-        });
-        feed.srcObject = cameraStream;
-      } catch (err) {
-        console.warn('Camera access denied or unavailable.', err);
+
+      const constraintsTryOrder = [
+        { video: { facingMode: isFlipped ? 'environment' : 'user' }, audio: true },
+        { video: { facingMode: isFlipped ? 'environment' : 'user' }, audio: false },
+        { video: true, audio: false }
+      ];
+
+      for (const constraints of constraintsTryOrder) {
+        try {
+          cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+          feed.srcObject = cameraStream;
+          feed.setAttribute('playsinline', 'true');
+          await feed.play();
+          return;
+        } catch (err) {
+          console.warn('Constraint failed, trying fallback...', err);
+        }
       }
+
+      alert('Camera access failed. Please ensure you are serving this page via HTTPS and camera permissions are allowed in your browser settings.');
     }
 
-    function flipCamera() {
+    async function flipCamera() {
       isFlipped = !isFlipped;
       const feed = document.getElementById('camera-feed');
+
+      if (cameraStream) {
+        const videoTrack = cameraStream.getVideoTracks()[0];
+        if (videoTrack && videoTrack.applyConstraints) {
+          try {
+            await videoTrack.applyConstraints({
+              facingMode: isFlipped ? 'environment' : 'user'
+            });
+            feed.style.transform = isFlipped ? 'scaleX(1)' : 'scaleX(-1)';
+            return;
+          } catch (e) {
+            // Fallback to CSS flip if constraint fails
+          }
+        }
+      }
+
       feed.style.transform = isFlipped ? 'scaleX(-1)' : 'scaleX(1)';
     }
 
