@@ -2,17 +2,29 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ZonOS Emulator</title>
 <style>
-  /* Base reset and centering */
+  /* Global resets to remove web behaviors */
+  * {
+    -webkit-tap-highlight-color: transparent; /* Removes blue tap highlight */
+    user-select: none; /* Prevents text selection on long press */
+    box-sizing: border-box;
+  }
+
+  html, body {
+    overflow: hidden; /* Prevents page scrolling */
+    overscroll-behavior: none; /* Prevents pull-to-refresh bounce */
+    height: 100vh;
+    margin: 0;
+  }
+
+  /* Base centering */
   body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
     background-color: #1a1a1a;
-    margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 
@@ -26,17 +38,17 @@
     position: relative;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    touch-action: none; /* Further prevents browser gestures inside the frame */
   }
 
   /* ZonOS Home Screen */
   .home-screen {
     width: 100%;
-    height: 100%;
+    height: calc(100% - 48px); /* Leave space for nav bar */
     background: linear-gradient(135deg, #00c6ff, #0072ff);
     display: flex;
     flex-direction: column;
     padding-top: 60px;
-    box-sizing: border-box;
   }
 
   .os-title {
@@ -95,11 +107,10 @@
     top: 100%; /* Hidden off-screen by default */
     left: 0;
     width: 100%;
-    height: 100%;
+    height: calc(100% - 48px); /* Leave space for nav bar */
     background-color: #f2f2f7;
     transition: top 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     z-index: 10;
-    box-sizing: border-box;
     padding: 60px 20px 20px;
   }
 
@@ -124,35 +135,35 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
 
-  /* Bottom Home Indicator Area */
-  .home-indicator-area {
+  /* 3-Button Navigation Bar */
+  .nav-bar {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 40px;
+    height: 48px;
+    background-color: #000;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 20;
+  }
+
+  .nav-btn {
+    color: #aaa;
+    font-size: 24px;
+    width: 48px;
+    height: 48px;
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 20;
-    cursor: grab;
+    cursor: pointer;
   }
 
-  .home-indicator-area:active {
-    cursor: grabbing;
-  }
-
-  .home-line {
-    width: 130px;
-    height: 5px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 10px;
-    transition: background-color 0.3s;
-  }
-
-  /* Changes the line color to dark when a light app is open */
-  .phone-frame.app-open .home-line {
-    background-color: rgba(0, 0, 0, 0.8);
+  .nav-btn:active {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
   }
 </style>
 </head>
@@ -181,65 +192,39 @@
     <div class="settings-card">About ZonOS</div>
   </div>
 
-  <div class="home-indicator-area" id="home-area">
-    <div class="home-line"></div>
+  <div class="nav-bar">
+    <div class="nav-btn" id="nav-back">◁</div>
+    <div class="nav-btn" id="nav-home">○</div>
+    <div class="nav-btn" id="nav-recents">□</div>
   </div>
 
 </div>
 
 <script>
-  const phone = document.getElementById('phone');
   const settingsBtn = document.getElementById('btn-settings');
   const settingsApp = document.getElementById('app-settings');
-  const homeArea = document.getElementById('home-area');
+  
+  const navBack = document.getElementById('nav-back');
+  const navHome = document.getElementById('nav-home');
 
-  // 1. Open the Settings App
+  // Open the Settings App
   settingsBtn.addEventListener('click', () => {
     settingsApp.classList.add('open');
-    phone.classList.add('app-open'); // Triggers the dark home bar
   });
 
-  // 2. Swipe Up Logic to Close App
-  let startY = 0;
-  let isDragging = false;
-
-  // Track dragging starting specifically on the home area
-  homeArea.addEventListener('mousedown', dragStart);
-  homeArea.addEventListener('touchstart', dragStart, {passive: true});
-
-  // Track the movement anywhere on the window once drag starts
-  window.addEventListener('mousemove', dragMove);
-  window.addEventListener('touchmove', dragMove, {passive: true});
-
-  // Reset drag when let go
-  window.addEventListener('mouseup', dragEnd);
-  window.addEventListener('touchend', dragEnd);
-
-  function dragStart(e) {
-    // Only engage the swipe tracker if an app is actually open
-    if (!settingsApp.classList.contains('open')) return;
-    
-    isDragging = true;
-    startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+  // Close app function
+  function closeApp() {
+    settingsApp.classList.remove('open');
   }
 
-  function dragMove(e) {
-    if (!isDragging) return;
-    
-    let currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
-    let diffY = startY - currentY;
+  // Bind Home and Back buttons to close the app
+  navHome.addEventListener('click', closeApp);
+  navBack.addEventListener('click', closeApp);
 
-    // If the user drags UP by more than 40 pixels, close the app
-    if (diffY > 40) {
-      settingsApp.classList.remove('open');
-      phone.classList.remove('app-open');
-      isDragging = false; 
-    }
-  }
-
-  function dragEnd() {
-    isDragging = false;
-  }
+  // Recents button (currently does nothing, setup for future use)
+  document.getElementById('nav-recents').addEventListener('click', () => {
+    console.log("Recents button clicked");
+  });
 </script>
 
 </body>
