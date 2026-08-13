@@ -7,14 +7,14 @@
 <style>
   /* Global resets to remove web behaviors */
   * {
-    -webkit-tap-highlight-color: transparent; /* Removes blue tap highlight */
-    user-select: none; /* Prevents text selection on long press */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
     box-sizing: border-box;
   }
 
   html, body {
-    overflow: hidden; /* Prevents page scrolling */
-    overscroll-behavior: none; /* Prevents pull-to-refresh bounce */
+    overflow: hidden;
+    overscroll-behavior: none;
     height: 100vh;
     margin: 0;
   }
@@ -28,24 +28,31 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 
-  /* The physical phone frame */
+  /* White Bezels Phone Frame */
   .phone-frame {
     width: 320px;
     height: 650px;
     background-color: #000;
     border-radius: 40px;
-    border: 12px solid #333;
+    border: 12px solid #ffffff;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-    touch-action: none; /* Further prevents browser gestures inside the frame */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+    touch-action: none;
   }
 
-  /* ZonOS Home Screen */
+  /* ZonOS Home Screen - Frutiger Aero Theme */
   .home-screen {
     width: 100%;
-    height: calc(100% - 48px); /* Leave space for nav bar */
-    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    height: 100%; 
+    background: 
+      radial-gradient(circle at 25% 35%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 3%),
+      radial-gradient(circle at 25% 35%, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 8%),
+      radial-gradient(circle at 75% 55%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 4%),
+      radial-gradient(circle at 75% 55%, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 10%),
+      radial-gradient(circle at 50% 10%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 25%),
+      radial-gradient(ellipse 130% 50% at 50% 100%, #8be836 0%, #3ca11d 30%, transparent 40%),
+      linear-gradient(to bottom, #0093E9 0%, #80D0C7 100%);
     display: flex;
     flex-direction: column;
     padding-top: 60px;
@@ -76,18 +83,18 @@
   .app-icon {
     width: 60px;
     height: 60px;
-    background-color: white;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
     border-radius: 16px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15), inset 0 2px 4px rgba(255,255,255,0.8);
     transition: transform 0.1s;
   }
 
   .app-icon:active {
-    transform: scale(0.95);
+    transform: scale(0.92);
   }
 
   .app-icon span {
@@ -98,25 +105,37 @@
     font-size: 12px;
     color: white;
     margin-top: 6px;
-    font-weight: 500;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
   }
 
-  /* Settings App Interface */
+  /* Settings App View (Icon Origin Zoom Animation) */
   .settings-app {
     position: absolute;
-    top: 100%; /* Hidden off-screen by default */
+    top: 0;
     left: 0;
     width: 100%;
-    height: calc(100% - 48px); /* Leave space for nav bar */
+    height: 100%;
     background-color: #f2f2f7;
-    transition: top 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     z-index: 10;
-    padding: 60px 20px 20px;
+    padding: 60px 20px 68px;
+    
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.05);
+    border-radius: 30px;
+    
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), 
+                opacity 0.25s ease,
+                border-radius 0.35s ease,
+                visibility 0.35s;
   }
 
-  /* Class toggled by JavaScript to slide the app up */
   .settings-app.open {
-    top: 0;
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+    border-radius: 0px;
   }
 
   .settings-header {
@@ -135,14 +154,14 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
 
-  /* 3-Button Navigation Bar */
+  /* Transparent Navigation Bar */
   .nav-bar {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
     height: 48px;
-    background-color: #000;
+    background-color: transparent;
     display: flex;
     justify-content: space-around;
     align-items: center;
@@ -150,20 +169,34 @@
   }
 
   .nav-btn {
-    color: #aaa;
-    font-size: 24px;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    font-size: 22px;
     width: 48px;
     height: 48px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    transition: color 0.3s, text-shadow 0.3s;
+  }
+
+  /* Scaled up the rectangle visually without disrupting flex alignment */
+  #nav-recents span {
+    display: inline-block;
+    transform: scale(1.35);
+    line-height: 1;
   }
 
   .nav-btn:active {
-    color: #fff;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(150, 150, 150, 0.2);
     border-radius: 50%;
+  }
+
+  /* Dark mode nav icons when app is active */
+  .nav-bar.app-open .nav-btn {
+    color: #333;
+    text-shadow: none;
   }
 </style>
 </head>
@@ -192,36 +225,51 @@
     <div class="settings-card">About ZonOS</div>
   </div>
 
-  <div class="nav-bar">
+  <div class="nav-bar" id="nav-bar">
     <div class="nav-btn" id="nav-back">◁</div>
     <div class="nav-btn" id="nav-home">○</div>
-    <div class="nav-btn" id="nav-recents">□</div>
+    <div class="nav-btn" id="nav-recents"><span>□</span></div>
   </div>
 
 </div>
 
 <script>
+  const phone = document.getElementById('phone');
   const settingsBtn = document.getElementById('btn-settings');
   const settingsApp = document.getElementById('app-settings');
+  const navBar = document.getElementById('nav-bar');
   
   const navBack = document.getElementById('nav-back');
   const navHome = document.getElementById('nav-home');
 
+  function setTransformOrigin(element, originTarget) {
+    const targetRect = originTarget.getBoundingClientRect();
+    const phoneRect = phone.getBoundingClientRect();
+
+    const originX = (targetRect.left + targetRect.width / 2) - phoneRect.left;
+    const originY = (targetRect.top + targetRect.height / 2) - phoneRect.top;
+
+    element.style.transformOrigin = `${originX}px ${originY}px`;
+  }
+
   // Open the Settings App
   settingsBtn.addEventListener('click', () => {
+    setTransformOrigin(settingsApp, settingsBtn);
     settingsApp.classList.add('open');
+    navBar.classList.add('app-open');
   });
 
   // Close app function
   function closeApp() {
     settingsApp.classList.remove('open');
+    navBar.classList.remove('app-open');
   }
 
   // Bind Home and Back buttons to close the app
   navHome.addEventListener('click', closeApp);
   navBack.addEventListener('click', closeApp);
 
-  // Recents button (currently does nothing, setup for future use)
+  // Recents button placeholder
   document.getElementById('nav-recents').addEventListener('click', () => {
     console.log("Recents button clicked");
   });
