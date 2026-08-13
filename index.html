@@ -1,1449 +1,246 @@
-a<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Phone Emulator</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none !important;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    img, video {
-      -webkit-user-drag: none;
-      -webkit-touch-callout: none !important;
-      pointer-events: auto;
-    }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background-color: #0d0d0d;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    /* Outer Phone Frame */
-    .phone-frame {
-      width: 320px;
-      height: 650px;
-      background-color: #000;
-      border-radius: 44px;
-      padding: 10px;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 0 2px #2a2a2a;
-      position: relative;
-    }
-
-    /* Physical Power Button */
-    .power-btn {
-      position: absolute;
-      right: -5px;
-      top: 140px;
-      width: 5px;
-      height: 50px;
-      background: linear-gradient(to bottom, #3a3a3a, #1a1a1a);
-      border-radius: 0 3px 3px 0;
-      cursor: pointer;
-      box-shadow: 1px 0 3px rgba(0,0,0,0.5);
-      z-index: 1000;
-    }
-    .power-btn:active {
-      transform: scaleX(0.7);
-    }
-
-    /* Screen Area */
-    .screen {
-      width: 100%;
-      height: 100%;
-      border-radius: 34px;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      background-color: #000;
-    }
-
-    /* Morning Snowy Mountain Wallpaper Layer */
-    .wallpaper {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('https://images.unsplash.com/photo-1517021897933-0e0319cfbc28?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
-      transition: transform 0.4s ease, filter 0.4s ease;
-      z-index: 1;
-    }
-
-    .screen.app-active .wallpaper {
-      transform: scale(1.1);
-      filter: brightness(0.8);
-    }
-
-    /* Middle Punch Hole Camera Cutout */
-    .punch-hole {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 12px;
-      height: 12px;
-      background-color: #000;
-      border-radius: 50%;
-      z-index: 600;
-      box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.2);
-    }
-
-    /* Screen Off Overlay */
-    .screen-off-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: #000;
-      z-index: 700;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease-in-out;
-    }
-    
-    .screen.off .screen-off-overlay {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    /* Lockscreen Overlay */
-    .lockscreen {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 500;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      padding: 50px 20px 40px 20px;
-      color: #fff;
-      background: url('https://images.unsplash.com/photo-1517021897933-0e0319cfbc28?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
-      transition: transform 0.45s cubic-bezier(0.32, 1, 0.23, 1), opacity 0.35s ease;
-      touch-action: none;
-    }
-
-    .lockscreen.unlocked {
-      transform: translateY(-100%);
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .lock-clock {
-      font-size: 58px;
-      font-weight: 200;
-      letter-spacing: -1px;
-      line-height: 1;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.4);
-    }
-
-    .lock-date {
-      font-size: 15px;
-      font-weight: 500;
-      margin-top: 6px;
-      text-shadow: 0 1px 6px rgba(0,0,0,0.4);
-    }
-
-    /* Unlock Button at Bottom Middle */
-    .unlock-btn-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-    }
-
-    .unlock-btn {
-      background: rgba(255, 255, 255, 0.25);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      color: #fff;
-      padding: 10px 24px;
-      border-radius: 22px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-      transition: transform 0.15s ease, background 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .unlock-btn:active {
-      transform: scale(0.94);
-      background: rgba(255, 255, 255, 0.4);
-    }
-
-    .unlock-btn svg {
-      width: 16px;
-      height: 16px;
-      fill: #fff;
-    }
-
-    /* Top Status Bar */
-    .status-bar {
-      height: 36px;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 20px;
-      color: #fff;
-      font-size: 12px;
-      font-weight: 600;
-      z-index: 100;
-      position: absolute;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
-    }
-
-    .app-window.open ~ .status-bar {
-      color: #000;
-      text-shadow: none;
-    }
-
-    #camera-app.open ~ .status-bar {
-      color: #fff;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
-    }
-
-    /* Homescreen Pages Wrapper with Fly-Down Unlock Effect */
-    .pages-wrapper {
-      position: relative;
-      z-index: 5;
-      flex: 1;
-      display: flex;
-      width: 200%;
-      height: calc(100% - 60px);
-      margin-top: 36px;
-      transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
-      touch-action: pan-y;
-    }
-
-    /* Unlock Animation: Apps Fly Down into Place */
-    .screen.locked .pages-wrapper {
-      transform: translateY(-40px);
-      opacity: 0;
-    }
-
-    .screen:not(.locked) .pages-wrapper {
-      transform: translateY(0);
-      opacity: 1;
-      transition: transform 0.45s cubic-bezier(0.32, 1, 0.23, 1), opacity 0.35s ease;
-    }
-
-    .home-page {
-      width: 50%;
-      height: 100%;
-      padding: 20px 18px;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-auto-rows: max-content;
-      gap: 16px;
-    }
-
-    .page-dots {
-      position: absolute;
-      bottom: 28px;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      gap: 6px;
-      z-index: 10;
-    }
-
-    .dot {
-      width: 6px;
-      height: 6px;
-      background-color: rgba(255, 255, 255, 0.4);
-      border-radius: 50%;
-      transition: background-color 0.3s ease, transform 0.3s ease;
-    }
-
-    .dot.active {
-      background-color: #ffffff;
-      transform: scale(1.2);
-    }
-
-    .app-icon {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-    }
-
-    .icon-box {
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      transition: transform 0.15s ease;
-    }
-
-    .icon-settings { background: linear-gradient(135deg, #8e8e93, #636366); }
-    .icon-camera   { background: linear-gradient(135deg, #4cd964, #34a853); }
-    .icon-photos   { background: linear-gradient(135deg, #ff9500, #ff2d55); }
-    .icon-clock    { background: linear-gradient(135deg, #1d1d1f, #000000); }
-
-    .app-icon:active .icon-box { transform: scale(0.9); }
-    .icon-box svg { width: 28px; height: 28px; fill: #fff; }
-    .app-label { color: #fff; font-size: 11px; font-weight: 500; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8); }
-
-    /* App Window Zoom From App Icon Location */
-    .app-window {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: #f2f2f7;
-      opacity: 0;
-      z-index: 20;
-      border-radius: 34px;
-      pointer-events: none;
-      transform: scale(0.1);
-      transition: transform 0.35s cubic-bezier(0.32, 1, 0.23, 1), opacity 0.22s ease, border-radius 0.35s ease;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .app-window.open {
-      opacity: 1;
-      pointer-events: auto;
-      transform: scale(1);
-      border-radius: 34px;
-    }
-
-    .app-header {
-      padding: 44px 16px 8px 16px;
-      background-color: #fff;
-      border-bottom: 1px solid #e5e5ea;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-    }
-
-    .app-header h1 { font-size: 22px; color: #000; }
-
-    .app-body {
-      padding: 16px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      overflow-y: auto;
-    }
-
-    /* Settings UI */
-    .setting-item {
-      background: #fff;
-      padding: 12px 14px;
-      border-radius: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 15px;
-      color: #000;
-    }
-
-    .toggle {
-      width: 40px;
-      height: 24px;
-      background: #e9e9ea;
-      border-radius: 12px;
-      position: relative;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .toggle.active { background: #34c759; }
-
-    .toggle-handle {
-      width: 20px;
-      height: 20px;
-      background: #fff;
-      border-radius: 50%;
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      transition: transform 0.2s;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-
-    .toggle.active .toggle-handle { transform: translateX(16px); }
-
-    /* Camera UI */
-    #camera-app { background-color: #000; }
-    .camera-container { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; background: #111; overflow: hidden; }
-    #camera-feed { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
-    
-    .rec-timer {
-      position: absolute;
-      top: 44px;
-      background: rgba(255, 59, 48, 0.85);
-      color: #fff;
-      padding: 4px 10px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      display: none;
-      align-items: center;
-      gap: 6px;
-      z-index: 5;
-    }
-
-    .rec-dot { width: 7px; height: 7px; background: #fff; border-radius: 50%; animation: blink 1s infinite; }
-    @keyframes blink { 50% { opacity: 0; } }
-
-    .mode-selector {
-      height: 28px;
-      background: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .mode-btn {
-      color: #8e8e93;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      letter-spacing: 1px;
-    }
-
-    .mode-btn.active { color: #ffcc00; }
-
-    .camera-controls { 
-      height: 90px; 
-      background: #000; 
-      display: flex; 
-      justify-content: space-around; 
-      align-items: center; 
-      padding: 0 16px;
-    }
-
-    .shutter-btn { 
-      width: 58px; 
-      height: 58px; 
-      border-radius: 50%; 
-      border: 3px solid #fff; 
-      background: transparent; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      cursor: pointer; 
-    }
-
-    .shutter-inner { 
-      width: 46px; 
-      height: 46px; 
-      border-radius: 50%; 
-      background: #fff; 
-      transition: all 0.2s;
-    }
-
-    .mode-video .shutter-inner { background: #ff3b30; }
-    .mode-video.recording .shutter-inner { border-radius: 6px; width: 24px; height: 24px; }
-
-    .cam-flip-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-    }
-
-    .cam-flip-btn svg { width: 22px; height: 22px; fill: #fff; }
-
-    /* Photos UI */
-    .photos-actions { display: flex; gap: 8px; align-items: center; }
-    .action-btn { color: #007aff; font-size: 14px; font-weight: 600; background: none; border: none; cursor: pointer; }
-    .action-btn.delete { color: #ff3b30; }
-
-    .photo-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 5px;
-    }
-
-    .photo-wrapper {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 1;
-      cursor: pointer;
-    }
-
-    .photo-thumb, .video-thumb {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 6px;
-      transition: transform 0.15s ease, opacity 0.15s ease;
-    }
-
-    .video-badge {
-      position: absolute;
-      bottom: 4px;
-      left: 4px;
-      background: rgba(0, 0, 0, 0.6);
-      color: #fff;
-      font-size: 9px;
-      padding: 2px 4px;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      font-weight: 600;
-    }
-
-    .photo-wrapper.selected .photo-thumb,
-    .photo-wrapper.selected .video-thumb {
-      opacity: 0.7;
-      transform: scale(0.92);
-    }
-
-    .select-check {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      border: 2px solid #fff;
-      background: rgba(0,0,0,0.3);
-      display: none;
-    }
-
-    .photo-wrapper.selected .select-check {
-      background: #007aff;
-      display: block;
-    }
-
-    .trash-section {
-      margin-top: 16px;
-      padding-top: 12px;
-      border-top: 1px solid #e5e5ea;
-    }
-
-    .trash-title {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: #000;
-    }
-
-    /* Media Viewer Overlay */
-    .media-viewer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      z-index: 150;
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .media-viewer.open { display: flex; }
-    .media-viewer-content { max-width: 100%; max-height: 80%; object-fit: contain; }
-
-    .viewer-close-btn {
-      position: absolute;
-      top: 44px;
-      right: 16px;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 600;
-      background: rgba(255, 255, 255, 0.25);
-      padding: 4px 12px;
-      border-radius: 16px;
-      cursor: pointer;
-      z-index: 160;
-    }
-
-    /* Clock UI */
-    .clock-display { font-size: 36px; font-weight: 300; text-align: center; margin: 16px 0; }
-    .stopwatch-controls { display: flex; justify-content: center; gap: 12px; }
-    .btn { padding: 8px 16px; border-radius: 18px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; }
-    .btn-start { background: #34c759; color: #fff; }
-    .btn-stop { background: #ff3b30; color: #fff; }
-    .btn-reset { background: #8e8e93; color: #fff; }
-
-    /* Bottom Home Bar Container */
-    .home-bar-container {
-      position: absolute;
-      bottom: 3px;
-      left: 0;
-      width: 100%;
-      height: 18px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 200;
-      cursor: pointer;
-      touch-action: none;
-    }
-
-    .home-bar {
-      width: 115px;
-      height: 4px;
-      background-color: #ffffff;
-      border-radius: 2px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-      transition: background-color 0.2s;
-    }
-
-    .app-window.open ~ .home-bar-container .home-bar { background-color: #000000; }
-    #camera-app.open ~ .home-bar-container .home-bar { background-color: #ffffff; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZonOS Emulator</title>
+<style>
+  /* Base reset and centering */
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #1a1a1a;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  /* The physical phone frame */
+  .phone-frame {
+    width: 320px;
+    height: 650px;
+    background-color: #000;
+    border-radius: 40px;
+    border: 12px solid #333;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  }
+
+  /* ZonOS Home Screen */
+  .home-screen {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    display: flex;
+    flex-direction: column;
+    padding-top: 60px;
+    box-sizing: border-box;
+  }
+
+  .os-title {
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    font-size: 24px;
+    margin-bottom: 30px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+
+  /* App Grid & Icons */
+  .app-grid {
+    display: flex;
+    padding: 0 20px;
+  }
+
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 15px;
+  }
+
+  .app-icon {
+    width: 60px;
+    height: 60px;
+    background-color: white;
+    border-radius: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: transform 0.1s;
+  }
+
+  .app-icon:active {
+    transform: scale(0.95);
+  }
+
+  .app-icon span {
+    font-size: 28px;
+  }
+
+  .app-label {
+    font-size: 12px;
+    color: white;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  /* Settings App Interface */
+  .settings-app {
+    position: absolute;
+    top: 100%; /* Hidden off-screen by default */
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f2f2f7;
+    transition: top 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    z-index: 10;
+    box-sizing: border-box;
+    padding: 60px 20px 20px;
+  }
+
+  /* Class toggled by JavaScript to slide the app up */
+  .settings-app.open {
+    top: 0;
+  }
+
+  .settings-header {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #000;
+  }
+
+  .settings-card {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    color: #333;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  /* Bottom Home Indicator Area */
+  .home-indicator-area {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    cursor: grab;
+  }
+
+  .home-indicator-area:active {
+    cursor: grabbing;
+  }
+
+  .home-line {
+    width: 130px;
+    height: 5px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    transition: background-color 0.3s;
+  }
+
+  /* Changes the line color to dark when a light app is open */
+  .phone-frame.app-open .home-line {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+</style>
 </head>
 <body>
 
-  <div class="phone-frame">
-    <div class="power-btn" id="power-btn"></div>
-
-    <div class="screen locked" id="screen">
-      
-      <div class="punch-hole"></div>
-
-      <div class="screen-off-overlay" id="screen-off-overlay"></div>
-
-      <div class="lockscreen" id="lockscreen">
-        <div style="text-align: center;">
-          <div class="lock-clock" id="lock-clock">09:41</div>
-          <div class="lock-date" id="lock-date">Tuesday, August 11</div>
+<div class="phone-frame" id="phone">
+  
+  <div class="home-screen">
+    <div class="os-title">ZonOS</div>
+    
+    <div class="app-grid">
+      <div class="app-container">
+        <div class="app-icon" id="btn-settings">
+          <span>⚙️</span>
         </div>
-
-        <div class="unlock-btn-container">
-          <button class="unlock-btn" id="unlock-btn">
-            <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-            Unlock
-          </button>
-        </div>
+        <div class="app-label">Settings</div>
       </div>
-
-      <div class="wallpaper"></div>
-
-      <div class="status-bar" id="status-bar">
-        <span id="status-time">9:41</span>
-        <span>100%</span>
-      </div>
-
-      <div class="pages-wrapper" id="pages-wrapper">
-        
-        <div class="home-page">
-          <div class="app-icon" data-app="settings-app">
-            <div class="icon-box icon-settings">
-              <svg viewBox="0 0 24 24">
-                <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6-3.6z"/>
-              </svg>
-            </div>
-            <span class="app-label">Settings</span>
-          </div>
-        </div>
-
-        <div class="home-page">
-          <div class="app-icon" data-app="camera-app">
-            <div class="icon-box icon-camera">
-              <svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
-            </div>
-            <span class="app-label">Camera</span>
-          </div>
-
-          <div class="app-icon" data-app="photos-app">
-            <div class="icon-box icon-photos">
-              <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-            </div>
-            <span class="app-label">Photos</span>
-          </div>
-
-          <div class="app-icon" data-app="clock-app">
-            <div class="icon-box icon-clock">
-              <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-            </div>
-            <span class="app-label">Clock</span>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="page-dots">
-        <div class="dot active" id="dot1"></div>
-        <div class="dot" id="dot2"></div>
-      </div>
-
-      <div class="app-window" id="settings-app">
-        <div class="app-header">
-          <h1>Settings</h1>
-        </div>
-        <div class="app-body">
-          <div class="setting-item">
-            <span>Wi-Fi</span>
-            <div class="toggle active" onclick="this.classList.toggle('active')"><div class="toggle-handle"></div></div>
-          </div>
-          <div class="setting-item">
-            <span>Bluetooth</span>
-            <div class="toggle active" onclick="this.classList.toggle('active')"><div class="toggle-handle"></div></div>
-          </div>
-          <div class="setting-item">
-            <span>Airplane Mode</span>
-            <div class="toggle" onclick="this.classList.toggle('active')"><div class="toggle-handle"></div></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="app-window" id="camera-app">
-        <div class="camera-container">
-          <div class="rec-timer" id="rec-timer"><div class="rec-dot"></div><span id="timer-count">00:00</span></div>
-          <video id="camera-feed" autoplay playsinline muted></video>
-        </div>
-        <div class="mode-selector">
-          <span class="mode-btn active" id="mode-photo-btn">PHOTO</span>
-          <span class="mode-btn" id="mode-video-btn">VIDEO</span>
-        </div>
-        <div class="camera-controls" id="camera-controls-bar">
-          <div style="width:40px;"></div>
-          <div class="shutter-btn" id="shutter-btn">
-            <div class="shutter-inner"></div>
-          </div>
-          <div class="cam-flip-btn" id="cam-flip-btn">
-            <svg viewBox="0 0 24 24"><path d="M19 8l-4 4h3c0 3.31-2.69 6-6 6-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C9.1 19.45 10.5 20 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46C14.9 4.55 13.5 4 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z"/></svg>
-          </div>
-        </div>
-      </div>
-
-      <div class="app-window" id="photos-app">
-        <div class="app-header">
-          <h1>Photos</h1>
-          <div class="photos-actions">
-            <button class="action-btn delete" id="delete-selected-btn" style="display:none;">Delete</button>
-            <button class="action-btn" id="cancel-select-btn" style="display:none;">Cancel</button>
-          </div>
-        </div>
-        <div class="app-body">
-          <div class="photo-grid" id="photo-grid"></div>
-
-          <div class="trash-section">
-            <div class="trash-title">
-              <span>Recently Deleted</span>
-              <div class="photos-actions">
-                <button class="action-btn delete" id="delete-trash-selected-btn" style="display:none;">Delete</button>
-                <button class="action-btn" id="cancel-trash-select-btn" style="display:none;">Cancel</button>
-                <button class="action-btn delete" id="empty-trash-btn">Empty</button>
-              </div>
-            </div>
-            <div class="photo-grid" id="trash-grid"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="media-viewer" id="media-viewer">
-        <div class="viewer-close-btn" id="viewer-close-btn">Done</div>
-        <div id="viewer-container" style="width:100%; height:100%; display:flex; justify-content:center; align-items:center;"></div>
-      </div>
-
-      <div class="app-window" id="clock-app">
-        <div class="app-header">
-          <h1>Stopwatch</h1>
-        </div>
-        <div class="app-body">
-          <div class="clock-display" id="stopwatch-display">00:00.00</div>
-          <div class="stopwatch-controls">
-            <button class="btn btn-start" id="start-btn">Start</button>
-            <button class="btn btn-reset" id="reset-btn">Reset</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="home-bar-container" id="home-bar-container">
-        <div class="home-bar"></div>
-      </div>
-
     </div>
   </div>
 
-  <canvas id="photo-canvas" style="display:none;"></canvas>
+  <div class="settings-app" id="app-settings">
+    <div class="settings-header">Settings</div>
+    <div class="settings-card">Wi-Fi</div>
+    <div class="settings-card">Bluetooth</div>
+    <div class="settings-card">Display & Brightness</div>
+    <div class="settings-card">About ZonOS</div>
+  </div>
 
-  <script>
-    // Prevent Context Menu on Long-Press
-    window.addEventListener('contextmenu', (e) => e.preventDefault());
+  <div class="home-indicator-area" id="home-area">
+    <div class="home-line"></div>
+  </div>
 
-    const pagesWrapper = document.getElementById('pages-wrapper');
-    const screen = document.getElementById('screen');
-    const lockscreen = document.getElementById('lockscreen');
-    const unlockBtn = document.getElementById('unlock-btn');
-    const dot1 = document.getElementById('dot1');
-    const dot2 = document.getElementById('dot2');
-    const homeBarContainer = document.getElementById('home-bar-container');
-    const statusTime = document.getElementById('status-time');
-    const lockClock = document.getElementById('lock-clock');
-    const lockDate = document.getElementById('lock-date');
-    const powerBtn = document.getElementById('power-btn');
-    let activeApp = null;
-    let isPoweredOff = false;
-    let isLocked = true;
+</div>
 
-    // Real-time Clocks
-    function updateClock() {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      statusTime.innerText = timeStr;
-      lockClock.innerText = timeStr;
+<script>
+  const phone = document.getElementById('phone');
+  const settingsBtn = document.getElementById('btn-settings');
+  const settingsApp = document.getElementById('app-settings');
+  const homeArea = document.getElementById('home-area');
 
-      const options = { weekday: 'long', month: 'long', day: 'numeric' };
-      lockDate.innerText = now.toLocaleDateString('en-US', options);
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
+  // 1. Open the Settings App
+  settingsBtn.addEventListener('click', () => {
+    settingsApp.classList.add('open');
+    phone.classList.add('app-open'); // Triggers the dark home bar
+  });
 
-    // Power Button Logic
-    powerBtn.addEventListener('click', () => {
-      if (!isPoweredOff) {
-        isPoweredOff = true;
-        screen.classList.add('off');
-        if (isRecording) stopRecording();
-      } else {
-        isPoweredOff = false;
-        screen.classList.remove('off');
-        isLocked = true;
-        screen.classList.add('locked');
-        lockscreen.classList.remove('unlocked');
-      }
-    });
+  // 2. Swipe Up Logic to Close App
+  let startY = 0;
+  let isDragging = false;
 
-    // Unlock Actions
-    function unlockPhone() {
-      isLocked = false;
-      screen.classList.remove('locked');
-      lockscreen.classList.add('unlocked');
-    }
+  // Track dragging starting specifically on the home area
+  homeArea.addEventListener('mousedown', dragStart);
+  homeArea.addEventListener('touchstart', dragStart, {passive: true});
 
-    unlockBtn.addEventListener('click', unlockPhone);
+  // Track the movement anywhere on the window once drag starts
+  window.addEventListener('mousemove', dragMove);
+  window.addEventListener('touchmove', dragMove, {passive: true});
 
-    // Slide up on Lockscreen to unlock
-    let lockStartY = 0;
-    let lockIsDragging = false;
+  // Reset drag when let go
+  window.addEventListener('mouseup', dragEnd);
+  window.addEventListener('touchend', dragEnd);
 
-    lockscreen.addEventListener('pointerdown', (e) => {
-      if (e.target.closest('#unlock-btn')) return;
-      lockStartY = e.clientY;
-      lockIsDragging = true;
-    });
-
-    window.addEventListener('pointermove', (e) => {
-      if (!lockIsDragging) return;
-      const deltaY = lockStartY - e.clientY;
-      if (deltaY > 50) {
-        unlockPhone();
-        lockIsDragging = false;
-      }
-    });
-
-    window.addEventListener('pointerup', () => lockIsDragging = false);
-
-    // Sound Effects
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  function dragStart(e) {
+    // Only engage the swipe tracker if an app is actually open
+    if (!settingsApp.classList.contains('open')) return;
     
-    function playCameraSound(type) {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+    isDragging = true;
+    startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+  }
 
-      if (type === 'shutter') {
-        const now = audioCtx.currentTime;
-        
-        const osc1 = audioCtx.createOscillator();
-        const gain1 = audioCtx.createGain();
-        osc1.type = 'triangle';
-        osc1.frequency.setValueAtTime(1200, now);
-        osc1.frequency.exponentialRampToValueAtTime(40, now + 0.04);
-        gain1.gain.setValueAtTime(0.5, now);
-        gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
-        osc1.connect(gain1);
-        gain1.connect(audioCtx.destination);
-        osc1.start(now);
-        osc1.stop(now + 0.04);
+  function dragMove(e) {
+    if (!isDragging) return;
+    
+    let currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+    let diffY = startY - currentY;
 
-        const osc2 = audioCtx.createOscillator();
-        const gain2 = audioCtx.createGain();
-        osc2.type = 'square';
-        osc2.frequency.setValueAtTime(800, now + 0.05);
-        osc2.frequency.exponentialRampToValueAtTime(30, now + 0.09);
-        gain2.gain.setValueAtTime(0.4, now + 0.05);
-        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
-        osc2.connect(gain2);
-        gain2.connect(audioCtx.destination);
-        osc2.start(now + 0.05);
-        osc2.stop(now + 0.09);
-
-      } else if (type === 'rec_start') {
-        const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(1046.5, now);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now);
-        osc.stop(now + 0.12);
-
-      } else if (type === 'rec_stop') {
-        const now = audioCtx.currentTime;
-        [0, 0.1].forEach(offset => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(880, now + offset);
-          gain.gain.setValueAtTime(0.15, now + offset);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + offset + 0.08);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start(now + offset);
-          osc.stop(now + offset + 0.08);
-        });
-      }
+    // If the user drags UP by more than 40 pixels, close the app
+    if (diffY > 40) {
+      settingsApp.classList.remove('open');
+      phone.classList.remove('app-open');
+      isDragging = false; 
     }
+  }
 
-    // App Zoom Animation From App Position
-    document.querySelectorAll('.app-icon').forEach(icon => {
-      icon.addEventListener('pointerdown', (e) => {
-        if (isLocked || isPoweredOff) return;
-        e.stopPropagation();
-        const appId = icon.getAttribute('data-app');
-        const targetApp = document.getElementById(appId);
-        const iconBox = icon.querySelector('.icon-box');
+  function dragEnd() {
+    isDragging = false;
+  }
+</script>
 
-        // Calculate App Center Position relative to screen
-        const iconRect = iconBox.getBoundingClientRect();
-        const screenRect = screen.getBoundingClientRect();
-        const originX = (iconRect.left + iconRect.width / 2) - screenRect.left;
-        const originY = (iconRect.top + iconRect.height / 2) - screenRect.top;
-
-        targetApp.style.transformOrigin = `${originX}px ${originY}px`;
-        targetApp.classList.add('open');
-        screen.classList.add('app-active');
-        activeApp = targetApp;
-
-        if (appId === 'camera-app') {
-          initCamera();
-        }
-      });
-    });
-
-    // Camera Stream
-    let cameraStream = null;
-    let isFlipped = false; 
-    let isLaptop = false;
-    let isMirroredLaptop = false;
-
-    const checkIsMobile = () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    isLaptop = !checkIsMobile();
-
-    async function initCamera() {
-      const feed = document.getElementById('camera-feed');
-
-      if (cameraStream && cameraStream.active) {
-        feed.srcObject = cameraStream;
-        updateFeedTransform();
-        return;
-      }
-
-      const constraintsTryOrder = isLaptop ? [
-        { video: true, audio: true }
-      ] : [
-        { video: { facingMode: { exact: isFlipped ? 'environment' : 'user' } }, audio: true },
-        { video: { facingMode: isFlipped ? 'environment' : 'user' }, audio: true },
-        { video: true, audio: true },
-        { video: true, audio: false }
-      ];
-
-      for (const constraints of constraintsTryOrder) {
-        try {
-          cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
-          feed.srcObject = cameraStream;
-          feed.setAttribute('playsinline', 'true');
-          updateFeedTransform();
-          await feed.play();
-          return;
-        } catch (err) {
-          console.warn('Fallback constraint triggered...', err);
-        }
-      }
-
-      alert('Camera access failed. Ensure permissions are allowed.');
-    }
-
-    function updateFeedTransform() {
-      const feed = document.getElementById('camera-feed');
-      if (isLaptop) {
-        feed.style.transform = isMirroredLaptop ? 'scaleX(-1)' : 'scaleX(1)';
-      } else {
-        feed.style.transform = !isFlipped ? 'scaleX(-1)' : 'scaleX(1)';
-      }
-    }
-
-    async function flipCamera() {
-      if (isLaptop) {
-        isMirroredLaptop = !isMirroredLaptop;
-        updateFeedTransform();
-      } else {
-        isFlipped = !isFlipped;
-        if (cameraStream) {
-          cameraStream.getTracks().forEach(track => track.stop());
-          cameraStream = null;
-        }
-        await initCamera();
-      }
-    }
-
-    document.getElementById('cam-flip-btn').addEventListener('click', flipCamera);
-
-    // Camera Controls
-    let cameraMode = 'photo';
-    let isRecording = false;
-    let mediaRecorder = null;
-    let recordedChunks = [];
-    let recTimerInterval = null;
-    let recSeconds = 0;
-
-    const modePhotoBtn = document.getElementById('mode-photo-btn');
-    const modeVideoBtn = document.getElementById('mode-video-btn');
-    const cameraControlsBar = document.getElementById('camera-controls-bar');
-    const recTimer = document.getElementById('rec-timer');
-    const timerCount = document.getElementById('timer-count');
-
-    modePhotoBtn.addEventListener('click', () => setCameraMode('photo'));
-    modeVideoBtn.addEventListener('click', () => setCameraMode('video'));
-
-    function setCameraMode(mode) {
-      if (isRecording) stopRecording();
-      cameraMode = mode;
-      if (mode === 'photo') {
-        modePhotoBtn.classList.add('active');
-        modeVideoBtn.classList.remove('active');
-        cameraControlsBar.classList.remove('mode-video');
-      } else {
-        modeVideoBtn.classList.add('active');
-        modePhotoBtn.classList.remove('active');
-        cameraControlsBar.classList.add('mode-video');
-      }
-    }
-
-    document.getElementById('shutter-btn').addEventListener('click', () => {
-      if (cameraMode === 'photo') {
-        takePhoto();
-      } else {
-        if (!isRecording) startRecording();
-        else stopRecording();
-      }
-    });
-
-    function takePhoto() {
-      playCameraSound('shutter');
-      const video = document.getElementById('camera-feed');
-      const canvas = document.getElementById('photo-canvas');
-      canvas.width = video.videoWidth || 300;
-      canvas.height = video.videoHeight || 300;
-      const ctx = canvas.getContext('2d');
-      
-      const shouldMirror = isLaptop ? isMirroredLaptop : !isFlipped;
-      if (shouldMirror) {
-        ctx.translate(canvas.width, 0);
-        ctx.scale(-1, 1);
-      }
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      mediaItems.unshift({ type: 'image', src: canvas.toDataURL('image/png') });
-      renderPhotos();
-    }
-
-    function startRecording() {
-      if (!cameraStream) return;
-      playCameraSound('rec_start');
-      recordedChunks = [];
-      mediaRecorder = new MediaRecorder(cameraStream);
-      mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
-      mediaRecorder.onstop = saveVideo;
-      mediaRecorder.start();
-
-      isRecording = true;
-      cameraControlsBar.classList.add('recording');
-      recTimer.style.display = 'flex';
-      recSeconds = 0;
-      timerCount.innerText = '00:00';
-      recTimerInterval = setInterval(() => {
-        recSeconds++;
-        let m = Math.floor(recSeconds / 60).toString().padStart(2, '0');
-        let s = (recSeconds % 60).toString().padStart(2, '0');
-        timerCount.innerText = `${m}:${s}`;
-      }, 1000);
-    }
-
-    function stopRecording() {
-      if (!isRecording) return;
-      playCameraSound('rec_stop');
-      isRecording = false;
-      mediaRecorder.stop();
-      clearInterval(recTimerInterval);
-      cameraControlsBar.classList.remove('recording');
-      recTimer.style.display = 'none';
-    }
-
-    function saveVideo() {
-      const blob = new Blob(recordedChunks, { type: 'video/mp4' });
-      const videoUrl = URL.createObjectURL(blob);
-      mediaItems.unshift({ type: 'video', src: videoUrl });
-      renderPhotos();
-    }
-
-    // PHOTOS & RECENTLY DELETED
-    let mediaItems = [
-      { type: 'image', src: 'https://images.unsplash.com/photo-1517021897933-0e0319cfbc28?auto=format&fit=crop&w=800&q=80' },
-      { type: 'image', src: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80' },
-      { type: 'image', src: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80' }
-    ];
-    let trashItems = [];
-
-    let isMainSelection = false;
-    let mainSelected = new Set();
-    let isTrashSelection = false;
-    let trashSelected = new Set();
-    let holdTimer = null;
-    let longPressed = false;
-
-    const photoGrid = document.getElementById('photo-grid');
-    const trashGrid = document.getElementById('trash-grid');
-    const deleteBtn = document.getElementById('delete-selected-btn');
-    const cancelBtn = document.getElementById('cancel-select-btn');
-    const deleteTrashBtn = document.getElementById('delete-trash-selected-btn');
-    const cancelTrashBtn = document.getElementById('cancel-trash-select-btn');
-    const emptyTrashBtn = document.getElementById('empty-trash-btn');
-
-    const mediaViewer = document.getElementById('media-viewer');
-    const viewerContainer = document.getElementById('viewer-container');
-    const viewerCloseBtn = document.getElementById('viewer-close-btn');
-
-    function openViewer(item) {
-      viewerContainer.innerHTML = '';
-      if (item.type === 'image') {
-        const img = document.createElement('img');
-        img.className = 'media-viewer-content';
-        img.src = item.src;
-        viewerContainer.appendChild(img);
-      } else {
-        const video = document.createElement('video');
-        video.className = 'media-viewer-content';
-        video.src = item.src;
-        video.controls = true;
-        video.autoplay = true;
-        video.muted = false;
-        video.playsInline = true;
-        viewerContainer.appendChild(video);
-      }
-      mediaViewer.classList.add('open');
-    }
-
-    viewerCloseBtn.addEventListener('click', () => {
-      viewerContainer.innerHTML = '';
-      mediaViewer.classList.remove('open');
-    });
-
-    function renderPhotos() {
-      photoGrid.innerHTML = '';
-      mediaItems.forEach((item, idx) => {
-        const wrap = document.createElement('div');
-        wrap.className = `photo-wrapper ${mainSelected.has(idx) ? 'selected' : ''}`;
-        
-        let el = item.type === 'video' ? document.createElement('video') : document.createElement('img');
-        el.className = item.type === 'video' ? 'video-thumb' : 'photo-thumb';
-        el.src = item.src;
-
-        const check = document.createElement('div');
-        check.className = 'select-check';
-
-        wrap.appendChild(el);
-        wrap.appendChild(check);
-
-        if (item.type === 'video') {
-          const badge = document.createElement('div');
-          badge.className = 'video-badge';
-          badge.innerHTML = '▶ Video';
-          wrap.appendChild(badge);
-        }
-
-        wrap.addEventListener('pointerdown', () => {
-          longPressed = false;
-          holdTimer = setTimeout(() => {
-            longPressed = true;
-            isMainSelection = true;
-            toggleMainSelect(idx);
-          }, 450);
-        });
-
-        wrap.addEventListener('pointerup', () => clearTimeout(holdTimer));
-        wrap.addEventListener('pointerleave', () => clearTimeout(holdTimer));
-
-        wrap.addEventListener('click', () => {
-          if (longPressed) return;
-          if (isMainSelection) {
-            toggleMainSelect(idx);
-          } else {
-            openViewer(item);
-          }
-        });
-
-        photoGrid.appendChild(wrap);
-      });
-
-      trashGrid.innerHTML = '';
-      trashItems.forEach((item, idx) => {
-        const wrap = document.createElement('div');
-        wrap.className = `photo-wrapper ${trashSelected.has(idx) ? 'selected' : ''}`;
-
-        let el = item.type === 'video' ? document.createElement('video') : document.createElement('img');
-        el.className = item.type === 'video' ? 'video-thumb' : 'photo-thumb';
-        el.src = item.src;
-
-        const check = document.createElement('div');
-        check.className = 'select-check';
-
-        wrap.appendChild(el);
-        wrap.appendChild(check);
-
-        if (item.type === 'video') {
-          const badge = document.createElement('div');
-          badge.className = 'video-badge';
-          badge.innerHTML = '▶ Video';
-          wrap.appendChild(badge);
-        }
-
-        wrap.addEventListener('pointerdown', () => {
-          longPressed = false;
-          holdTimer = setTimeout(() => {
-            longPressed = true;
-            isTrashSelection = true;
-            toggleTrashSelect(idx);
-          }, 450);
-        });
-
-        wrap.addEventListener('pointerup', () => clearTimeout(holdTimer));
-        wrap.addEventListener('pointerleave', () => clearTimeout(holdTimer));
-
-        wrap.addEventListener('click', () => {
-          if (longPressed) return;
-          if (isTrashSelection) {
-            toggleTrashSelect(idx);
-          } else {
-            openViewer(item);
-          }
-        });
-
-        trashGrid.appendChild(wrap);
-      });
-
-      deleteBtn.style.display = isMainSelection ? 'inline-block' : 'none';
-      cancelBtn.style.display = isMainSelection ? 'inline-block' : 'none';
-
-      deleteTrashBtn.style.display = isTrashSelection ? 'inline-block' : 'none';
-      cancelTrashBtn.style.display = isTrashSelection ? 'inline-block' : 'none';
-      emptyTrashBtn.style.display = isTrashSelection ? 'none' : 'inline-block';
-    }
-
-    function toggleMainSelect(idx) {
-      if (mainSelected.has(idx)) mainSelected.delete(idx);
-      else mainSelected.add(idx);
-      renderPhotos();
-    }
-
-    function toggleTrashSelect(idx) {
-      if (trashSelected.has(idx)) trashSelected.delete(idx);
-      else trashSelected.add(idx);
-      renderPhotos();
-    }
-
-    cancelBtn.addEventListener('click', () => {
-      isMainSelection = false;
-      mainSelected.clear();
-      renderPhotos();
-    });
-
-    deleteBtn.addEventListener('click', () => {
-      if (mainSelected.size === 0) return;
-      const confirmDelete = confirm(`Are you sure you want to delete ${mainSelected.size} selected item(s)?`);
-      if (confirmDelete) {
-        const remaining = [];
-        mediaItems.forEach((item, idx) => {
-          if (mainSelected.has(idx)) trashItems.push(item);
-          else remaining.push(item);
-        });
-        mediaItems = remaining;
-        isMainSelection = false;
-        mainSelected.clear();
-        renderPhotos();
-      }
-    });
-
-    cancelTrashBtn.addEventListener('click', () => {
-      isTrashSelection = false;
-      trashSelected.clear();
-      renderPhotos();
-    });
-
-    deleteTrashBtn.addEventListener('click', () => {
-      if (trashSelected.size === 0) return;
-      const confirmDelete = confirm(`Are you sure you want to permanently delete ${trashSelected.size} item(s)?`);
-      if (confirmDelete) {
-        trashItems = trashItems.filter((_, idx) => !trashSelected.has(idx));
-        isTrashSelection = false;
-        trashSelected.clear();
-        renderPhotos();
-      }
-    });
-
-    emptyTrashBtn.addEventListener('click', () => {
-      if (trashItems.length === 0) return;
-      const confirmEmpty = confirm("Are you sure you want to permanently delete all items in Recently Deleted?");
-      if (confirmEmpty) {
-        trashItems = [];
-        renderPhotos();
-      }
-    });
-
-    renderPhotos();
-
-    // Stopwatch Logic
-    let stopwatchInterval, elapsedTime = 0, isRunning = false;
-    const stopwatchDisplay = document.getElementById('stopwatch-display');
-    const startBtn = document.getElementById('start-btn');
-
-    startBtn.addEventListener('click', () => {
-      if (!isRunning) {
-        isRunning = true;
-        startBtn.innerText = 'Stop';
-        startBtn.className = 'btn btn-stop';
-        const startTime = Date.now() - elapsedTime;
-        stopwatchInterval = setInterval(() => {
-          elapsedTime = Date.now() - startTime;
-          let m = Math.floor(elapsedTime / 60000);
-          let s = Math.floor((elapsedTime % 60000) / 1000);
-          let ms = Math.floor((elapsedTime % 1000) / 10);
-          stopwatchDisplay.innerText = 
-            `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
-        }, 10);
-      } else {
-        isRunning = false;
-        startBtn.innerText = 'Start';
-        startBtn.className = 'btn btn-start';
-        clearInterval(stopwatchInterval);
-      }
-    });
-
-    document.getElementById('reset-btn').addEventListener('click', () => {
-      isRunning = false;
-      clearInterval(stopwatchInterval);
-      elapsedTime = 0;
-      stopwatchDisplay.innerText = '00:00.00';
-      startBtn.innerText = 'Start';
-      startBtn.className = 'btn btn-start';
-    });
-
-    // Homescreen Page Swiping
-    let currentPage = 0, pageStartX = 0, pageIsDragging = false;
-
-    pagesWrapper.addEventListener('pointerdown', (e) => {
-      if (isLocked || isPoweredOff) return;
-      pageStartX = e.clientX;
-      pageIsDragging = true;
-    });
-
-    window.addEventListener('pointerup', (e) => {
-      if (!pageIsDragging) return;
-      const diffX = pageStartX - e.clientX;
-
-      if (diffX > 40 && currentPage === 0) {
-        currentPage = 1;
-        pagesWrapper.style.transform = 'translateX(-50%)';
-        dot1.classList.remove('active');
-        dot2.classList.add('active');
-      } else if (diffX < -40 && currentPage === 1) {
-        currentPage = 0;
-        pagesWrapper.style.transform = 'translateX(0%)';
-        dot2.classList.remove('active');
-        dot1.classList.add('active');
-      }
-      pageIsDragging = false;
-    });
-
-    // Home Bar Gesture Trigger
-    let barStartY = 0;
-    let isBarDragging = false;
-
-    function onBarStart(y) {
-      if (isLocked || isPoweredOff) return;
-      barStartY = y;
-      isBarDragging = true;
-    }
-
-    function onBarMove(y) {
-      if (!isBarDragging || !activeApp) return;
-      const deltaY = barStartY - y;
-      
-      if (deltaY > 15) {
-        if (isRecording) stopRecording();
-        activeApp.classList.remove('open');
-        screen.classList.remove('app-active');
-        mediaViewer.classList.remove('open');
-        viewerContainer.innerHTML = '';
-        activeApp = null;
-        isBarDragging = false;
-      }
-    }
-
-    homeBarContainer.addEventListener('touchstart', (e) => onBarStart(e.touches[0].clientY), { passive: true });
-    homeBarContainer.addEventListener('touchmove', (e) => onBarMove(e.touches[0].clientY), { passive: true });
-    homeBarContainer.addEventListener('touchend', () => isBarDragging = false);
-
-    homeBarContainer.addEventListener('mousedown', (e) => onBarStart(e.clientY));
-    window.addEventListener('mousemove', (e) => onBarMove(e.clientY));
-    window.addEventListener('mouseup', () => isBarDragging = false);
-  </script>
 </body>
 </html>
