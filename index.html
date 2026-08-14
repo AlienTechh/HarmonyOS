@@ -41,22 +41,57 @@
     touch-action: none;
   }
 
-  /* ZonOS Home Screen - Frutiger Aero Theme */
+  /* ZonOS Home Screen - Premium Frutiger Aero Wallpaper */
   .home-screen {
     width: 100%;
     height: 100%; 
-    background: 
-      radial-gradient(circle at 25% 35%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 3%),
-      radial-gradient(circle at 25% 35%, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 8%),
-      radial-gradient(circle at 75% 55%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 4%),
-      radial-gradient(circle at 75% 55%, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 10%),
-      radial-gradient(circle at 50% 10%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 25%),
-      radial-gradient(ellipse 130% 50% at 50% 100%, #8be836 0%, #3ca11d 30%, transparent 40%),
-      linear-gradient(to bottom, #0093E9 0%, #80D0C7 100%);
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #0077c8 0%, #00bfff 45%, #7ae5ff 70%, #a8f5ff 100%);
     display: flex;
     flex-direction: column;
     padding-top: 60px;
   }
+
+  /* Aero Sky Sun / Gloss Flare */
+  .home-screen::before {
+    content: "";
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.4) 30%, rgba(255,255,255,0) 70%);
+    pointer-events: none;
+  }
+
+  /* Glossy Green Aero Hill */
+  .home-screen::after {
+    content: "";
+    position: absolute;
+    bottom: -40px;
+    left: -20%;
+    width: 140%;
+    height: 220px;
+    background: linear-gradient(180deg, #a3f238 0%, #4cb816 40%, #207d06 100%);
+    border-radius: 50% 50% 0 0 / 80% 80% 0 0;
+    box-shadow: inset 0 12px 15px rgba(255, 255, 255, 0.65), 0 -4px 20px rgba(0,0,0,0.15);
+    pointer-events: none;
+  }
+
+  /* Floating Glossy Aero Bubbles */
+  .aero-bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.6) 100%);
+    box-shadow: inset -2px -2px 6px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+  }
+
+  .b1 { width: 45px; height: 45px; top: 120px; left: 30px; }
+  .b2 { width: 25px; height: 25px; top: 220px; right: 40px; }
+  .b3 { width: 65px; height: 65px; bottom: 170px; right: 20px; opacity: 0.85; }
 
   .os-title {
     text-align: center;
@@ -64,13 +99,15 @@
     font-weight: bold;
     font-size: 24px;
     margin-bottom: 30px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    z-index: 2;
   }
 
   /* App Grid & Icons */
   .app-grid {
     display: flex;
     padding: 0 20px;
+    z-index: 2;
   }
 
   .app-container {
@@ -83,13 +120,13 @@
   .app-icon {
     width: 60px;
     height: 60px;
-    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+    background: linear-gradient(180deg, #ffffff 0%, #e6e6e6 100%);
     border-radius: 16px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15), inset 0 2px 4px rgba(255,255,255,0.8);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 2px 3px rgba(255,255,255,0.9);
     transition: transform 0.1s;
   }
 
@@ -106,10 +143,10 @@
     color: white;
     margin-top: 6px;
     font-weight: 600;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    text-shadow: 0 1px 4px rgba(0,0,0,0.7);
   }
 
-  /* Settings App View (Icon Origin Zoom Animation) */
+  /* Settings App View */
   .settings-app {
     position: absolute;
     top: 0;
@@ -120,22 +157,10 @@
     z-index: 10;
     padding: 60px 20px 68px;
     
-    opacity: 0;
+    /* Default hidden state */
     visibility: hidden;
-    transform: scale(0.05);
-    border-radius: 30px;
-    
-    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), 
-                opacity 0.25s ease,
-                border-radius 0.35s ease,
-                visibility 0.35s;
-  }
-
-  .settings-app.open {
-    opacity: 1;
-    visibility: visible;
-    transform: scale(1);
-    border-radius: 0px;
+    opacity: 0;
+    transform: translateY(100%);
   }
 
   .settings-header {
@@ -181,7 +206,6 @@
     transition: color 0.3s, text-shadow 0.3s;
   }
 
-  /* Scaled up the rectangle visually without disrupting flex alignment */
   #nav-recents span {
     display: inline-block;
     transform: scale(1.35);
@@ -205,6 +229,10 @@
 <div class="phone-frame" id="phone">
   
   <div class="home-screen">
+    <div class="aero-bubble b1"></div>
+    <div class="aero-bubble b2"></div>
+    <div class="aero-bubble b3"></div>
+
     <div class="os-title">ZonOS</div>
     
     <div class="app-grid">
@@ -242,34 +270,71 @@
   const navBack = document.getElementById('nav-back');
   const navHome = document.getElementById('nav-home');
 
-  function setTransformOrigin(element, originTarget) {
+  let isOpen = false;
+
+  // Calculate icon origin for Zoom-In opening
+  function getIconOrigin(originTarget) {
     const targetRect = originTarget.getBoundingClientRect();
     const phoneRect = phone.getBoundingClientRect();
 
     const originX = (targetRect.left + targetRect.width / 2) - phoneRect.left;
     const originY = (targetRect.top + targetRect.height / 2) - phoneRect.top;
 
-    element.style.transformOrigin = `${originX}px ${originY}px`;
+    return `${originX}px ${originY}px`;
   }
 
-  // Open the Settings App
-  settingsBtn.addEventListener('click', () => {
-    setTransformOrigin(settingsApp, settingsBtn);
-    settingsApp.classList.add('open');
+  // OPEN ANIMATION: Pure Zoom-In from App Icon
+  function openApp() {
+    if (isOpen) return;
+    isOpen = true;
+
+    // Set origin to app icon
+    settingsApp.style.transformOrigin = getIconOrigin(settingsBtn);
+
+    // Prepare scale(0.05) starting point without animation duration
+    settingsApp.style.transition = 'none';
+    settingsApp.style.transform = 'scale(0.05)';
+    settingsApp.style.opacity = '0';
+    settingsApp.style.borderRadius = '30px';
+    settingsApp.style.visibility = 'visible';
+
+    // Trigger reflow to apply instantaneous styles
+    settingsApp.offsetHeight;
+
+    // Apply Zoom transition to scale(1)
+    settingsApp.style.transition = 'transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease, border-radius 0.35s ease';
+    settingsApp.style.transform = 'scale(1)';
+    settingsApp.style.opacity = '1';
+    settingsApp.style.borderRadius = '0px';
+
     navBar.classList.add('app-open');
-  });
-
-  // Close app function
-  function closeApp() {
-    settingsApp.classList.remove('open');
-    navBar.classList.remove('app-open');
   }
 
-  // Bind Home and Back buttons to close the app
+  // CLOSE ANIMATION: Pure Slide-Down off screen
+  function closeApp() {
+    if (!isOpen) return;
+    isOpen = false;
+
+    // Transition down off the screen
+    settingsApp.style.transition = 'transform 0.32s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease';
+    settingsApp.style.transform = 'translateY(100%)';
+    settingsApp.style.opacity = '0';
+
+    navBar.classList.remove('app-open');
+
+    // Hide visibility once slide-down finishes
+    setTimeout(() => {
+      if (!isOpen) {
+        settingsApp.style.visibility = 'hidden';
+      }
+    }, 320);
+  }
+
+  // Event Listeners
+  settingsBtn.addEventListener('click', openApp);
   navHome.addEventListener('click', closeApp);
   navBack.addEventListener('click', closeApp);
 
-  // Recents button placeholder
   document.getElementById('nav-recents').addEventListener('click', () => {
     console.log("Recents button clicked");
   });
