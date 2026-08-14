@@ -26,7 +26,7 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 
-  /* Phone Frame with White Bezels */
+  /* Phone Frame */
   .phone-frame {
     width: 320px;
     height: 650px;
@@ -39,31 +39,41 @@
     touch-action: none;
   }
 
-  /* iOS Style Abstract Gradient Wallpaper */
+  /* Wallpaper Matching Your Screenshot */
   .home-screen {
     width: 100%;
     height: 100%; 
     position: relative;
     overflow: hidden;
-    background: 
-      radial-gradient(circle at 10% 10%, rgba(255, 30, 80, 0.65) 0%, transparent 45%),
-      radial-gradient(circle at 90% 15%, rgba(10, 210, 255, 0.7) 0%, transparent 40%),
-      radial-gradient(circle at 50% 110%, rgba(255, 100, 150, 0.6) 0%, transparent 50%),
-      linear-gradient(135deg, #0d2a5a 0%, #1a5ac7 50%, #0d2a5a 100%);
+    background-color: #00bcd4;
     display: flex;
     flex-direction: column;
     padding-top: 60px;
   }
 
+  .wallpaper-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
   .os-title {
+    position: relative;
+    z-index: 2;
     text-align: center;
     color: white;
     font-weight: 600;
     font-size: 24px;
     margin-bottom: 30px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 
   .app-grid {
+    position: relative;
+    z-index: 2;
     display: flex;
     padding: 0 20px;
   }
@@ -99,6 +109,7 @@
     color: white;
     margin-top: 6px;
     font-weight: 500;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
   }
 
   /* App Window */
@@ -112,7 +123,6 @@
     z-index: 10;
     padding: 60px 20px 68px;
     
-    /* Closed Default State */
     display: none;
     opacity: 0;
     transform: scale(0.05);
@@ -143,7 +153,7 @@
     cursor: pointer;
   }
 
-  /* Navigation Switcher inside Settings */
+  /* Navigation Switcher */
   .nav-options-menu {
     display: none;
     background: #e5e5ea;
@@ -219,11 +229,11 @@
     left: 0;
     width: 100%;
     height: 36px;
-    display: none; /* Shown in gestures mode */
+    display: none;
     justify-content: center;
     align-items: center;
     z-index: 20;
-    cursor: grab;
+    cursor: pointer;
     touch-action: none;
   }
 
@@ -245,6 +255,32 @@
 <div class="phone-frame" id="phone">
   
   <div class="home-screen">
+    <svg class="wallpaper-svg" viewBox="0 0 320 650" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="bg-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#ab47bc"/>
+          <stop offset="40%" stop-color="#8e24aa"/>
+          <stop offset="100%" stop-color="#00bcd4"/>
+        </linearGradient>
+        
+        <linearGradient id="wave1-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#e1bee7"/>
+          <stop offset="100%" stop-color="#ce93d8"/>
+        </linearGradient>
+
+        <linearGradient id="wave2-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#8e24aa"/>
+          <stop offset="100%" stop-color="#4a148c"/>
+        </linearGradient>
+      </defs>
+
+      <rect width="320" height="650" fill="url(#bg-grad)" />
+
+      <path d="M 0,280 C 100,290 200,340 320,380 L 320,650 L 0,650 Z" fill="url(#wave1-grad)" opacity="0.85" />
+
+      <path d="M 0,320 C 120,330 220,420 320,490 L 320,650 L 0,650 Z" fill="url(#wave2-grad)" />
+    </svg>
+
     <div class="os-title">ZonOS</div>
     <div class="app-grid">
       <div class="app-container">
@@ -308,11 +344,10 @@
   const optButtons = document.getElementById('opt-buttons');
   const optGestures = document.getElementById('opt-gestures');
 
-  let navMode = 'buttons'; // 'buttons' or 'gestures'
+  let navMode = 'buttons';
   let isOpen = false;
-  let isAnimating = false;
+  let animationTimer = null;
 
-  // Calculate Icon Center Point for Zoom Origin
   function updateIconOrigin() {
     const targetRect = settingsBtn.getBoundingClientRect();
     const phoneRect = phone.getBoundingClientRect();
@@ -323,63 +358,49 @@
     settingsApp.style.transformOrigin = `${originX}px ${originY}px`;
   }
 
-  // RELIABLE OPEN APP
+  // OPEN APP (Spam-proof)
   function openApp() {
-    if (isOpen || isAnimating) return;
+    if (animationTimer) clearTimeout(animationTimer);
+    
     isOpen = true;
-    isAnimating = true;
-
     updateIconOrigin();
 
-    // Prepare initial styles
     settingsApp.style.display = 'block';
-    settingsApp.style.transition = 'none';
-    settingsApp.style.transform = 'scale(0.05)';
-    settingsApp.style.opacity = '0';
-    settingsApp.style.borderRadius = '30px';
+    settingsApp.offsetHeight; // Force reflow
 
-    // Force DOM Reflow
-    settingsApp.offsetHeight;
-
-    // Trigger Slow Zoom Open Animation (0.8s)
-    settingsApp.style.transition = 'transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease, border-radius 0.8s ease';
+    settingsApp.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease, border-radius 0.4s ease';
     settingsApp.style.transform = 'scale(1)';
     settingsApp.style.opacity = '1';
     settingsApp.style.borderRadius = '0px';
 
     phone.classList.add('app-open');
-
-    setTimeout(() => {
-      isAnimating = false;
-    }, 800);
   }
 
-  // RELIABLE CLOSE APP
+  // CLOSE APP (Spam-proof)
   function closeApp() {
-    if (!isOpen || isAnimating) return;
+    if (animationTimer) clearTimeout(animationTimer);
+
     isOpen = false;
-    isAnimating = true;
 
     if (navMode === 'gestures') {
-      // Zoom out to icon
       updateIconOrigin();
-      settingsApp.style.transition = 'transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.6s ease, border-radius 0.8s ease';
+      settingsApp.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease, border-radius 0.4s ease';
       settingsApp.style.transform = 'scale(0.05)';
       settingsApp.style.opacity = '0';
       settingsApp.style.borderRadius = '30px';
     } else {
-      // Slide down
-      settingsApp.style.transition = 'transform 0.8s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.6s ease';
+      settingsApp.style.transition = 'transform 0.4s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease';
       settingsApp.style.transform = 'translateY(100%)';
       settingsApp.style.opacity = '0';
     }
 
     phone.classList.remove('app-open');
 
-    setTimeout(() => {
-      settingsApp.style.display = 'none';
-      isAnimating = false;
-    }, 800);
+    animationTimer = setTimeout(() => {
+      if (!isOpen) {
+        settingsApp.style.display = 'none';
+      }
+    }, 400);
   }
 
   // NAVIGATION SWITCHING LOGIC
@@ -411,54 +432,24 @@
     gestureBar.style.display = 'flex';
   });
 
-  // DRAG / SWIPE UP TO CLOSE (Works for Mouse & Touch)
+  // SWIPE/CLICK TO CLOSE ON GESTURE BAR
   let startY = 0;
-  let isDragging = false;
 
-  function handleStart(e) {
-    if (navMode !== 'gestures' || !isOpen || isAnimating) return;
-    isDragging = true;
-    startY = e.touches ? e.touches[0].clientY : e.clientY;
-    settingsApp.style.transition = 'none';
-  }
-
-  function handleMove(e) {
-    if (!isDragging) return;
-    const currentY = e.touches ? e.touches[0].clientY : e.clientY;
-    const dragDistance = startY - currentY; // Upward drag
-
-    if (dragDistance > 0 && dragDistance < 150) {
-      settingsApp.style.transform = `translateY(-${dragDistance}px)`;
-    }
-  }
-
-  function handleEnd(e) {
-    if (!isDragging) return;
-    isDragging = false;
-
-    const endY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
-    const totalDrag = startY - endY;
-
-    if (totalDrag > 60) {
-      // Swiped up enough -> close
+  gestureBar.addEventListener('mousedown', (e) => { startY = e.clientY; });
+  gestureBar.addEventListener('mouseup', (e) => {
+    if (navMode === 'gestures' && isOpen && (startY - e.clientY >= 0)) {
       closeApp();
-    } else {
-      // Snap back if swipe was too short
-      settingsApp.style.transition = 'transform 0.3s ease-out';
-      settingsApp.style.transform = 'translateY(0)';
     }
-  }
+  });
 
-  // Attach Gesture listeners
-  gestureBar.addEventListener('mousedown', handleStart);
-  document.addEventListener('mousemove', handleMove);
-  document.addEventListener('mouseup', handleEnd);
+  gestureBar.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; });
+  gestureBar.addEventListener('touchend', (e) => {
+    if (navMode === 'gestures' && isOpen && (startY - e.changedTouches[0].clientY >= 0)) {
+      closeApp();
+    }
+  });
 
-  gestureBar.addEventListener('touchstart', handleStart);
-  document.addEventListener('touchmove', handleMove);
-  document.addEventListener('touchend', handleEnd);
-
-  // Button Listeners
+  // BUTTON LISTENERS
   settingsBtn.addEventListener('click', openApp);
   navHome.addEventListener('click', closeApp);
   navBack.addEventListener('click', closeApp);
