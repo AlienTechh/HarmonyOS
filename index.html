@@ -39,7 +39,7 @@
     touch-action: none;
   }
 
-  /* Wallpaper Matching Your Screenshot */
+  /* Curved Wave Wallpaper */
   .home-screen {
     width: 100%;
     height: 100%; 
@@ -122,11 +122,8 @@
     background-color: #f2f2f7;
     z-index: 10;
     padding: 60px 20px 68px;
-    
     display: none;
     opacity: 0;
-    transform: scale(0.05);
-    border-radius: 30px;
   }
 
   .settings-header {
@@ -222,7 +219,7 @@
     color: #333;
   }
 
-  /* Swipe Gestures Indicator */
+  /* Swipe Gestures Indicator Area */
   .gesture-bar-area {
     position: absolute;
     bottom: 0;
@@ -233,15 +230,15 @@
     justify-content: center;
     align-items: center;
     z-index: 20;
-    cursor: pointer;
     touch-action: none;
   }
 
   .gesture-line {
     width: 120px;
-    height: 5px;
+    height: 6px;
     background-color: #ffffff;
     border-radius: 10px;
+    cursor: pointer;
     transition: background-color 0.3s;
   }
 
@@ -275,9 +272,7 @@
       </defs>
 
       <rect width="320" height="650" fill="url(#bg-grad)" />
-
       <path d="M 0,280 C 100,290 200,340 320,380 L 320,650 L 0,650 Z" fill="url(#wave1-grad)" opacity="0.85" />
-
       <path d="M 0,320 C 120,330 220,420 320,490 L 320,650 L 0,650 Z" fill="url(#wave2-grad)" />
     </svg>
 
@@ -324,7 +319,7 @@
   </div>
 
   <div class="gesture-bar-area" id="gesture-bar">
-    <div class="gesture-line"></div>
+    <div class="gesture-line" id="gesture-line"></div>
   </div>
 
 </div>
@@ -335,6 +330,7 @@
   const settingsApp = document.getElementById('app-settings');
   const navBar = document.getElementById('nav-bar');
   const gestureBar = document.getElementById('gesture-bar');
+  const gestureLine = document.getElementById('gesture-line');
   
   const navBack = document.getElementById('nav-back');
   const navHome = document.getElementById('nav-home');
@@ -348,7 +344,8 @@
   let isOpen = false;
   let animationTimer = null;
 
-  function updateIconOrigin() {
+  // Transform origin anchored precisely to the Settings icon position
+  function setOriginToIcon() {
     const targetRect = settingsBtn.getBoundingClientRect();
     const phoneRect = phone.getBoundingClientRect();
 
@@ -358,17 +355,22 @@
     settingsApp.style.transformOrigin = `${originX}px ${originY}px`;
   }
 
-  // OPEN APP (Spam-proof)
+  // OPEN APP (Zoom In from icon for both modes)
   function openApp() {
     if (animationTimer) clearTimeout(animationTimer);
-    
     isOpen = true;
-    updateIconOrigin();
+
+    setOriginToIcon();
 
     settingsApp.style.display = 'block';
-    settingsApp.offsetHeight; // Force reflow
+    settingsApp.style.transition = 'none';
+    settingsApp.style.transform = 'scale(0.05)';
+    settingsApp.style.opacity = '0';
+    settingsApp.style.borderRadius = '30px';
+    
+    settingsApp.offsetHeight; // Force DOM Reflow
 
-    settingsApp.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease, border-radius 0.4s ease';
+    settingsApp.style.transition = 'transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.25s ease, border-radius 0.35s ease';
     settingsApp.style.transform = 'scale(1)';
     settingsApp.style.opacity = '1';
     settingsApp.style.borderRadius = '0px';
@@ -376,23 +378,17 @@
     phone.classList.add('app-open');
   }
 
-  // CLOSE APP (Spam-proof)
+  // CLOSE APP (Zoom Out back to icon for both modes)
   function closeApp() {
     if (animationTimer) clearTimeout(animationTimer);
-
     isOpen = false;
 
-    if (navMode === 'gestures') {
-      updateIconOrigin();
-      settingsApp.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease, border-radius 0.4s ease';
-      settingsApp.style.transform = 'scale(0.05)';
-      settingsApp.style.opacity = '0';
-      settingsApp.style.borderRadius = '30px';
-    } else {
-      settingsApp.style.transition = 'transform 0.4s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease';
-      settingsApp.style.transform = 'translateY(100%)';
-      settingsApp.style.opacity = '0';
-    }
+    setOriginToIcon();
+
+    settingsApp.style.transition = 'transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.25s ease, border-radius 0.35s ease';
+    settingsApp.style.transform = 'scale(0.05)';
+    settingsApp.style.opacity = '0';
+    settingsApp.style.borderRadius = '30px';
 
     phone.classList.remove('app-open');
 
@@ -400,10 +396,10 @@
       if (!isOpen) {
         settingsApp.style.display = 'none';
       }
-    }, 400);
+    }, 350);
   }
 
-  // NAVIGATION SWITCHING LOGIC
+  // NAVIGATION SYSTEM SWITCHING
   btnToggleNavMenu.addEventListener('click', () => {
     navOptionsMenu.classList.toggle('show');
   });
@@ -432,22 +428,34 @@
     gestureBar.style.display = 'flex';
   });
 
-  // SWIPE/CLICK TO CLOSE ON GESTURE BAR
+  // STRICT SWIPE UP ONLY ON THE LINE TO CLOSE
   let startY = 0;
+  let isTracking = false;
 
-  gestureBar.addEventListener('mousedown', (e) => { startY = e.clientY; });
-  gestureBar.addEventListener('mouseup', (e) => {
-    if (navMode === 'gestures' && isOpen && (startY - e.clientY >= 0)) {
+  function handleGestureStart(e) {
+    if (navMode !== 'gestures' || !isOpen) return;
+    isTracking = true;
+    startY = e.touches ? e.touches[0].clientY : e.clientY;
+  }
+
+  function handleGestureEnd(e) {
+    if (!isTracking) return;
+    isTracking = false;
+
+    const endY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+    const swipeDistance = startY - endY;
+
+    // Strict threshold: Must swipe UP by at least 25px
+    if (swipeDistance >= 25) {
       closeApp();
     }
-  });
+  }
 
-  gestureBar.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; });
-  gestureBar.addEventListener('touchend', (e) => {
-    if (navMode === 'gestures' && isOpen && (startY - e.changedTouches[0].clientY >= 0)) {
-      closeApp();
-    }
-  });
+  gestureLine.addEventListener('mousedown', handleGestureStart);
+  document.addEventListener('mouseup', handleGestureEnd);
+
+  gestureLine.addEventListener('touchstart', handleGestureStart);
+  document.addEventListener('touchend', handleGestureEnd);
 
   // BUTTON LISTENERS
   settingsBtn.addEventListener('click', openApp);
