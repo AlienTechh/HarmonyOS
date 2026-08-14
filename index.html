@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ZonOS Emulator</title>
 <style>
-  /* Global resets to remove web behaviors */
   * {
     -webkit-tap-highlight-color: transparent;
     user-select: none;
@@ -19,16 +18,15 @@
     margin: 0;
   }
 
-  /* Base centering */
   body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #1a1a1a;
+    background-color: #121212;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 
-  /* White Bezels Phone Frame */
+  /* Phone Frame with White Bezels */
   .phone-frame {
     width: 320px;
     height: 650px;
@@ -37,97 +35,55 @@
     border: 12px solid #ffffff;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
     touch-action: none;
   }
 
-  /* ZonOS Home Screen - Premium Frutiger Aero Wallpaper */
+  /* iOS Style Abstract Gradient Wallpaper */
   .home-screen {
     width: 100%;
     height: 100%; 
     position: relative;
     overflow: hidden;
-    background: linear-gradient(180deg, #0077c8 0%, #00bfff 45%, #7ae5ff 70%, #a8f5ff 100%);
+    background: 
+      radial-gradient(circle at 10% 10%, rgba(255, 30, 80, 0.65) 0%, transparent 45%),
+      radial-gradient(circle at 90% 15%, rgba(10, 210, 255, 0.7) 0%, transparent 40%),
+      radial-gradient(circle at 50% 110%, rgba(255, 100, 150, 0.6) 0%, transparent 50%),
+      linear-gradient(135deg, #0d2a5a 0%, #1a5ac7 50%, #0d2a5a 100%);
     display: flex;
     flex-direction: column;
     padding-top: 60px;
   }
 
-  /* Aero Sky Sun / Gloss Flare */
-  .home-screen::before {
-    content: "";
-    position: absolute;
-    top: -60px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.4) 30%, rgba(255,255,255,0) 70%);
-    pointer-events: none;
-  }
-
-  /* Glossy Green Aero Hill */
-  .home-screen::after {
-    content: "";
-    position: absolute;
-    bottom: -40px;
-    left: -20%;
-    width: 140%;
-    height: 220px;
-    background: linear-gradient(180deg, #a3f238 0%, #4cb816 40%, #207d06 100%);
-    border-radius: 50% 50% 0 0 / 80% 80% 0 0;
-    box-shadow: inset 0 12px 15px rgba(255, 255, 255, 0.65), 0 -4px 20px rgba(0,0,0,0.15);
-    pointer-events: none;
-  }
-
-  /* Floating Glossy Aero Bubbles */
-  .aero-bubble {
-    position: absolute;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.6) 100%);
-    box-shadow: inset -2px -2px 6px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1);
-    pointer-events: none;
-  }
-
-  .b1 { width: 45px; height: 45px; top: 120px; left: 30px; }
-  .b2 { width: 25px; height: 25px; top: 220px; right: 40px; }
-  .b3 { width: 65px; height: 65px; bottom: 170px; right: 20px; opacity: 0.85; }
-
   .os-title {
     text-align: center;
     color: white;
-    font-weight: bold;
+    font-weight: 600;
     font-size: 24px;
     margin-bottom: 30px;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.4);
-    z-index: 2;
   }
 
-  /* App Grid & Icons */
   .app-grid {
     display: flex;
     padding: 0 20px;
-    z-index: 2;
   }
 
   .app-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-right: 15px;
   }
 
   .app-icon {
     width: 60px;
     height: 60px;
-    background: linear-gradient(180deg, #ffffff 0%, #e6e6e6 100%);
+    background: #ffffff;
     border-radius: 16px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 2px 3px rgba(255,255,255,0.9);
-    transition: transform 0.1s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
 
   .app-icon:active {
@@ -142,11 +98,10 @@
     font-size: 12px;
     color: white;
     margin-top: 6px;
-    font-weight: 600;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+    font-weight: 500;
   }
 
-  /* Settings App View */
+  /* App Window */
   .settings-app {
     position: absolute;
     top: 0;
@@ -157,14 +112,15 @@
     z-index: 10;
     padding: 60px 20px 68px;
     
-    /* Default hidden state */
-    visibility: hidden;
+    /* Closed Default State */
+    display: none;
     opacity: 0;
-    transform: translateY(100%);
+    transform: scale(0.05);
+    border-radius: 30px;
   }
 
   .settings-header {
-    font-size: 32px;
+    font-size: 30px;
     font-weight: bold;
     margin-bottom: 20px;
     color: #000;
@@ -172,14 +128,57 @@
 
   .settings-card {
     background: white;
-    padding: 15px;
+    padding: 16px;
     border-radius: 12px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     color: #333;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   }
 
-  /* Transparent Navigation Bar */
+  .clickable-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  /* Navigation Switcher inside Settings */
+  .nav-options-menu {
+    display: none;
+    background: #e5e5ea;
+    border-radius: 12px;
+    padding: 10px;
+    margin-bottom: 12px;
+  }
+
+  .nav-options-menu.show {
+    display: block;
+  }
+
+  .option-btn {
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .option-btn:last-child {
+    margin-bottom: 0;
+  }
+
+  .option-btn.active {
+    border: 2px solid #007aff;
+    color: #007aff;
+  }
+
+  /* 3-Button Navigation Bar */
   .nav-bar {
     position: absolute;
     bottom: 0;
@@ -195,7 +194,6 @@
 
   .nav-btn {
     color: #fff;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
     font-size: 22px;
     width: 48px;
     height: 48px;
@@ -203,24 +201,42 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    transition: color 0.3s, text-shadow 0.3s;
   }
 
   #nav-recents span {
     display: inline-block;
     transform: scale(1.35);
-    line-height: 1;
   }
 
-  .nav-btn:active {
-    background-color: rgba(150, 150, 150, 0.2);
-    border-radius: 50%;
-  }
-
-  /* Dark mode nav icons when app is active */
-  .nav-bar.app-open .nav-btn {
+  .phone-frame.app-open .nav-btn {
     color: #333;
-    text-shadow: none;
+  }
+
+  /* Swipe Gestures Indicator */
+  .gesture-bar-area {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 36px;
+    display: none; /* Shown in gestures mode */
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .gesture-line {
+    width: 120px;
+    height: 5px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    transition: background-color 0.3s;
+  }
+
+  .phone-frame.app-open .gesture-line {
+    background-color: #333333;
   }
 </style>
 </head>
@@ -229,12 +245,7 @@
 <div class="phone-frame" id="phone">
   
   <div class="home-screen">
-    <div class="aero-bubble b1"></div>
-    <div class="aero-bubble b2"></div>
-    <div class="aero-bubble b3"></div>
-
     <div class="os-title">ZonOS</div>
-    
     <div class="app-grid">
       <div class="app-container">
         <div class="app-icon" id="btn-settings">
@@ -247,6 +258,23 @@
 
   <div class="settings-app" id="app-settings">
     <div class="settings-header">Settings</div>
+    
+    <div class="settings-card clickable-card" id="btn-toggle-nav-menu">
+      <span>Navigation System</span>
+      <span id="current-nav-label" style="color: #8e8e93; font-size: 14px;">3-Button ❯</span>
+    </div>
+
+    <div class="nav-options-menu" id="nav-options-menu">
+      <div class="option-btn active" id="opt-buttons">
+        <span>3-Button Navigation</span>
+        <span class="check-mark">✓</span>
+      </div>
+      <div class="option-btn" id="opt-gestures">
+        <span>Swipe Gestures</span>
+        <span class="check-mark"></span>
+      </div>
+    </div>
+
     <div class="settings-card">Wi-Fi</div>
     <div class="settings-card">Bluetooth</div>
     <div class="settings-card">Display & Brightness</div>
@@ -259,6 +287,10 @@
     <div class="nav-btn" id="nav-recents"><span>□</span></div>
   </div>
 
+  <div class="gesture-bar-area" id="gesture-bar">
+    <div class="gesture-line"></div>
+  </div>
+
 </div>
 
 <script>
@@ -266,78 +298,170 @@
   const settingsBtn = document.getElementById('btn-settings');
   const settingsApp = document.getElementById('app-settings');
   const navBar = document.getElementById('nav-bar');
+  const gestureBar = document.getElementById('gesture-bar');
   
   const navBack = document.getElementById('nav-back');
   const navHome = document.getElementById('nav-home');
+  const btnToggleNavMenu = document.getElementById('btn-toggle-nav-menu');
+  const navOptionsMenu = document.getElementById('nav-options-menu');
+  const currentNavLabel = document.getElementById('current-nav-label');
+  const optButtons = document.getElementById('opt-buttons');
+  const optGestures = document.getElementById('opt-gestures');
 
+  let navMode = 'buttons'; // 'buttons' or 'gestures'
   let isOpen = false;
+  let isAnimating = false;
 
-  // Calculate icon origin for Zoom-In opening
-  function getIconOrigin(originTarget) {
-    const targetRect = originTarget.getBoundingClientRect();
+  // Calculate Icon Center Point for Zoom Origin
+  function updateIconOrigin() {
+    const targetRect = settingsBtn.getBoundingClientRect();
     const phoneRect = phone.getBoundingClientRect();
 
     const originX = (targetRect.left + targetRect.width / 2) - phoneRect.left;
     const originY = (targetRect.top + targetRect.height / 2) - phoneRect.top;
 
-    return `${originX}px ${originY}px`;
+    settingsApp.style.transformOrigin = `${originX}px ${originY}px`;
   }
 
-  // OPEN ANIMATION: Pure Zoom-In from App Icon
+  // RELIABLE OPEN APP
   function openApp() {
-    if (isOpen) return;
+    if (isOpen || isAnimating) return;
     isOpen = true;
+    isAnimating = true;
 
-    // Set origin to app icon
-    settingsApp.style.transformOrigin = getIconOrigin(settingsBtn);
+    updateIconOrigin();
 
-    // Prepare scale(0.05) starting point without animation duration
+    // Prepare initial styles
+    settingsApp.style.display = 'block';
     settingsApp.style.transition = 'none';
     settingsApp.style.transform = 'scale(0.05)';
     settingsApp.style.opacity = '0';
     settingsApp.style.borderRadius = '30px';
-    settingsApp.style.visibility = 'visible';
 
-    // Trigger reflow to apply instantaneous styles
+    // Force DOM Reflow
     settingsApp.offsetHeight;
 
-    // Apply Zoom transition to scale(1)
-    settingsApp.style.transition = 'transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease, border-radius 0.35s ease';
+    // Trigger Slow Zoom Open Animation (0.8s)
+    settingsApp.style.transition = 'transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease, border-radius 0.8s ease';
     settingsApp.style.transform = 'scale(1)';
     settingsApp.style.opacity = '1';
     settingsApp.style.borderRadius = '0px';
 
-    navBar.classList.add('app-open');
-  }
+    phone.classList.add('app-open');
 
-  // CLOSE ANIMATION: Pure Slide-Down off screen
-  function closeApp() {
-    if (!isOpen) return;
-    isOpen = false;
-
-    // Transition down off the screen
-    settingsApp.style.transition = 'transform 0.32s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease';
-    settingsApp.style.transform = 'translateY(100%)';
-    settingsApp.style.opacity = '0';
-
-    navBar.classList.remove('app-open');
-
-    // Hide visibility once slide-down finishes
     setTimeout(() => {
-      if (!isOpen) {
-        settingsApp.style.visibility = 'hidden';
-      }
-    }, 320);
+      isAnimating = false;
+    }, 800);
   }
 
-  // Event Listeners
+  // RELIABLE CLOSE APP
+  function closeApp() {
+    if (!isOpen || isAnimating) return;
+    isOpen = false;
+    isAnimating = true;
+
+    if (navMode === 'gestures') {
+      // Zoom out to icon
+      updateIconOrigin();
+      settingsApp.style.transition = 'transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.6s ease, border-radius 0.8s ease';
+      settingsApp.style.transform = 'scale(0.05)';
+      settingsApp.style.opacity = '0';
+      settingsApp.style.borderRadius = '30px';
+    } else {
+      // Slide down
+      settingsApp.style.transition = 'transform 0.8s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.6s ease';
+      settingsApp.style.transform = 'translateY(100%)';
+      settingsApp.style.opacity = '0';
+    }
+
+    phone.classList.remove('app-open');
+
+    setTimeout(() => {
+      settingsApp.style.display = 'none';
+      isAnimating = false;
+    }, 800);
+  }
+
+  // NAVIGATION SWITCHING LOGIC
+  btnToggleNavMenu.addEventListener('click', () => {
+    navOptionsMenu.classList.toggle('show');
+  });
+
+  optButtons.addEventListener('click', () => {
+    navMode = 'buttons';
+    optButtons.classList.add('active');
+    optGestures.classList.remove('active');
+    optButtons.querySelector('.check-mark').textContent = '✓';
+    optGestures.querySelector('.check-mark').textContent = '';
+    currentNavLabel.textContent = '3-Button ❯';
+
+    navBar.style.display = 'flex';
+    gestureBar.style.display = 'none';
+  });
+
+  optGestures.addEventListener('click', () => {
+    navMode = 'gestures';
+    optGestures.classList.add('active');
+    optButtons.classList.remove('active');
+    optGestures.querySelector('.check-mark').textContent = '✓';
+    optButtons.querySelector('.check-mark').textContent = '';
+    currentNavLabel.textContent = 'Gestures ❯';
+
+    navBar.style.display = 'none';
+    gestureBar.style.display = 'flex';
+  });
+
+  // DRAG / SWIPE UP TO CLOSE (Works for Mouse & Touch)
+  let startY = 0;
+  let isDragging = false;
+
+  function handleStart(e) {
+    if (navMode !== 'gestures' || !isOpen || isAnimating) return;
+    isDragging = true;
+    startY = e.touches ? e.touches[0].clientY : e.clientY;
+    settingsApp.style.transition = 'none';
+  }
+
+  function handleMove(e) {
+    if (!isDragging) return;
+    const currentY = e.touches ? e.touches[0].clientY : e.clientY;
+    const dragDistance = startY - currentY; // Upward drag
+
+    if (dragDistance > 0 && dragDistance < 150) {
+      settingsApp.style.transform = `translateY(-${dragDistance}px)`;
+    }
+  }
+
+  function handleEnd(e) {
+    if (!isDragging) return;
+    isDragging = false;
+
+    const endY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+    const totalDrag = startY - endY;
+
+    if (totalDrag > 60) {
+      // Swiped up enough -> close
+      closeApp();
+    } else {
+      // Snap back if swipe was too short
+      settingsApp.style.transition = 'transform 0.3s ease-out';
+      settingsApp.style.transform = 'translateY(0)';
+    }
+  }
+
+  // Attach Gesture listeners
+  gestureBar.addEventListener('mousedown', handleStart);
+  document.addEventListener('mousemove', handleMove);
+  document.addEventListener('mouseup', handleEnd);
+
+  gestureBar.addEventListener('touchstart', handleStart);
+  document.addEventListener('touchmove', handleMove);
+  document.addEventListener('touchend', handleEnd);
+
+  // Button Listeners
   settingsBtn.addEventListener('click', openApp);
   navHome.addEventListener('click', closeApp);
   navBack.addEventListener('click', closeApp);
-
-  document.getElementById('nav-recents').addEventListener('click', () => {
-    console.log("Recents button clicked");
-  });
 </script>
 
 </body>
