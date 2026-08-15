@@ -253,7 +253,7 @@
     text-shadow: 0 1px 4px rgba(0,0,0,0.8);
   }
 
-  /* App Window Container with Restored Smooth Animations */
+  /* App Window Container */
   .settings-app {
     position: absolute;
     top: 0;
@@ -396,7 +396,7 @@
     color: #333;
   }
 
-  /* Swipe Gesture Bar */
+  /* Swipe Gesture Bar Area */
   .gesture-bar-area {
     position: absolute;
     bottom: 0;
@@ -441,7 +441,7 @@
     <!-- Screen Content Wrapper -->
     <div class="screen-content" id="screen-content">
 
-      <!-- Lockscreen (No White Bar) -->
+      <!-- Lockscreen -->
       <div class="lockscreen" id="lockscreen">
         <div>
           <div class="lock-time" id="lock-time">12:00</div>
@@ -537,17 +537,17 @@
   const optButtons = document.getElementById('opt-buttons');
   const optGestures = document.getElementById('opt-gestures');
 
+  // STATE INITIALIZATION FIX
   let isPowerOn = true;
-  let isLocked = false;
+  let isLocked = true; // Set to true on first load so swipe up works instantly
   let navMode = 'buttons';
   let appIsOpen = false;
   let animTimer = null;
 
-  // POWER BUTTON WITH CRT OFF & FADE ON ANIMATIONS
+  // POWER BUTTON LOGIC
   btnPower.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     if (isPowerOn) {
-      // CRT Turn Off
       screenContent.classList.remove('fade-on');
       screenContent.classList.add('crt-off');
       
@@ -557,7 +557,6 @@
         screenContent.classList.remove('crt-off');
       }, 400);
     } else {
-      // Turn On -> Lockscreen Fade-In
       isPowerOn = true;
       isLocked = true;
       phone.classList.remove('is-off');
@@ -575,7 +574,6 @@
     }
   });
 
-  // LOCKSCREEN TIME UPDATE
   function updateTime() {
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
@@ -584,39 +582,47 @@
   }
   updateTime();
 
-  // SWIPE UP ANYWHERE ON WALLPAPER TO UNLOCK
+  // HIGH-SENSITIVITY LOCKSCREEN UNLOCK
   let unlockStartY = 0;
   let isUnlocking = false;
 
-  lockscreen.addEventListener('pointerdown', (e) => {
+  function handleUnlockStart(e) {
     if (!isPowerOn || !isLocked) return;
     isUnlocking = true;
-    unlockStartY = e.clientY;
-  });
+    unlockStartY = e.touches ? e.touches[0].clientY : e.clientY;
+  }
 
-  document.addEventListener('pointermove', (e) => {
+  function handleUnlockMove(e) {
     if (!isUnlocking || !isLocked) return;
-    const diff = unlockStartY - e.clientY;
+    const currentY = e.touches ? e.touches[0].clientY : e.clientY;
+    const diff = unlockStartY - currentY;
     if (diff > 0) {
       lockscreen.style.transform = `translateY(-${diff}px)`;
     }
-  });
+  }
 
-  document.addEventListener('pointerup', (e) => {
+  function handleUnlockEnd(e) {
     if (!isUnlocking || !isLocked) return;
     isUnlocking = false;
-    const diff = unlockStartY - e.clientY;
-    if (diff > 60) {
-      // Unlock Success
+    const endY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+    const diff = unlockStartY - endY;
+
+    if (diff > 40) { // Reduced threshold for effortless unlock
       isLocked = false;
       lockscreen.style.transform = 'translateY(-100%)';
       lockscreen.style.opacity = '0';
       setTimeout(() => { lockscreen.style.display = 'none'; }, 300);
     } else {
-      // Reset Lockscreen Position
       lockscreen.style.transform = 'translateY(0)';
     }
-  });
+  }
+
+  lockscreen.addEventListener('mousedown', handleUnlockStart);
+  lockscreen.addEventListener('touchstart', handleUnlockStart, { passive: true });
+  window.addEventListener('mousemove', handleUnlockMove);
+  window.addEventListener('touchmove', handleUnlockMove, { passive: true });
+  window.addEventListener('mouseup', handleUnlockEnd);
+  window.addEventListener('touchend', handleUnlockEnd);
 
   // APP ZOOM ORIGIN SETUP
   function setOriginToIcon() {
@@ -627,7 +633,7 @@
     settingsApp.style.transformOrigin = `${originX}px ${originY}px`;
   }
 
-  // APP OPEN / CLOSE WITH SMOOTH ANIMATIONS & SPAM INTERRUPT HANDLING
+  // APP OPEN / CLOSE LOGIC
   function openApp(e) {
     if (e) e.preventDefault();
     if (!isPowerOn || isLocked) return;
@@ -643,7 +649,7 @@
     settingsApp.style.opacity = '0';
     settingsApp.style.borderRadius = '30px';
 
-    settingsApp.offsetHeight; // Force Reflow
+    settingsApp.offsetHeight;
 
     settingsApp.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease, border-radius 0.5s ease';
     settingsApp.style.transform = 'scale(1)';
@@ -723,24 +729,31 @@
     gestureBar.style.display = 'flex';
   });
 
-  // GESTURE BAR SWIPE UP TO CLOSE APP
+  // HIGH-SENSITIVITY GESTURE SWIPE TO CLOSE APP
   let gestureStartY = 0;
   let isGesturing = false;
 
-  gestureLine.addEventListener('pointerdown', (e) => {
-    if (navMode !== 'gestures') return;
+  function handleGestureStart(e) {
+    if (navMode !== 'gestures' || !appIsOpen) return;
     isGesturing = true;
-    gestureStartY = e.clientY;
-  });
+    gestureStartY = e.touches ? e.touches[0].clientY : e.clientY;
+  }
 
-  document.addEventListener('pointerup', (e) => {
+  function handleGestureEnd(e) {
     if (!isGesturing) return;
     isGesturing = false;
-    const diff = gestureStartY - e.clientY;
-    if (diff >= 20) {
+    const endY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+    const diff = gestureStartY - endY;
+
+    if (diff >= 12) { // Ultra-responsive swipe threshold
       closeApp();
     }
-  });
+  }
+
+  gestureBar.addEventListener('mousedown', handleGestureStart);
+  gestureBar.addEventListener('touchstart', handleGestureStart, { passive: true });
+  window.addEventListener('mouseup', handleGestureEnd);
+  window.addEventListener('touchend', handleGestureEnd);
 </script>
 
 </body>
