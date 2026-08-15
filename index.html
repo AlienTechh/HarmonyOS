@@ -1,1151 +1,263 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ZonOS Emulator</title>
-<style>
-  * {
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    box-sizing: border-box;
-  }
-
-  html, body {
-    overflow: hidden;
-    overscroll-behavior: none;
-    height: 100vh;
-    margin: 0;
-  }
-
-  body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #0d0d0d;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  }
-
-  /* Realistic Phone Body */
-  .phone-outer {
-    position: relative;
-    padding: 12px;
-    background: linear-gradient(135deg, #2c2c2e, #1c1c1e);
-    border-radius: 48px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 2px rgba(255,255,255,0.3);
-  }
-
-  /* Physical Power Button */
-  .btn-power {
-    position: absolute;
-    right: -5px;
-    top: 140px;
-    width: 5px;
-    height: 50px;
-    background: #3a3a3c;
-    border-radius: 0 3px 3px 0;
-    cursor: pointer;
-    box-shadow: inset -1px 0 2px rgba(255,255,255,0.2);
-    z-index: 300;
-  }
-
-  .btn-power:active {
-    background: #555;
-  }
-
-  /* Phone Display Frame */
-  .phone-frame {
-    width: 320px;
-    height: 650px;
-    background-color: #000;
-    border-radius: 38px;
-    position: relative;
-    overflow: hidden;
-    border: 4px solid #000;
-    touch-action: none;
-  }
-
-  /* Screen Display Wrapper for CRT Effect */
-  .screen-content {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    overflow: hidden;
-    transform-origin: center center;
-  }
-
-  /* CRT Animation Classes */
-  .screen-content.crt-off {
-    animation: crtTurnOff 0.4s forwards cubic-bezier(0.1, 0.8, 0.3, 1);
-  }
-
-  .screen-content.fade-on {
-    animation: fadeInOn 0.4s forwards ease-out;
-  }
-
-  @keyframes crtTurnOff {
-    0% {
-      transform: scale(1, 1);
-      filter: brightness(1);
-    }
-    50% {
-      transform: scale(1, 0.005);
-      filter: brightness(2);
-    }
-    100% {
-      transform: scale(0, 0);
-      filter: brightness(5);
-    }
-  }
-
-  @keyframes fadeInOn {
-    0% {
-      opacity: 0;
-      transform: scale(0.98);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  /* Physical Punch Hole Camera Layer */
-  .punch-hole {
-    position: absolute;
-    top: 14px;
-    left: 20px;
-    width: 13px;
-    height: 13px;
-    background-color: #000;
-    border-radius: 50%;
-    z-index: 100;
-    box-shadow: inset 0 0 3px rgba(255,255,255,0.2);
-    pointer-events: none;
-  }
-
-  /* Screen Blackout */
-  .screen-off-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #000;
-    z-index: 250;
-    display: none;
-  }
-
-  .phone-frame.is-off .screen-off-overlay {
-    display: block;
-  }
-
-  /* Lockscreen */
-  .lockscreen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 80;
-    background: url('https://i.pinimg.com/736x/44/17/b8/4417b896161f41910658ee601b48e40b.jpg') center/cover no-repeat;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    padding: 70px 20px 40px;
-    color: white;
-    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    touch-action: none;
-    will-change: transform, opacity;
-  }
-
-  /* Fluid iOS Spring Unlocking Transition */
-  .phone-frame.is-unlocked .lockscreen {
-    transform: translateY(-100%) scale(1.05);
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .lock-time {
-    font-size: 54px;
-    font-weight: 200;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-    text-align: center;
-  }
-
-  .lock-date {
-    font-size: 16px;
-    font-weight: 400;
-    margin-top: -10px;
-    opacity: 0.9;
-    text-align: center;
-  }
-
-  .unlock-text {
-    font-size: 13px;
-    letter-spacing: 0.5px;
-    opacity: 0.8;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
-  }
-
-  /* Home Screen */
-  .home-screen {
-    width: 100%;
-    height: 100%; 
-    position: relative;
-    overflow: hidden;
-    background: url('https://i.pinimg.com/736x/44/17/b8/4417b896161f41910658ee601b48e40b.jpg') center/cover no-repeat;
-    display: flex;
-    flex-direction: column;
-    padding-top: 60px;
-    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-    transform-origin: center center;
-  }
-
-  .phone-frame.app-open .home-screen {
-    transform: scale(1.12);
-  }
-
-  .os-title {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    color: white;
-    font-weight: 600;
-    font-size: 24px;
-    margin-bottom: 25px;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.6);
-    transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.5s ease;
-  }
-
-  /* App Grid */
-  .app-grid {
-    position: relative;
-    z-index: 2;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 18px 12px;
-    padding: 0 18px;
-    transition: transform 0.5s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.4s ease;
-  }
-
-  .phone-frame.is-locked .app-grid,
-  .phone-frame.is-locked .os-title {
-    transform: scale(0.85) translateY(40px);
-    opacity: 0;
-  }
-
-  .app-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .app-icon {
-    width: 54px;
-    height: 54px;
-    background: #ffffff;
-    border-radius: 14px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    touch-action: manipulation;
-    overflow: hidden;
-    transform: translateZ(0);
-  }
-
-  .app-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    pointer-events: none;
-  }
-
-  .app-icon:active {
-    transform: scale(0.92);
-  }
-
-  .app-label {
-    font-size: 11px;
-    color: white;
-    margin-top: 5px;
-    font-weight: 500;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-  }
-
-  /* Generic App Window Container */
-  .app-view {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #f2f2f7;
-    z-index: 10;
-    display: none;
-    opacity: 0;
-    overflow: hidden;
-    transform: scale(0.05);
-    border-radius: 30px;
-    will-change: transform, opacity;
-  }
-
-  .app-content {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    padding: 60px 20px 68px;
-    transform: scale(0.94);
-    opacity: 0.8;
-    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease;
-  }
-
-  .phone-frame.app-open .app-content {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  .app-header {
-    font-size: 30px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    color: #000;
-    display: flex;
-    align-items: center;
-  }
-
-  .settings-card {
-    background: white;
-    padding: 16px;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    color: #333;
-    font-weight: 500;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  }
-
-  .clickable-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-  }
-
-  /* Sub-Pages for Settings */
-  .page-view {
-    position: absolute;
-    top: 60px;
-    left: 20px;
-    right: 20px;
-    bottom: 68px;
-    background: #f2f2f7;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-  }
-
-  #page-main {
-    z-index: 1;
-  }
-
-  #page-nav {
-    z-index: 2;
-    transform: translateX(100%);
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  #page-nav.active {
-    transform: translateX(0);
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .back-btn {
-    font-size: 24px;
-    color: #007aff;
-    cursor: pointer;
-    margin-right: 10px;
-    line-height: 1;
-  }
-
-  .option-btn {
-    padding: 16px;
-    background: white;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    font-size: 15px;
-    font-weight: 500;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  }
-
-  .option-btn.active {
-    border: 2px solid #007aff;
-    color: #007aff;
-  }
-
-  /* Mock App Layouts */
-  .chat-bubble {
-    background: #007aff;
-    color: white;
-    padding: 12px 16px;
-    border-radius: 18px;
-    margin-bottom: 10px;
-    max-width: 80%;
-    font-size: 14px;
-  }
-
-  .photo-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-
-  .photo-box {
-    width: 100%;
-    height: 100px;
-    background: #ccc;
-    border-radius: 12px;
-  }
-
-  /* Navigation Bar */
-  .nav-bar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 48px;
-    background-color: transparent;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    z-index: 20;
-  }
-
-  .nav-btn {
-    color: #fff;
-    font-size: 22px;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    touch-action: manipulation;
-  }
-
-  .phone-frame.app-open .nav-btn {
-    color: #333;
-  }
-
-  /* Swipe Gesture Bar Area */
-  .gesture-bar-area {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 36px;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 20;
-    touch-action: none;
-  }
-
-  .gesture-line {
-    width: 120px;
-    height: 6px;
-    background-color: #ffffff;
-    border-radius: 10px;
-    cursor: pointer;
-  }
-
-  .phone-frame.app-open .gesture-line {
-    background-color: #333333;
-  }
-
-  /* Top Right Control Center Gesture Zone */
-  .top-right-trigger {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 50%;
-    height: 50px;
-    z-index: 200;
-    touch-action: none;
-    cursor: pointer;
-  }
-
-  /* Control Center Panel */
-  .control-center {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(18, 18, 20, 0.85);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    z-index: 210;
-    padding: 50px 16px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    transform: translateY(-100%);
-    opacity: 0;
-    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
-    color: white;
-    box-sizing: border-box;
-    touch-action: none;
-  }
-
-  .control-center.active {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  .cc-row, .cc-slider-container, .cc-grid-small {
-    transform: translateY(-20px) scale(0.96);
-    opacity: 0;
-    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
-  }
-
-  .control-center.active .cc-row {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-    transition-delay: 0.05s;
-  }
-
-  .control-center.active .cc-slider-container:nth-child(2) {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-    transition-delay: 0.1s;
-  }
-
-  .control-center.active .cc-slider-container:nth-child(3) {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-    transition-delay: 0.15s;
-  }
-
-  .control-center.active .cc-grid-small {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-    transition-delay: 0.2s;
-  }
-
-  .cc-dismiss-handle {
-    width: 40px;
-    height: 5px;
-    background: rgba(255, 255, 255, 0.4);
-    border-radius: 10px;
-    margin: 10px auto 0;
-  }
-
-  .cc-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  .cc-large-tile {
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: 22px;
-    height: 86px;
-    padding: 14px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: background 0.2s, transform 0.15s ease;
-    cursor: pointer;
-  }
-
-  .cc-large-tile:active {
-    transform: scale(0.95);
-  }
-
-  .cc-large-tile.active {
-    background: #34c759;
-    color: #fff;
-  }
-
-  .cc-grid-small {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-  }
-
-  .cc-small-tile {
-    background: rgba(255, 255, 255, 0.12);
-    aspect-ratio: 1;
-    border-radius: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 18px;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.15s ease;
-  }
-
-  .cc-small-tile:active {
-    transform: scale(0.9);
-  }
-
-  .cc-slider-container {
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: 22px;
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .cc-slider {
-    flex: 1;
-    -webkit-appearance: none;
-    appearance: none;
-    height: 6px;
-    border-radius: 3px;
-    background: rgba(255, 255, 255, 0.3);
-    outline: none;
-  }
-
-  .cc-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: white;
-    cursor: pointer;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ZonOS Emulator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-user-select: none; /* Disable text highlight */
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden; /* Disable website scroll */
+            touch-action: none; /* Prevent pinch-to-zoom and unwanted gestures */
+        }
+
+        /* Phone Frame */
+        .phone-frame {
+            width: 320px;
+            height: 640px;
+            background-color: #000;
+            border-radius: 40px;
+            border: 12px solid #333;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Speaker / Notch */
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 20px;
+            background-color: #333;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            z-index: 100;
+        }
+
+        /* Screen Area */
+        .phone-screen {
+            flex: 1;
+            background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            color: #fff;
+        }
+
+        /* Home Screen */
+        .home-screen {
+            flex: 1;
+            padding: 40px 20px 20px 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: 70px;
+            gap: 15px;
+        }
+
+        .app-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .app-icon:active {
+            transform: scale(0.90);
+        }
+
+        .app-icon-img {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff758c, #ff7eb3);
+            border-radius: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .app-icon span {
+            font-size: 11px;
+            margin-top: 5px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* Settings App - Smooth spring/bounce opening animation */
+        .settings-app {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.85) translateY(40px);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+        }
+
+        .settings-app.open {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .settings-header {
+            padding: 45px 20px 15px 20px;
+            font-size: 22px;
+            font-weight: 700;
+            border-bottom: 1px solid #222;
+        }
+
+        .settings-content {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .settings-item {
+            background-color: #1e1e1e;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        /* Gesture Bar */
+        .gesture-bar-container {
+            height: 24px;
+            width: 100%;
+            background-color: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 101;
+            cursor: pointer;
+        }
+
+        .gesture-line {
+            width: 100px;
+            height: 4px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 2px;
+            transition: background-color 0.2s;
+        }
+
+        .gesture-bar-container:active .gesture-line {
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+    </style>
 </head>
 <body>
 
-<div class="phone-outer">
-  <!-- Power Button -->
-  <div class="btn-power" id="btn-power"></div>
-
-  <!-- Phone Frame -->
-  <div class="phone-frame is-locked" id="phone">
-    
-    <!-- Physical Punch Hole Camera -->
-    <div class="punch-hole"></div>
-
-    <!-- Top Right Control Center Gesture Trigger Zone -->
-    <div class="top-right-trigger" id="cc-trigger"></div>
-
-    <!-- Screen Off Overlay -->
-    <div class="screen-off-overlay" id="screen-off"></div>
-
-    <!-- Control Center Panel -->
-    <div class="control-center" id="control-center">
-      <div class="cc-row">
-        <div class="cc-large-tile active" id="tile-wifi">
-          <div style="font-size: 20px;">📶</div>
-          <div>
-            <div style="font-weight: 600; font-size: 14px;">Wi-Fi</div>
-            <div style="font-size: 11px; opacity: 0.7;">Connected</div>
-          </div>
-        </div>
-        <div class="cc-large-tile" id="tile-bt">
-          <div style="font-size: 20px;">🎧</div>
-          <div>
-            <div style="font-weight: 600; font-size: 14px;">Bluetooth</div>
-            <div style="font-size: 11px; opacity: 0.7;">Off</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="cc-slider-container">
-        <span>☀️</span>
-        <input type="range" class="cc-slider" value="80" min="10" max="100">
-      </div>
-
-      <div class="cc-slider-container">
-        <span>🔊</span>
-        <input type="range" class="cc-slider" value="60" min="0" max="100">
-      </div>
-
-      <div class="cc-grid-small">
-        <div class="cc-small-tile">🔦</div>
-        <div class="cc-small-tile">✈️</div>
-        <div class="cc-small-tile">🌙</div>
-        <div class="cc-small-tile">🔄</div>
-      </div>
-
-      <div class="cc-dismiss-handle"></div>
-    </div>
-
-    <!-- Screen Content Wrapper -->
-    <div class="screen-content" id="screen-content">
-
-      <!-- Lockscreen -->
-      <div class="lockscreen" id="lockscreen">
-        <div>
-          <div class="lock-time" id="lock-time">12:00</div>
-          <div class="lock-date" id="lock-date">Monday, August 15</div>
-        </div>
-        <div class="unlock-text">Swipe up anywhere to unlock</div>
-      </div>
-
-      <!-- Home Screen -->
-      <div class="home-screen" id="home-screen">
-        <div class="os-title">ZonOS</div>
-        <div class="app-grid" id="app-grid">
-          
-          <div class="app-container">
-            <div class="app-icon" id="btn-settings" data-target="app-settings">
-              <img src="https://www.freeiconspng.com/uploads/settings-icon-3.png" alt="Settings" style="width: 34px; height: 34px; object-fit: contain;">
-            </div>
-            <div class="app-label">Settings</div>
-          </div>
-
-          <div class="app-container">
-            <div class="app-icon" id="btn-messages" data-target="app-messages">
-              <img src="https://www.freeiconspng.com/uploads/message-icon-png-10.png" alt="Messages" style="width: 34px; height: 34px; object-fit: contain;">
-            </div>
-            <div class="app-label">Messages</div>
-          </div>
-
-          <div class="app-container">
-            <div class="app-icon" id="btn-camera" data-target="app-camera">
-              <img src="https://static.vecteezy.com/system/resources/thumbnails/077/016/061/small/modern-flat-camera-device-symbol-minimalist-style-icon-graphic-vector.jpg" alt="Camera">
-            </div>
-            <div class="app-label">Camera</div>
-          </div>
-
-          <div class="app-container">
-            <div class="app-icon" id="btn-photos" data-target="app-photos">
-              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRE5VvfZKcCda2NL0oB9Uwzv8MYeUrb5eGgiHS-nJDLg&s=10" alt="Photos">
-            </div>
-            <div class="app-label">Photos</div>
-          </div>
-
-          <div class="app-container">
-            <div class="app-icon" id="btn-music" data-target="app-music">
-              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTKdpVk6adnDq15f6eTnMOOyQB5oh_pXI0CVd0EzfLf2Q&s=10" alt="Music">
-            </div>
-            <div class="app-label">Music</div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Settings App View -->
-      <div class="app-view" id="app-settings">
-        <div class="app-content">
-          <div class="page-view" id="page-main">
-            <div class="app-header">Settings</div>
-            <div class="settings-card">Wi-Fi</div>
-            <div class="settings-card">Bluetooth</div>
-            <div class="settings-card">Display & Brightness</div>
-            <div class="settings-card">About ZonOS</div>
+    <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen" id="phoneScreen">
             
-            <div class="settings-card clickable-card" id="btn-open-nav-page">
-              <span>Navigation System</span>
-              <span id="current-nav-label" style="color: #8e8e93; font-size: 14px;">3-Button ❯</span>
-            </div>
-          </div>
-
-          <div class="page-view" id="page-nav">
-            <div class="app-header">
-              <span class="back-btn" id="btn-back-settings">‹</span>
-              <span>Navigation</span>
+            <!-- Home Screen Layout -->
+            <div class="home-screen">
+                <div class="app-icon" id="openSettings">
+                    <div class="app-icon-img">⚙️</div>
+                    <span>Settings</span>
+                </div>
             </div>
 
-            <div class="option-btn active" id="opt-buttons">
-              <span>3-Button Navigation</span>
-              <span class="check-mark">✓</span>
+            <!-- Settings Application -->
+            <div class="settings-app" id="settingsApp">
+                <div class="settings-header">Settings</div>
+                <div class="settings-content">
+                    <div class="settings-item">
+                        <span>ZonOS Version</span>
+                        <span style="color: #888;">1.1.0</span>
+                    </div>
+                    <div class="settings-item">
+                        <span>Fluid Animations</span>
+                        <span style="color: #ff758c;">Active</span>
+                    </div>
+                    <div class="settings-item">
+                        <span>Storage</span>
+                        <span style="color: #888;">14.2GB / 64GB</span>
+                    </div>
+                </div>
             </div>
-            <div class="option-btn" id="opt-gestures">
-              <span>Swipe Gestures</span>
-              <span class="check-mark"></span>
+
+            <!-- Bottom Swipe Line -->
+            <div class="gesture-bar-container" id="gestureBar">
+                <div class="gesture-line"></div>
             </div>
-          </div>
+
         </div>
-      </div>
-
-      <!-- Messages App View -->
-      <div class="app-view" id="app-messages">
-        <div class="app-content">
-          <div class="app-header">Messages</div>
-          <div class="chat-bubble">Hey! Welcome to ZonOS!</div>
-          <div class="chat-bubble" style="background: #e5e5ea; color: #000; align-self: flex-end;">New message icon set! ✉️</div>
-        </div>
-      </div>
-
-      <!-- Camera App View -->
-      <div class="app-view" id="app-camera" style="background: #000; color: white;">
-        <div class="app-content" style="display: flex; flex-direction: column; justify-content: space-between; align-items: center;">
-          <div class="app-header" style="color: white;">Camera</div>
-          <div style="width: 70px; height: 70px; border-radius: 50%; border: 4px solid white; display: flex; justify-content: center; align-items: center;">
-            <div style="width: 54px; height: 54px; background: white; border-radius: 50%;"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Photos App View -->
-      <div class="app-view" id="app-photos">
-        <div class="app-content">
-          <div class="app-header">Photos</div>
-          <div class="photo-grid">
-            <div class="photo-box" style="background: linear-gradient(45deg, #ff9a9e, #fecfef);"></div>
-            <div class="photo-box" style="background: linear-gradient(45deg, #a1c4fd, #c2e9fb);"></div>
-            <div class="photo-box" style="background: linear-gradient(45deg, #ffecd2, #fcb69f);"></div>
-            <div class="photo-box" style="background: linear-gradient(45deg, #84fab0, #8fd3f4);"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Music App View -->
-      <div class="app-view" id="app-music">
-        <div class="app-content" style="text-align: center;">
-          <div class="app-header">Music</div>
-          <div style="width: 140px; height: 140px; background: #ff2d55; margin: 20px auto; border-radius: 20px; display: flex; justify-content: center; align-items: center; color: white; font-size: 50px;">🎵</div>
-          <h3>Now Playing</h3>
-          <p style="color: #666;">ZonOS Soundtrack</p>
-        </div>
-      </div>
-
-      <!-- 3-Button Navigation Bar -->
-      <div class="nav-bar" id="nav-bar">
-        <div class="nav-btn" id="nav-back">◁</div>
-        <div class="nav-btn" id="nav-home">○</div>
-        <div class="nav-btn" id="nav-recents">□</div>
-      </div>
-
-      <!-- Swipe Gesture Bar -->
-      <div class="gesture-bar-area" id="gesture-bar">
-        <div class="gesture-line" id="gesture-line"></div>
-      </div>
-
     </div>
-  </div>
-</div>
 
-<script>
-  const phone = document.getElementById('phone');
-  const screenContent = document.getElementById('screen-content');
-  const btnPower = document.getElementById('btn-power');
-  const lockscreen = document.getElementById('lockscreen');
-  const lockTime = document.getElementById('lock-time');
-  
-  const navBar = document.getElementById('nav-bar');
-  const gestureBar = document.getElementById('gesture-bar');
-  
-  const navBack = document.getElementById('nav-back');
-  const navHome = document.getElementById('nav-home');
-  const btnOpenNavPage = document.getElementById('btn-open-nav-page');
-  const btnBackSettings = document.getElementById('btn-back-settings');
-  const pageNav = document.getElementById('page-nav');
-  const currentNavLabel = document.getElementById('current-nav-label');
-  const optButtons = document.getElementById('opt-buttons');
-  const optGestures = document.getElementById('opt-gestures');
-  const controlCenter = document.getElementById('control-center');
-  const ccTrigger = document.getElementById('cc-trigger');
+    <script>
+        const openSettingsBtn = document.getElementById('openSettings');
+        const settingsApp = document.getElementById('settingsApp');
+        const gestureBar = document.getElementById('gestureBar');
 
-  let isPowerOn = true;
-  let isLocked = true;
-  let navMode = 'buttons';
-  let activeApp = null;
-  let animTimer = null;
+        // Open Settings App with custom scale-up effect
+        openSettingsBtn.addEventListener('click', () => {
+            settingsApp.classList.add('open');
+        });
 
-  // POWER BUTTON LOGIC
-  btnPower.addEventListener('pointerdown', (e) => {
-    e.preventDefault();
-    if (isPowerOn) {
-      screenContent.classList.remove('fade-on');
-      screenContent.classList.add('crt-off');
-      controlCenter.classList.remove('active');
-      
-      setTimeout(() => {
-        isPowerOn = false;
-        phone.classList.add('is-off');
-        screenContent.classList.remove('crt-off');
-      }, 400);
-    } else {
-      isPowerOn = true;
-      isLocked = true;
-      phone.classList.add('is-locked');
-      phone.classList.remove('is-unlocked');
-      phone.classList.remove('is-off');
-      
-      lockscreen.style.transform = '';
-      lockscreen.style.opacity = '';
-      lockscreen.style.display = 'flex';
-      updateTime();
+        // Swipe up logic for touch screens
+        let startY = 0;
 
-      screenContent.classList.remove('crt-off');
-      screenContent.classList.add('fade-on');
-      setTimeout(() => {
-        screenContent.classList.remove('fade-on');
-      }, 400);
-    }
-  });
+        gestureBar.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+        }, { passive: true });
 
-  function updateTime() {
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    lockTime.textContent = `${hours}:${minutes}`;
-  }
-  updateTime();
+        gestureBar.addEventListener('touchend', (e) => {
+            let endY = e.changedTouches[0].clientY;
+            if (startY - endY > 25) { // Threshold for swipe up
+                settingsApp.classList.remove('open');
+            }
+        }, { passive: true });
 
-  // SMOOTH UNLOCK ANIMATION
-  let unlockStartY = 0;
-  let isUnlocking = false;
+        // Mouse support for desktop testing (Click & Drag up)
+        gestureBar.addEventListener('mousedown', (e) => {
+            startY = e.clientY;
 
-  function handleUnlockStart(e) {
-    if (!isPowerOn || !isLocked) return;
-    isUnlocking = true;
-    unlockStartY = e.touches ? e.touches[0].clientY : e.clientY;
-    lockscreen.style.transition = 'none';
-  }
+            const onMouseUp = (upEvent) => {
+                let endY = upEvent.clientY;
+                if (startY - endY > 20) {
+                    settingsApp.classList.remove('open');
+                }
+                window.removeEventListener('mouseup', onMouseUp);
+            };
 
-  function handleUnlockMove(e) {
-    if (!isUnlocking || !isLocked) return;
-    const currentY = e.touches ? e.touches[0].clientY : e.clientY;
-    const diff = unlockStartY - currentY;
-    if (diff > 0) {
-      const progress = Math.min(diff / 300, 1);
-      const moveY = diff * 0.8;
-      const opacityVal = 1 - (progress * 0.9);
-
-      lockscreen.style.transform = `translateY(-${moveY}px) scale(${1 + progress * 0.05})`;
-      lockscreen.style.opacity = opacityVal;
-    }
-  }
-
-  function handleUnlockEnd(e) {
-    if (!isUnlocking || !isLocked) return;
-    isUnlocking = false;
-    const endY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
-    const diff = unlockStartY - endY;
-
-    lockscreen.style.transition = '';
-
-    if (diff > 40) {
-      isLocked = false;
-      phone.classList.remove('is-locked');
-      phone.classList.add('is-unlocked');
-      setTimeout(() => { 
-        lockscreen.style.display = 'none'; 
-      }, 500);
-    } else {
-      lockscreen.style.transform = '';
-      lockscreen.style.opacity = '';
-    }
-  }
-
-  lockscreen.addEventListener('mousedown', handleUnlockStart);
-  lockscreen.addEventListener('touchstart', handleUnlockStart, { passive: true });
-  window.addEventListener('mousemove', handleUnlockMove);
-  window.addEventListener('touchmove', handleUnlockMove, { passive: true });
-  window.addEventListener('mouseup', handleUnlockEnd);
-  window.addEventListener('touchend', handleUnlockEnd);
-
-  // CONTROL CENTER SWIPE DOWN & UP GESTURES
-  let ccStartY = 0;
-  let isCcSwipingDown = false;
-  let isCcSwipingUp = false;
-
-  // Pull down from top-right corner to open
-  function handleCcStart(e) {
-    if (!isPowerOn || isLocked) return;
-    if (controlCenter.classList.contains('active')) return;
-    isCcSwipingDown = true;
-    ccStartY = e.touches ? e.touches[0].clientY : e.clientY;
-  }
-
-  function handleCcMove(e) {
-    if (!isCcSwipingDown) return;
-    const currentY = e.touches ? e.touches[0].clientY : e.clientY;
-    if (currentY - ccStartY > 20) {
-      controlCenter.classList.add('active');
-      isCcSwipingDown = false;
-    }
-  }
-
-  ccTrigger.addEventListener('mousedown', handleCcStart);
-  ccTrigger.addEventListener('touchstart', handleCcStart, { passive: true });
-  window.addEventListener('mousemove', handleCcMove);
-  window.addEventListener('touchmove', handleCcMove, { passive: true });
-
-  // Swipe UP anywhere on Control Center panel to close
-  function handleCcCloseStart(e) {
-    if (!controlCenter.classList.contains('active')) return;
-    if (e.target.tagName === 'INPUT' || e.target.classList.contains('cc-slider')) return;
-    isCcSwipingUp = true;
-    ccStartY = e.touches ? e.touches[0].clientY : e.clientY;
-  }
-
-  function handleCcCloseMove(e) {
-    if (!isCcSwipingUp) return;
-    const currentY = e.touches ? e.touches[0].clientY : e.clientY;
-    if (ccStartY - currentY > 30) {
-      controlCenter.classList.remove('active');
-      isCcSwipingUp = false;
-    }
-  }
-
-  controlCenter.addEventListener('mousedown', handleCcCloseStart);
-  controlCenter.addEventListener('touchstart', handleCcCloseStart, { passive: true });
-  window.addEventListener('mousemove', handleCcCloseMove);
-  window.addEventListener('touchmove', handleCcCloseMove, { passive: true });
-
-  window.addEventListener('mouseup', () => {
-    isCcSwipingDown = false;
-    isCcSwipingUp = false;
-  });
-  window.addEventListener('touchend', () => {
-    isCcSwipingDown = false;
-    isCcSwipingUp = false;
-  });
-
-  // Click outside to close Control Center
-  phone.addEventListener('pointerdown', (e) => {
-    if (
-      controlCenter.classList.contains('active') && 
-      !controlCenter.contains(e.target) && 
-      !ccTrigger.contains(e.target)
-    ) {
-      controlCenter.classList.remove('active');
-    }
-  });
-
-  // DYNAMIC APP OPEN / CLOSE
-  function openApp(appEl, iconEl) {
-    if (!isPowerOn || isLocked) return;
-
-    if (animTimer) clearTimeout(animTimer);
-    activeApp = appEl;
-
-    const targetRect = iconEl.getBoundingClientRect();
-    const phoneRect = phone.getBoundingClientRect();
-    const originX = (targetRect.left + targetRect.width / 2) - phoneRect.left;
-    const originY = (targetRect.top + targetRect.height / 2) - phoneRect.top;
-    
-    activeApp.style.transformOrigin = `${originX}px ${originY}px`;
-
-    activeApp.style.display = 'block';
-    activeApp.style.transition = 'none';
-    activeApp.style.transform = 'scale(0.05)';
-    activeApp.style.opacity = '0';
-    activeApp.style.borderRadius = '30px';
-
-    activeApp.offsetHeight;
-
-    activeApp.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease, border-radius 0.5s ease';
-    activeApp.style.transform = 'scale(1)';
-    activeApp.style.opacity = '1';
-    activeApp.style.borderRadius = '0px';
-
-    phone.classList.add('app-open');
-  }
-
-  function closeApp() {
-    if (!isPowerOn || (!isLocked && !activeApp)) return;
-
-    if (animTimer) clearTimeout(animTimer);
-    
-    const targetApp = activeApp;
-    targetApp.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease, border-radius 0.5s ease';
-    targetApp.style.transform = 'scale(0.05)';
-    targetApp.style.opacity = '0';
-    targetApp.style.borderRadius = '30px';
-
-    phone.classList.remove('app-open');
-
-    animTimer = setTimeout(() => {
-      targetApp.style.display = 'none';
-      pageNav.classList.remove('active');
-      activeApp = null;
-    }, 500);
-  }
-
-  // APP ICON BINDINGS
-  document.querySelectorAll('.app-icon').forEach(icon => {
-    icon.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      const targetId = icon.getAttribute('data-target');
-      const targetApp = document.getElementById(targetId);
-      if (targetApp) {
-        openApp(targetApp, icon);
-      }
-    });
-  });
-
-  navHome.addEventListener('pointerdown', (e) => { e.preventDefault(); closeApp(); });
-
-  navBack.addEventListener('pointerdown', (e) => {
-    e.preventDefault();
-    if (pageNav.classList.contains('active')) {
-      pageNav.classList.remove('active');
-    } else {
-      closeApp();
-    }
-  });
-
-  btnOpenNavPage.addEventListener('click', () => { pageNav.classList.add('active'); });
-  btnBackSettings.addEventListener('click', () => { pageNav.classList.remove('active'); });
-
-  // NAVIGATION SWITCHING
-  optButtons.addEventListener('click', () => {
-    navMode = 'buttons';
-    optButtons.classList.add('active');
-    optGestures.classList.remove('active');
-    optButtons.querySelector('.check-mark').textContent = '✓';
-    optGestures.querySelector('.check-mark').textContent = '';
-    currentNavLabel.textContent = '3-Button ❯';
-
-    navBar.style.display = 'flex';
-    gestureBar.style.display = 'none';
-  });
-
-  optGestures.addEventListener('click', () => {
-    navMode = 'gestures';
-    optGestures.classList.add('active');
-    optButtons.classList.remove('active');
-    optGestures.querySelector('.check-mark').textContent = '✓';
-    optButtons.querySelector('.check-mark').textContent = '';
-    currentNavLabel.textContent = 'Gestures ❯';
-
-    navBar.style.display = 'none';
-    gestureBar.style.display = 'flex';
-  });
-
-  // SWIPE GESTURE TO CLOSE APP
-  let gestureStartY = 0;
-  let isGesturing = false;
-
-  function handleGestureStart(e) {
-    if (navMode !== 'gestures' || !activeApp) return;
-    isGesturing = true;
-    gestureStartY = e.touches ? e.touches[0].clientY : e.clientY;
-  }
-
-  function handleGestureEnd(e) {
-    if (!isGesturing) return;
-    isGesturing = false;
-    const endY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
-    const diff = gestureStartY - endY;
-
-    if (diff >= 12) {
-      closeApp();
-    }
-  }
-
-  gestureBar.addEventListener('mousedown', handleGestureStart);
-  gestureBar.addEventListener('touchstart', handleGestureStart, { passive: true });
-  window.addEventListener('mouseup', handleGestureEnd);
-  window.addEventListener('touchend', handleGestureEnd);
-</script>
-
+            window.addEventListener('mouseup', onMouseUp);
+        });
+    </script>
 </body>
 </html>
