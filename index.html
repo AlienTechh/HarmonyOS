@@ -27,7 +27,7 @@
     }
 
     body {
-      background: #ffffff; /* White background */
+      background: #ffffff;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
@@ -135,7 +135,7 @@
       text-shadow: 0 1px 3px rgba(0,0,0,0.8);
     }
 
-    /* App Window */
+    /* App Window Base */
     .app-window {
       position: absolute;
       top: 0;
@@ -143,36 +143,48 @@
       width: 100%;
       height: 100%;
       background: #121212;
-      display: none; /* Instant hide to prevent parallel animations */
-      opacity: 0;
-      transform: scale(0.08);
-      transform-origin: center center;
+      display: none;
       pointer-events: none;
       z-index: 15;
       flex-direction: column;
     }
 
-    /* Active State for Normal Opening */
+    /* Keyframes for Budget Zoom Open */
+    @keyframes budgetOpen {
+      0% {
+        transform: scale(0.08);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* Keyframes for Smooth Zoom Close */
+    @keyframes budgetClose {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(0.08);
+        opacity: 0;
+      }
+    }
+
+    /* Active Open State */
     .app-window.active {
-      display: flex;
-      opacity: 1;
-      transform: scale(1);
+      display: flex !important;
       pointer-events: auto;
-      transition: transform 0.05s linear, opacity 0.04s linear;
+      animation: budgetOpen 0.18s cubic-bezier(0, 0, 0.2, 1) forwards;
     }
 
-    /* Closing Zoom Animation State */
+    /* Closing State */
     .app-window.closing {
-      display: flex;
-      opacity: 0;
-      transform: scale(0.08);
+      display: flex !important;
       pointer-events: none;
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-in;
-    }
-
-    /* Budget Cut Mode (Instant Switch with NO animation) */
-    .app-window.no-anim {
-      transition: none !important;
+      animation: budgetClose 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     .app-header {
@@ -309,15 +321,13 @@
 
     let closeTimeout = null;
 
-    // Prevent scrolling default
     document.addEventListener('touchmove', (e) => {
       e.preventDefault();
     }, { passive: false });
 
-    // Open App Logic (Budget Cut mode: instant kill on previous state)
+    // Open App Logic
     appIcons.forEach(icon => {
       icon.addEventListener('click', () => {
-        // Clear any running closing animation instantly
         if (closeTimeout) {
           clearTimeout(closeTimeout);
           closeTimeout = null;
@@ -326,13 +336,12 @@
         const screenRect = screen.getBoundingClientRect();
         const iconRect = icon.getBoundingClientRect();
 
-        // Calculate icon origin point inside screen
-        const originX = (iconRect.left + iconRect.width / 2) - screenRect.left;
-        const originY = (iconRect.top + iconRect.height / 2) - screenRect.top;
+        // Calculate icon position relative to screen container
+        const originX = (iconRect.left + (iconRect.width / 2)) - screenRect.left;
+        const originY = (iconRect.top + (iconRect.height / 2)) - screenRect.top;
 
-        // Instantly kill transitions to change transform-origin without parallel animation glitch
-        appWindow.classList.add('no-anim');
-        appWindow.classList.remove('active', 'closing');
+        // Reset visibility display and apply dynamic transform origin
+        appWindow.style.display = 'flex';
         appWindow.style.transformOrigin = `${originX}px ${originY}px`;
 
         const appName = icon.getAttribute('data-app');
@@ -344,23 +353,23 @@
           appContent.textContent = `Welcome to the ${appTitle.textContent} app.`;
         }
 
-        // Force browser layout repaint then trigger fast open
-        void appWindow.offsetWidth;
-        appWindow.classList.remove('no-anim');
+        // Force animation restart cleanly
+        appWindow.classList.remove('closing', 'active');
+        void appWindow.offsetWidth; // Trigger reflow
         appWindow.classList.add('active');
       });
     });
 
-    // Close App Logic (Smooth zoom back to icon)
+    // Close App Logic
     function closeApp() {
       if (!appWindow.classList.contains('active')) return;
 
       appWindow.classList.remove('active');
       appWindow.classList.add('closing');
 
-      // Hide window immediately after transition completes
       closeTimeout = setTimeout(() => {
         appWindow.classList.remove('closing');
+        appWindow.style.display = 'none';
         closeTimeout = null;
       }, 350);
     }
