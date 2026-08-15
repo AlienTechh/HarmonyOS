@@ -124,17 +124,17 @@
     overflow: hidden;
   }
 
-  /* Inner Content Container for Slight Expansion Effect */
+  /* Inner Content Container for Scale Effect */
   .settings-content {
     width: 100%;
     height: 100%;
+    position: relative;
     padding: 60px 20px 68px;
     transform: scale(0.94);
     opacity: 0.8;
     transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.6s ease;
   }
 
-  /* Expands to 1.0 (slightly bigger feel) when fully open */
   .phone-frame.app-open .settings-content {
     transform: scale(1);
     opacity: 1;
@@ -145,6 +145,8 @@
     font-weight: bold;
     margin-bottom: 20px;
     color: #000;
+    display: flex;
+    align-items: center;
   }
 
   .settings-card {
@@ -164,34 +166,54 @@
     cursor: pointer;
   }
 
-  /* Navigation Switcher */
-  .nav-options-menu {
-    display: none;
-    background: #e5e5ea;
-    border-radius: 12px;
-    padding: 10px;
-    margin-bottom: 12px;
+  /* Navigation Page Views */
+  .page-view {
+    position: absolute;
+    top: 60px;
+    left: 20px;
+    right: 20px;
+    bottom: 68px;
+    background: #f2f2f7;
+    transition: transform 0.35s ease, opacity 0.35s ease;
   }
 
-  .nav-options-menu.show {
-    display: block;
+  #page-main {
+    z-index: 1;
+  }
+
+  #page-nav {
+    z-index: 2;
+    transform: translateX(100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #page-nav.active {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .back-btn {
+    font-size: 24px;
+    color: #007aff;
+    cursor: pointer;
+    margin-right: 10px;
+    line-height: 1;
   }
 
   .option-btn {
-    padding: 12px;
+    padding: 16px;
     background: white;
-    border-radius: 8px;
-    margin-bottom: 8px;
+    border-radius: 12px;
+    margin-bottom: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
-  }
-
-  .option-btn:last-child {
-    margin-bottom: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   }
 
   .option-btn.active {
@@ -281,14 +303,30 @@
   <!-- Settings App View -->
   <div class="settings-app" id="app-settings">
     <div class="settings-content">
-      <div class="settings-header">Settings</div>
       
-      <div class="settings-card clickable-card" id="btn-toggle-nav-menu">
-        <span>Navigation System</span>
-        <span id="current-nav-label" style="color: #8e8e93; font-size: 14px;">3-Button ❯</span>
+      <!-- Main Settings Page -->
+      <div class="page-view" id="page-main">
+        <div class="settings-header">Settings</div>
+        
+        <div class="settings-card">Wi-Fi</div>
+        <div class="settings-card">Bluetooth</div>
+        <div class="settings-card">Display & Brightness</div>
+        <div class="settings-card">About ZonOS</div>
+        
+        <!-- Navigation System moved down -->
+        <div class="settings-card clickable-card" id="btn-open-nav-page">
+          <span>Navigation System</span>
+          <span id="current-nav-label" style="color: #8e8e93; font-size: 14px;">3-Button ❯</span>
+        </div>
       </div>
 
-      <div class="nav-options-menu" id="nav-options-menu">
+      <!-- Navigation System Sub-Page -->
+      <div class="page-view" id="page-nav">
+        <div class="settings-header">
+          <span class="back-btn" id="btn-back-settings">‹</span>
+          <span>Navigation</span>
+        </div>
+
         <div class="option-btn active" id="opt-buttons">
           <span>3-Button Navigation</span>
           <span class="check-mark">✓</span>
@@ -299,10 +337,6 @@
         </div>
       </div>
 
-      <div class="settings-card">Wi-Fi</div>
-      <div class="settings-card">Bluetooth</div>
-      <div class="settings-card">Display & Brightness</div>
-      <div class="settings-card">About ZonOS</div>
     </div>
   </div>
 
@@ -330,8 +364,9 @@
   
   const navBack = document.getElementById('nav-back');
   const navHome = document.getElementById('nav-home');
-  const btnToggleNavMenu = document.getElementById('btn-toggle-nav-menu');
-  const navOptionsMenu = document.getElementById('nav-options-menu');
+  const btnOpenNavPage = document.getElementById('btn-open-nav-page');
+  const btnBackSettings = document.getElementById('btn-back-settings');
+  const pageNav = document.getElementById('page-nav');
   const currentNavLabel = document.getElementById('current-nav-label');
   const optButtons = document.getElementById('opt-buttons');
   const optGestures = document.getElementById('opt-gestures');
@@ -340,7 +375,6 @@
   let isOpen = false;
   let animationTimer = null;
 
-  // Calculates origin anchoring directly to the icon
   function setOriginToIcon() {
     const targetRect = settingsBtn.getBoundingClientRect();
     const phoneRect = phone.getBoundingClientRect();
@@ -364,9 +398,8 @@
     settingsApp.style.opacity = '0';
     settingsApp.style.borderRadius = '30px';
     
-    settingsApp.offsetHeight; // Force reflow
+    settingsApp.offsetHeight; // Reflow
 
-    // Smooth 0.6s transition
     settingsApp.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease, border-radius 0.6s ease';
     settingsApp.style.transform = 'scale(1)';
     settingsApp.style.opacity = '1';
@@ -382,7 +415,6 @@
 
     setOriginToIcon();
 
-    // Smooth 0.6s transition
     settingsApp.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease, border-radius 0.6s ease';
     settingsApp.style.transform = 'scale(0.05)';
     settingsApp.style.opacity = '0';
@@ -393,15 +425,21 @@
     animationTimer = setTimeout(() => {
       if (!isOpen) {
         settingsApp.style.display = 'none';
+        pageNav.classList.remove('active'); // Reset sub-page on close
       }
     }, 600);
   }
 
-  // NAVIGATION SWITCHING
-  btnToggleNavMenu.addEventListener('click', () => {
-    navOptionsMenu.classList.toggle('show');
+  // NAVIGATION SUB-PAGE ROUTING
+  btnOpenNavPage.addEventListener('click', () => {
+    pageNav.classList.add('active');
   });
 
+  btnBackSettings.addEventListener('click', () => {
+    pageNav.classList.remove('active');
+  });
+
+  // MODE SWITCHING
   optButtons.addEventListener('click', () => {
     navMode = 'buttons';
     optButtons.classList.add('active');
@@ -455,9 +493,15 @@
   document.addEventListener('touchend', handleGestureEnd);
 
   // LISTENERS
-  settingsBtn.addEventListener('click', openApp);
-  navHome.addEventListener('click', closeApp);
-  navBack.addEventListener('click', closeApp);
+  settingsBtn.onclick = openApp;
+  navHome.onclick = closeApp;
+  navBack.onclick = () => {
+    if (pageNav.classList.contains('active')) {
+      pageNav.classList.remove('active');
+    } else {
+      closeApp();
+    }
+  };
 </script>
 
 </body>
