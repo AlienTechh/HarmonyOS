@@ -46,7 +46,7 @@
     border-radius: 0 3px 3px 0;
     cursor: pointer;
     box-shadow: inset -1px 0 2px rgba(255,255,255,0.2);
-    z-index: 200;
+    z-index: 300;
   }
 
   .btn-power:active {
@@ -109,7 +109,7 @@
     }
   }
 
-  /* Physical Punch Hole Camera */
+  /* Physical Punch Hole Camera Layer */
   .punch-hole {
     position: absolute;
     top: 14px;
@@ -120,6 +120,7 @@
     border-radius: 50%;
     z-index: 100;
     box-shadow: inset 0 0 3px rgba(255,255,255,0.2);
+    pointer-events: none;
   }
 
   /* Screen Blackout */
@@ -130,7 +131,7 @@
     width: 100%;
     height: 100%;
     background-color: #000;
-    z-index: 90;
+    z-index: 250;
     display: none;
   }
 
@@ -153,8 +154,16 @@
     align-items: center;
     padding: 70px 20px 40px;
     color: white;
-    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     touch-action: none;
+    will-change: transform, opacity;
+  }
+
+  /* Fluid iOS Spring Unlocking Transition */
+  .phone-frame.is-unlocked .lockscreen {
+    transform: translateY(-100%) scale(1.05);
+    opacity: 0;
+    pointer-events: none;
   }
 
   .lock-time {
@@ -206,9 +215,10 @@
     font-size: 24px;
     margin-bottom: 25px;
     text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+    transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.5s ease;
   }
 
-  /* iOS Fly-Down App Grid */
+  /* App Grid */
   .app-grid {
     position: relative;
     z-index: 2;
@@ -216,11 +226,12 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 18px 12px;
     padding: 0 18px;
-    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+    transition: transform 0.5s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.4s ease;
   }
 
-  .phone-frame.is-locked .app-grid {
-    transform: translateY(-80px) scale(0.7);
+  .phone-frame.is-locked .app-grid,
+  .phone-frame.is-locked .os-title {
+    transform: scale(0.85) translateY(40px);
     opacity: 0;
   }
 
@@ -242,6 +253,7 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     touch-action: manipulation;
     overflow: hidden;
+    transform: translateZ(0);
   }
 
   .app-icon img {
@@ -455,6 +467,162 @@
   .phone-frame.app-open .gesture-line {
     background-color: #333333;
   }
+
+  /* Top Right Control Center Gesture Zone */
+  .top-right-trigger {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 50px;
+    z-index: 200;
+    touch-action: none;
+    cursor: pointer;
+  }
+
+  /* Control Center Panel */
+  .control-center {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(18, 18, 20, 0.85);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    z-index: 210;
+    padding: 50px 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transform: translateY(-100%);
+    opacity: 0;
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+    color: white;
+    box-sizing: border-box;
+    touch-action: none;
+  }
+
+  .control-center.active {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .cc-row, .cc-slider-container, .cc-grid-small {
+    transform: translateY(-20px) scale(0.96);
+    opacity: 0;
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+  }
+
+  .control-center.active .cc-row {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    transition-delay: 0.05s;
+  }
+
+  .control-center.active .cc-slider-container:nth-child(2) {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    transition-delay: 0.1s;
+  }
+
+  .control-center.active .cc-slider-container:nth-child(3) {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    transition-delay: 0.15s;
+  }
+
+  .control-center.active .cc-grid-small {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    transition-delay: 0.2s;
+  }
+
+  .cc-dismiss-handle {
+    width: 40px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 10px;
+    margin: 10px auto 0;
+  }
+
+  .cc-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .cc-large-tile {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+    height: 86px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: background 0.2s, transform 0.15s ease;
+    cursor: pointer;
+  }
+
+  .cc-large-tile:active {
+    transform: scale(0.95);
+  }
+
+  .cc-large-tile.active {
+    background: #34c759;
+    color: #fff;
+  }
+
+  .cc-grid-small {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .cc-small-tile {
+    background: rgba(255, 255, 255, 0.12);
+    aspect-ratio: 1;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s ease;
+  }
+
+  .cc-small-tile:active {
+    transform: scale(0.9);
+  }
+
+  .cc-slider-container {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .cc-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    outline: none;
+  }
+
+  .cc-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -466,11 +634,53 @@
   <!-- Phone Frame -->
   <div class="phone-frame is-locked" id="phone">
     
-    <!-- Punch Hole Camera -->
+    <!-- Physical Punch Hole Camera -->
     <div class="punch-hole"></div>
+
+    <!-- Top Right Control Center Gesture Trigger Zone -->
+    <div class="top-right-trigger" id="cc-trigger"></div>
 
     <!-- Screen Off Overlay -->
     <div class="screen-off-overlay" id="screen-off"></div>
+
+    <!-- Control Center Panel -->
+    <div class="control-center" id="control-center">
+      <div class="cc-row">
+        <div class="cc-large-tile active" id="tile-wifi">
+          <div style="font-size: 20px;">📶</div>
+          <div>
+            <div style="font-weight: 600; font-size: 14px;">Wi-Fi</div>
+            <div style="font-size: 11px; opacity: 0.7;">Connected</div>
+          </div>
+        </div>
+        <div class="cc-large-tile" id="tile-bt">
+          <div style="font-size: 20px;">🎧</div>
+          <div>
+            <div style="font-weight: 600; font-size: 14px;">Bluetooth</div>
+            <div style="font-size: 11px; opacity: 0.7;">Off</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cc-slider-container">
+        <span>☀️</span>
+        <input type="range" class="cc-slider" value="80" min="10" max="100">
+      </div>
+
+      <div class="cc-slider-container">
+        <span>🔊</span>
+        <input type="range" class="cc-slider" value="60" min="0" max="100">
+      </div>
+
+      <div class="cc-grid-small">
+        <div class="cc-small-tile">🔦</div>
+        <div class="cc-small-tile">✈️</div>
+        <div class="cc-small-tile">🌙</div>
+        <div class="cc-small-tile">🔄</div>
+      </div>
+
+      <div class="cc-dismiss-handle"></div>
+    </div>
 
     <!-- Screen Content Wrapper -->
     <div class="screen-content" id="screen-content">
@@ -628,7 +838,6 @@
   
   const navBar = document.getElementById('nav-bar');
   const gestureBar = document.getElementById('gesture-bar');
-  const gestureLine = document.getElementById('gesture-line');
   
   const navBack = document.getElementById('nav-back');
   const navHome = document.getElementById('nav-home');
@@ -638,6 +847,8 @@
   const currentNavLabel = document.getElementById('current-nav-label');
   const optButtons = document.getElementById('opt-buttons');
   const optGestures = document.getElementById('opt-gestures');
+  const controlCenter = document.getElementById('control-center');
+  const ccTrigger = document.getElementById('cc-trigger');
 
   let isPowerOn = true;
   let isLocked = true;
@@ -651,6 +862,7 @@
     if (isPowerOn) {
       screenContent.classList.remove('fade-on');
       screenContent.classList.add('crt-off');
+      controlCenter.classList.remove('active');
       
       setTimeout(() => {
         isPowerOn = false;
@@ -661,10 +873,11 @@
       isPowerOn = true;
       isLocked = true;
       phone.classList.add('is-locked');
+      phone.classList.remove('is-unlocked');
       phone.classList.remove('is-off');
       
-      lockscreen.style.transform = 'translateY(0)';
-      lockscreen.style.opacity = '1';
+      lockscreen.style.transform = '';
+      lockscreen.style.opacity = '';
       lockscreen.style.display = 'flex';
       updateTime();
 
@@ -684,7 +897,7 @@
   }
   updateTime();
 
-  // LOCKSCREEN UNLOCK
+  // SMOOTH UNLOCK ANIMATION
   let unlockStartY = 0;
   let isUnlocking = false;
 
@@ -692,6 +905,7 @@
     if (!isPowerOn || !isLocked) return;
     isUnlocking = true;
     unlockStartY = e.touches ? e.touches[0].clientY : e.clientY;
+    lockscreen.style.transition = 'none';
   }
 
   function handleUnlockMove(e) {
@@ -699,7 +913,12 @@
     const currentY = e.touches ? e.touches[0].clientY : e.clientY;
     const diff = unlockStartY - currentY;
     if (diff > 0) {
-      lockscreen.style.transform = `translateY(-${diff}px)`;
+      const progress = Math.min(diff / 300, 1);
+      const moveY = diff * 0.8;
+      const opacityVal = 1 - (progress * 0.9);
+
+      lockscreen.style.transform = `translateY(-${moveY}px) scale(${1 + progress * 0.05})`;
+      lockscreen.style.opacity = opacityVal;
     }
   }
 
@@ -709,14 +928,18 @@
     const endY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
     const diff = unlockStartY - endY;
 
+    lockscreen.style.transition = '';
+
     if (diff > 40) {
       isLocked = false;
-      lockscreen.style.transform = 'translateY(-100%)';
-      lockscreen.style.opacity = '0';
       phone.classList.remove('is-locked');
-      setTimeout(() => { lockscreen.style.display = 'none'; }, 300);
+      phone.classList.add('is-unlocked');
+      setTimeout(() => { 
+        lockscreen.style.display = 'none'; 
+      }, 500);
     } else {
-      lockscreen.style.transform = 'translateY(0)';
+      lockscreen.style.transform = '';
+      lockscreen.style.opacity = '';
     }
   }
 
@@ -727,18 +950,87 @@
   window.addEventListener('mouseup', handleUnlockEnd);
   window.addEventListener('touchend', handleUnlockEnd);
 
-  // DYNAMIC APP OPEN / CLOSE FOR ALL APPS
+  // CONTROL CENTER SWIPE DOWN & UP GESTURES
+  let ccStartY = 0;
+  let isCcSwipingDown = false;
+  let isCcSwipingUp = false;
+
+  // Pull down from top-right corner to open
+  function handleCcStart(e) {
+    if (!isPowerOn || isLocked) return;
+    if (controlCenter.classList.contains('active')) return;
+    isCcSwipingDown = true;
+    ccStartY = e.touches ? e.touches[0].clientY : e.clientY;
+  }
+
+  function handleCcMove(e) {
+    if (!isCcSwipingDown) return;
+    const currentY = e.touches ? e.touches[0].clientY : e.clientY;
+    if (currentY - ccStartY > 20) {
+      controlCenter.classList.add('active');
+      isCcSwipingDown = false;
+    }
+  }
+
+  ccTrigger.addEventListener('mousedown', handleCcStart);
+  ccTrigger.addEventListener('touchstart', handleCcStart, { passive: true });
+  window.addEventListener('mousemove', handleCcMove);
+  window.addEventListener('touchmove', handleCcMove, { passive: true });
+
+  // Swipe UP anywhere on Control Center panel to close
+  function handleCcCloseStart(e) {
+    if (!controlCenter.classList.contains('active')) return;
+    if (e.target.tagName === 'INPUT' || e.target.classList.contains('cc-slider')) return;
+    isCcSwipingUp = true;
+    ccStartY = e.touches ? e.touches[0].clientY : e.clientY;
+  }
+
+  function handleCcCloseMove(e) {
+    if (!isCcSwipingUp) return;
+    const currentY = e.touches ? e.touches[0].clientY : e.clientY;
+    if (ccStartY - currentY > 30) {
+      controlCenter.classList.remove('active');
+      isCcSwipingUp = false;
+    }
+  }
+
+  controlCenter.addEventListener('mousedown', handleCcCloseStart);
+  controlCenter.addEventListener('touchstart', handleCcCloseStart, { passive: true });
+  window.addEventListener('mousemove', handleCcCloseMove);
+  window.addEventListener('touchmove', handleCcCloseMove, { passive: true });
+
+  window.addEventListener('mouseup', () => {
+    isCcSwipingDown = false;
+    isCcSwipingUp = false;
+  });
+  window.addEventListener('touchend', () => {
+    isCcSwipingDown = false;
+    isCcSwipingUp = false;
+  });
+
+  // Click outside to close Control Center
+  phone.addEventListener('pointerdown', (e) => {
+    if (
+      controlCenter.classList.contains('active') && 
+      !controlCenter.contains(e.target) && 
+      !ccTrigger.contains(e.target)
+    ) {
+      controlCenter.classList.remove('active');
+    }
+  });
+
+  // DYNAMIC APP OPEN / CLOSE
   function openApp(appEl, iconEl) {
     if (!isPowerOn || isLocked) return;
 
     if (animTimer) clearTimeout(animTimer);
     activeApp = appEl;
 
-    // Calculate zoom origin based on clicked icon
     const targetRect = iconEl.getBoundingClientRect();
     const phoneRect = phone.getBoundingClientRect();
     const originX = (targetRect.left + targetRect.width / 2) - phoneRect.left;
     const originY = (targetRect.top + targetRect.height / 2) - phoneRect.top;
+    
     activeApp.style.transformOrigin = `${originX}px ${originY}px`;
 
     activeApp.style.display = 'block';
@@ -747,7 +1039,7 @@
     activeApp.style.opacity = '0';
     activeApp.style.borderRadius = '30px';
 
-    activeApp.offsetHeight; // Force reflow
+    activeApp.offsetHeight;
 
     activeApp.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease, border-radius 0.5s ease';
     activeApp.style.transform = 'scale(1)';
@@ -758,7 +1050,7 @@
   }
 
   function closeApp() {
-    if (!isPowerOn || !isLocked && !activeApp) return;
+    if (!isPowerOn || (!isLocked && !activeApp)) return;
 
     if (animTimer) clearTimeout(animTimer);
     
@@ -777,7 +1069,7 @@
     }, 500);
   }
 
-  // BIND EVENT LISTENERS TO ALL APP ICONS
+  // APP ICON BINDINGS
   document.querySelectorAll('.app-icon').forEach(icon => {
     icon.addEventListener('pointerdown', (e) => {
       e.preventDefault();
