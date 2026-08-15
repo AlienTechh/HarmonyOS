@@ -2,10 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- Viewport settings to completely disable scaling and double-tap zoom -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ZonOS Emulator</title>
   <style>
+    /* Global Anti-Scroll, Anti-Highlight, Anti-Zoom CSS */
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden; /* Removes all page scrolling */
+      touch-action: manipulation; /* Disables double-tap zoom */
+      -webkit-tap-highlight-color: transparent; /* Removes blue/grey tap highlights */
+      user-select: none; /* Prevents text and element highlighting */
+      -webkit-user-select: none;
+    }
+
     /* Reset & Center Container */
-    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      user-select: none; 
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+
     body {
       background: #1e1e24;
       display: flex;
@@ -111,6 +133,7 @@
       justify-content: center;
       align-items: center;
       z-index: 10;
+      cursor: pointer;
     }
 
     .home-bar {
@@ -156,6 +179,11 @@
     const settingsWindow = document.getElementById('settingsWindow');
     const homeBar = document.getElementById('homeBar');
 
+    // Prevent default touch behaviors (like page bounce/drag gestures)
+    document.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
     // Open Settings App
     settingsApp.addEventListener('click', () => {
       settingsWindow.classList.add('active');
@@ -166,7 +194,7 @@
 
     homeBar.addEventListener('touchstart', (e) => {
       startY = e.touches[0].clientY;
-    });
+    }, { passive: true });
 
     homeBar.addEventListener('touchend', (e) => {
       let endY = e.changedTouches[0].clientY;
