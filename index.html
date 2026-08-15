@@ -53,7 +53,6 @@
     transform-origin: center center;
   }
 
-  /* Wallpaper Zooms In When App Opens */
   .phone-frame.app-open .home-screen {
     transform: scale(1.15);
   }
@@ -92,14 +91,18 @@
     align-items: center;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    touch-action: manipulation;
+  }
+
+  .app-icon img {
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+    pointer-events: none;
   }
 
   .app-icon:active {
     transform: scale(0.92);
-  }
-
-  .app-icon span {
-    font-size: 28px;
   }
 
   .app-label {
@@ -125,7 +128,7 @@
     will-change: transform, opacity;
   }
 
-  /* Inner Content Container for Scale Effect */
+  /* Inner Content Scale Effect */
   .settings-content {
     width: 100%;
     height: 100%;
@@ -245,6 +248,7 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    touch-action: manipulation;
   }
 
   #nav-recents span {
@@ -294,7 +298,7 @@
     <div class="app-grid">
       <div class="app-container">
         <div class="app-icon" id="btn-settings">
-          <span>⚙️</span>
+          <img src="https://www.freeiconspng.com/uploads/settings-icon-3.png" alt="Settings">
         </div>
         <div class="app-label">Settings</div>
       </div>
@@ -314,14 +318,14 @@
         <div class="settings-card">Display & Brightness</div>
         <div class="settings-card">About ZonOS</div>
         
-        <!-- Navigation System Sub-Page Link -->
+        <!-- Navigation System Option -->
         <div class="settings-card clickable-card" id="btn-open-nav-page">
           <span>Navigation System</span>
           <span id="current-nav-label" style="color: #8e8e93; font-size: 14px;">3-Button ❯</span>
         </div>
       </div>
 
-      <!-- Navigation System Sub-Page View -->
+      <!-- Navigation System Sub-Page -->
       <div class="page-view" id="page-nav">
         <div class="settings-header">
           <span class="back-btn" id="btn-back-settings">‹</span>
@@ -386,8 +390,9 @@
     settingsApp.style.transformOrigin = `${originX}px ${originY}px`;
   }
 
-  // OPEN APP (Spam-Friendly Interrupt Handler)
-  function openApp() {
+  // OPEN APP (Spam-friendly instant reset)
+  function openApp(e) {
+    if (e) e.preventDefault();
     if (animationTimer) clearTimeout(animationTimer);
     isOpen = true;
 
@@ -395,15 +400,13 @@
 
     settingsApp.style.display = 'block';
     
-    // Immediate state reset for spam tapping
     settingsApp.style.transition = 'none';
     settingsApp.style.transform = 'scale(0.05)';
     settingsApp.style.opacity = '0';
     settingsApp.style.borderRadius = '30px';
     
-    settingsApp.offsetHeight; // Force instant reflow
+    settingsApp.offsetHeight; // Force reflow
 
-    // Smooth animation trigger
     settingsApp.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease, border-radius 0.6s ease';
     settingsApp.style.transform = 'scale(1)';
     settingsApp.style.opacity = '1';
@@ -412,8 +415,9 @@
     phone.classList.add('app-open');
   }
 
-  // CLOSE APP (Spam-Friendly Interrupt Handler)
-  function closeApp() {
+  // CLOSE APP (Spam-friendly instant reset)
+  function closeApp(e) {
+    if (e) e.preventDefault();
     if (animationTimer) clearTimeout(animationTimer);
     isOpen = false;
 
@@ -434,17 +438,17 @@
     }, 600);
   }
 
-  // NAVIGATION SUB-PAGE
-  btnOpenNavPage.onclick = () => {
+  // SUB-PAGE NAVIGATION
+  btnOpenNavPage.addEventListener('click', () => {
     pageNav.classList.add('active');
-  };
+  });
 
-  btnBackSettings.onclick = () => {
+  btnBackSettings.addEventListener('click', () => {
     pageNav.classList.remove('active');
-  };
+  });
 
-  // MODE SWITCHING
-  optButtons.onclick = () => {
+  // NAVIGATION SWITCHING
+  optButtons.addEventListener('click', () => {
     navMode = 'buttons';
     optButtons.classList.add('active');
     optGestures.classList.remove('active');
@@ -454,9 +458,9 @@
 
     navBar.style.display = 'flex';
     gestureBar.style.display = 'none';
-  };
+  });
 
-  optGestures.onclick = () => {
+  optGestures.addEventListener('click', () => {
     navMode = 'gestures';
     optGestures.classList.add('active');
     optButtons.classList.remove('active');
@@ -466,7 +470,7 @@
 
     navBar.style.display = 'none';
     gestureBar.style.display = 'flex';
-  };
+  });
 
   // STRICT SWIPE UP ON THE LINE TO CLOSE
   let startY = 0;
@@ -493,19 +497,20 @@
   gestureLine.addEventListener('mousedown', handleGestureStart);
   document.addEventListener('mouseup', handleGestureEnd);
 
-  gestureLine.addEventListener('touchstart', handleGestureStart);
-  document.addEventListener('touchend', handleGestureEnd);
+  gestureLine.addEventListener('touchstart', handleGestureStart, { passive: true });
+  document.addEventListener('touchend', handleGestureEnd, { passive: true });
 
-  // BUTTON LISTENERS
-  settingsBtn.onclick = openApp;
-  navHome.onclick = closeApp;
-  navBack.onclick = () => {
+  // HIGH-RESPONSIVENESS TOUCH EVENT BINDINGS
+  settingsBtn.addEventListener('pointerdown', openApp);
+  navHome.addEventListener('pointerdown', closeApp);
+  navBack.addEventListener('pointerdown', (e) => {
     if (pageNav.classList.contains('active')) {
+      e.preventDefault();
       pageNav.classList.remove('active');
     } else {
-      closeApp();
+      closeApp(e);
     }
-  };
+  });
 </script>
 
 </body>
