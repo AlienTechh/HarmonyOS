@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZonOS Emulator</title>
+    <title>ZonOS Ultimate Pro</title>
     <style>
         * {
             box-sizing: border-box;
@@ -16,8 +16,17 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* Hide scrollbars globally */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        * {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
         body {
-            background: #09090b;
+            background: #020204;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -26,56 +35,78 @@
             touch-action: none;
         }
 
-        /* Phone Frame */
+        /* Phone Frame with Titanium Shimmer Effect */
         .phone-frame {
-            width: 320px;
-            height: 640px;
-            background-color: #111;
-            border-radius: 44px;
-            border: 10px solid #222;
+            width: 330px;
+            height: 670px;
+            background-color: #000;
+            border-radius: 48px;
+            border: 10px solid #1a1a1c;
             position: relative;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.85), inset 0 0 12px rgba(255,255,255,0.06);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.95), inset 0 0 15px rgba(255,255,255,0.08);
             overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
-        /* Dynamic Notch */
+        /* Dynamic Island with Interactive Pulse */
         .phone-notch {
             position: absolute;
-            top: 8px;
+            top: 10px;
             left: 50%;
             transform: translateX(-50%);
-            width: 90px;
-            height: 24px;
+            width: 100px;
+            height: 28px;
             background-color: #000;
-            border-radius: 12px;
-            z-index: 100;
+            border-radius: 16px;
+            z-index: 1000;
             display: flex;
             align-items: center;
-            justify-content: flex-end;
-            padding-right: 8px;
+            justify-content: space-between;
+            padding: 0 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
 
-        .phone-notch::before {
-            content: '';
-            position: absolute;
-            left: 10px;
+        .camera-dot {
             width: 10px;
             height: 10px;
             background-color: #111;
             border-radius: 50%;
         }
 
-        /* Screen Area with iOS Style Fluid Wallpaper */
+        .sensor-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #0a0a23;
+            border-radius: 50%;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 38px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 26px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            z-index: 900;
+            pointer-events: none;
+        }
+
+        /* Screen Area with Vivid OLED Wallpaper */
         .phone-screen {
             flex: 1;
             background: 
-                radial-gradient(circle at 0% 0%, #ff5277, transparent 50%),
-                radial-gradient(circle at 100% 0%, #4a00e0, transparent 50%),
-                radial-gradient(circle at 100% 100%, #00d2ff, transparent 50%),
-                radial-gradient(circle at 0% 100%, #ff8c00, transparent 50%),
-                #1a0b2e;
+                radial-gradient(circle at 20% 15%, rgba(0, 242, 254, 0.5), transparent 50%),
+                radial-gradient(circle at 80% 85%, rgba(241, 39, 17, 0.4), transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(111, 44, 255, 0.6), transparent 70%),
+                #07070f;
             position: relative;
             overflow: hidden;
             display: flex;
@@ -83,14 +114,15 @@
             color: #fff;
         }
 
-        /* Home Screen */
+        /* Home Screen Container */
         .home-screen {
             flex: 1;
-            padding: 50px 20px 20px 20px;
+            padding: 60px 22px 20px 22px;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            grid-auto-rows: 70px;
-            gap: 15px;
+            grid-auto-rows: 78px;
+            gap: 16px;
+            overflow-y: auto;
         }
 
         .app-icon {
@@ -98,94 +130,187 @@
             flex-direction: column;
             align-items: center;
             cursor: pointer;
-            transition: opacity 0.2s ease;
+            transition: transform 0.15s ease, opacity 0.15s ease;
             outline: none;
         }
 
         .app-icon:active {
-            opacity: 0.5;
+            transform: scale(0.85);
+            opacity: 0.7;
         }
 
         .app-icon-img {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #a1a1aa, #52525b);
-            border-radius: 14px;
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 28px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            position: relative;
         }
 
         .app-icon span {
             font-size: 11px;
             margin-top: 6px;
             font-weight: 500;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
             letter-spacing: 0.2px;
         }
 
-        /* Settings App - Smooth Origin Zoom (No Bounce) */
-        .settings-app {
+        /* App Icon Themes */
+        .icon-settings { background: linear-gradient(135deg, #a1a1aa, #52525b); }
+        .icon-photos { background: linear-gradient(135deg, #ff9500, #ff2d55); }
+        .icon-music { background: linear-gradient(135deg, #ff2d55, #af52de); }
+        .icon-notes { background: linear-gradient(135deg, #ffcc00, #ff9500); }
+        .icon-weather { background: linear-gradient(135deg, #5ac8fa, #007aff); }
+        .icon-calculator { background: linear-gradient(135deg, #ff9500, #ff3b30); }
+        .icon-safari { background: linear-gradient(135deg, #00c6ff, #0072ff); }
+        .icon-game { background: linear-gradient(135deg, #30cfd0, #330867); }
+
+        /* Generic App Window Layout */
+        .os-app {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #f2f2f7;
+            background-color: #f4f4f6;
             color: #000;
             z-index: 50;
             display: flex;
             flex-direction: column;
-            
-            /* Transform Origin precisely at the center of the first icon */
-            /* Padding Left: 20px + Half Icon (28px) = 48px */
-            /* Padding Top: 50px + Half Icon (28px) = 78px */
-            transform-origin: 48px 78px;
             transform: scale(0);
             opacity: 0;
             pointer-events: none;
-            
-            /* Clean ease-out curve without bounce */
-            transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
         }
 
-        .settings-app.open {
+        .os-app.open {
             transform: scale(1);
             opacity: 1;
             pointer-events: auto;
         }
 
-        .settings-header {
-            padding: 55px 20px 15px 20px;
-            font-size: 28px;
+        .app-header {
+            padding: 52px 20px 15px 20px;
+            font-size: 26px;
             font-weight: 700;
             border-bottom: 1px solid #d1d1d6;
-            background-color: #f2f2f7;
+            background-color: #f4f4f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .settings-content {
+        .app-body {
             padding: 20px;
             flex: 1;
             overflow-y: auto;
         }
 
-        .settings-item {
+        /* App Components */
+        .app-card {
             background-color: #ffffff;
             padding: 16px;
-            border-radius: 10px;
+            border-radius: 14px;
             margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 15px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+
+        /* Photos Grid */
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .photo-thumb {
+            width: 100%;
+            height: 85px;
+            background: #e5e5ea;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 26px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Weather UI */
+        .weather-card {
+            background: linear-gradient(135deg, #3a7bd5, #3a6073);
+            color: #fff;
+            padding: 24px;
+            border-radius: 18px;
+            text-align: center;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 20px rgba(58, 123, 213, 0.3);
+        }
+
+        /* Calculator UI */
+        .calc-display {
+            background: #1c1c1e;
+            color: #fff;
+            font-size: 38px;
+            padding: 22px;
+            text-align: right;
+            border-radius: 14px;
+            margin-bottom: 15px;
+            font-weight: 300;
+        }
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .calc-btn {
+            background: #e5e5ea;
+            border: none;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .calc-btn:active { background: #d1d1d6; }
+        .calc-btn.orange { background: #ff9500; color: #fff; }
+        .calc-btn.orange:active { background: #e08500; }
+        .calc-btn.dark { background: #3a3a3c; color: #fff; }
+
+        /* Mini Game UI */
+        .game-container {
+            background: #1c1c1e;
+            color: #fff;
+            padding: 20px;
+            border-radius: 18px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+        .game-btn {
+            background: #007aff;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 15px;
         }
 
         /* Gesture Bar */
         .gesture-bar-container {
-            height: 28px;
+            height: 30px;
             width: 100%;
             background-color: transparent;
             display: flex;
@@ -194,58 +319,209 @@
             position: absolute;
             bottom: 0;
             left: 0;
-            z-index: 101;
+            z-index: 1001;
             cursor: pointer;
         }
 
-        /* Dynamic Gesture Bar Color */
         .gesture-line {
-            width: 130px;
+            width: 135px;
             height: 5px;
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(255, 255, 255, 0.9);
             border-radius: 3px;
-            transition: background-color 0.25s ease, width 0.2s ease;
+            transition: background-color 0.25s ease, width 0.2s ease, transform 0.2s ease;
         }
 
-        .settings-app.open ~ .gesture-bar-container .gesture-line {
-            background-color: #000; /* Dark line when app is open */
+        .os-app.open ~ .gesture-bar-container .gesture-line {
+            background-color: #000;
         }
 
         .gesture-bar-container:active .gesture-line {
             width: 110px;
-            background-color: rgba(0, 0, 0, 0.5);
+            transform: scaleY(1.2);
         }
     </style>
 </head>
 <body>
 
     <div class="phone-frame">
-        <div class="phone-notch"></div>
+        <!-- Dynamic Island -->
+        <div class="phone-notch">
+            <div class="sensor-dot"></div>
+            <div class="camera-dot"></div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span id="clock">9:41</span>
+            <span>5G 🔋</span>
+        </div>
+
         <div class="phone-screen" id="phoneScreen">
             
-            <!-- Home Screen Layout -->
-            <div class="home-screen">
-                <div class="app-icon" id="openSettings" tabindex="0">
-                    <div class="app-icon-img">⚙️</div>
+            <!-- Home Screen Grid -->
+            <div class="home-screen" id="homeScreen">
+                <div class="app-icon" data-target="appSettings" style="transform-origin: 49px 88px;">
+                    <div class="app-icon-img icon-settings">⚙️</div>
                     <span>Settings</span>
+                </div>
+                <div class="app-icon" data-target="appPhotos" style="transform-origin: 131px 88px;">
+                    <div class="app-icon-img icon-photos">🖼️</div>
+                    <span>Photos</span>
+                </div>
+                <div class="app-icon" data-target="appMusic" style="transform-origin: 213px 88px;">
+                    <div class="app-icon-img icon-music">🎵</div>
+                    <span>Music</span>
+                </div>
+                <div class="app-icon" data-target="appNotes" style="transform-origin: 295px 88px;">
+                    <div class="app-icon-img icon-notes">📝</div>
+                    <span>Notes</span>
+                </div>
+                <div class="app-icon" data-target="appWeather" style="transform-origin: 49px 182px;">
+                    <div class="app-icon-img icon-weather">🌤️</div>
+                    <span>Weather</span>
+                </div>
+                <div class="app-icon" data-target="appCalc" style="transform-origin: 131px 182px;">
+                    <div class="app-icon-img icon-calculator">🧮</div>
+                    <span>Calc</span>
+                </div>
+                <div class="app-icon" data-target="appSafari" style="transform-origin: 213px 182px;">
+                    <div class="app-icon-img icon-safari">🧭</div>
+                    <span>Safari</span>
+                </div>
+                <div class="app-icon" data-target="appGame" style="transform-origin: 295px 182px;">
+                    <div class="app-icon-img icon-game">🎮</div>
+                    <span>Arcade</span>
                 </div>
             </div>
 
-            <!-- Settings Application -->
-            <div class="settings-app" id="settingsApp">
-                <div class="settings-header">Settings</div>
-                <div class="settings-content">
-                    <div class="settings-item">
-                        <span>ZonOS Version</span>
-                        <span style="color: #007aff;">3.0</span>
+            <!-- 1. Settings App -->
+            <div class="os-app" id="appSettings" style="transform-origin: 49px 88px;">
+                <div class="app-header">Settings</div>
+                <div class="app-body">
+                    <div class="app-card">
+                        <span>ZonOS System</span>
+                        <span style="color: #007aff;">v12.0 Pro</span>
                     </div>
-                    <div class="settings-item">
-                        <span>Animation</span>
-                        <span style="color: #8e8e93;">Linear Seamless</span>
+                    <div class="app-card">
+                        <span>Dark Appearance</span>
+                        <span style="color: #34c759;">Active</span>
                     </div>
-                    <div class="settings-item">
-                        <span>Wallpaper</span>
-                        <span style="color: #8e8e93;">iOS Fluid</span>
+                    <div class="app-card">
+                        <span>Battery Health</span>
+                        <span style="color: #8e8e93;">99%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Photos App -->
+            <div class="os-app" id="appPhotos" style="transform-origin: 131px 88px;">
+                <div class="app-header">Photos</div>
+                <div class="app-body">
+                    <div class="photos-grid">
+                        <div class="photo-thumb">🌄</div>
+                        <div class="photo-thumb">🌊</div>
+                        <div class="photo-thumb">🏙️</div>
+                        <div class="photo-thumb">🐱</div>
+                        <div class="photo-thumb">🚀</div>
+                        <div class="photo-thumb">🌲</div>
+                        <div class="photo-thumb">⚡</div>
+                        <div class="photo-thumb">🔥</div>
+                        <div class="photo-thumb">💎</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Music App -->
+            <div class="os-app" id="appMusic" style="transform-origin: 213px 88px;">
+                <div class="app-header">Music</div>
+                <div class="app-body">
+                    <div class="app-card" style="flex-direction: column; align-items: center; text-align: center; padding: 40px 20px;">
+                        <div style="font-size: 60px; margin-bottom: 15px;">🎧</div>
+                        <h3 style="margin-bottom: 5px; font-size: 20px;">Cosmic Beats</h3>
+                        <p style="color: #8e8e93; font-size: 13px; margin-bottom: 25px;">ZonOS Spatial Audio</p>
+                        <div style="font-size: 32px; cursor: pointer;">▶️</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Notes App -->
+            <div class="os-app" id="appNotes" style="transform-origin: 295px 88px;">
+                <div class="app-header">Notes</div>
+                <div class="app-body">
+                    <div class="app-card">
+                        <span>🚀 Engineered flawless fluid OS</span>
+                    </div>
+                    <div class="app-card">
+                        <span>💡 Removed all scrollbars completely</span>
+                    </div>
+                    <div class="app-card">
+                        <span>✨ Ultimate responsiveness unlocked</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Weather App -->
+            <div class="os-app" id="appWeather" style="transform-origin: 49px 182px;">
+                <div class="app-header">Weather</div>
+                <div class="app-body">
+                    <div class="weather-card">
+                        <h2 style="font-weight: 500;"> Cupertino</h2>
+                        <h1 style="font-size: 56px; margin: 12px 0; font-weight: 300;">74°F</h1>
+                        <p style="letter-spacing: 0.5px;">Sunny & Bright</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Calculator App -->
+            <div class="os-app" id="appCalc" style="transform-origin: 131px 182px;">
+                <div class="app-header">Calculator</div>
+                <div class="app-body">
+                    <div class="calc-display" id="calcDisplay">0</div>
+                    <div class="calc-grid">
+                        <button class="calc-btn dark" onclick="clearCalc()">C</button>
+                        <button class="calc-btn dark">±</button>
+                        <button class="calc-btn dark">%</button>
+                        <button class="calc-btn orange">÷</button>
+                        <button class="calc-btn" onclick="appendCalc('7')">7</button>
+                        <button class="calc-btn" onclick="appendCalc('8')">8</button>
+                        <button class="calc-btn" onclick="appendCalc('9')">9</button>
+                        <button class="calc-btn orange">×</button>
+                        <button class="calc-btn" onclick="appendCalc('4')">4</button>
+                        <button class="calc-btn" onclick="appendCalc('5')">5</button>
+                        <button class="calc-btn" onclick="appendCalc('6')">6</button>
+                        <button class="calc-btn orange">-</button>
+                        <button class="calc-btn" onclick="appendCalc('1')">1</button>
+                        <button class="calc-btn" onclick="appendCalc('2')">2</button>
+                        <button class="calc-btn" onclick="appendCalc('3')">3</button>
+                        <button class="calc-btn orange">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. Safari App -->
+            <div class="os-app" id="appSafari" style="transform-origin: 213px 182px;">
+                <div class="app-header">Safari</div>
+                <div class="app-body">
+                    <div class="app-card" style="background: #1c1c1e; color: #fff; justify-content: center; padding: 12px;">
+                        <span style="font-size: 13px; color: #8e8e93;">🔒 zonos.browser / secure</span>
+                    </div>
+                    <div class="app-card" style="flex-direction: column; align-items: center; text-align: center; padding: 40px 20px;">
+                        <div style="font-size: 40px; margin-bottom: 10px;">🌐</div>
+                        <h3>Welcome to ZonOS Web</h3>
+                        <p style="color: #8e8e93; font-size: 13px; margin-top: 5px;">Lightning fast web emulation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. Mini Game App -->
+            <div class="os-app" id="appGame" style="transform-origin: 295px 182px;">
+                <div class="app-header">Arcade</div>
+                <div class="app-body" style="height: 100%; display: flex; flex-direction: column;">
+                    <div class="game-container">
+                        <div style="font-size: 42px; margin-bottom: 10px;">🏆</div>
+                        <h3 style="margin-bottom: 5px;">Tap Master</h3>
+                        <p style="color: #8e8e93; font-size: 13px;">Score: <span id="gameScore" style="color: #fff; font-weight: bold;">0</span></p>
+                        <button class="game-btn" onclick="incrementScore()">Tap Here!</button>
                     </div>
                 </div>
             </div>
@@ -259,16 +535,34 @@
     </div>
 
     <script>
-        const openSettingsBtn = document.getElementById('openSettings');
-        const settingsApp = document.getElementById('settingsApp');
-        const gestureBar = document.getElementById('gestureBar');
+        // Live Clock Update
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            document.getElementById('clock').innerText = `${hours}:${minutes}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
 
-        // Open Settings App directly from origin without bounce
-        openSettingsBtn.addEventListener('click', () => {
-            settingsApp.classList.add('open');
+        // App Opening Logic with Dynamic Origin Mapping
+        const appIcons = document.querySelectorAll('.app-icon');
+        let activeApp = null;
+
+        appIcons.forEach(icon => {
+            icon.addEventListener('click', () => {
+                const targetId = icon.getAttribute('data-target');
+                const targetApp = document.getElementById(targetId);
+                if (targetApp) {
+                    targetApp.classList.add('open');
+                    activeApp = targetApp;
+                }
+            });
         });
 
-        // Swipe up logic for touch screens
+        // Swipe Up to Close Active App
+        const gestureBar = document.getElementById('gestureBar');
         let startY = 0;
 
         gestureBar.addEventListener('touchstart', (e) => {
@@ -277,25 +571,46 @@
 
         gestureBar.addEventListener('touchend', (e) => {
             let endY = e.changedTouches[0].clientY;
-            if (startY - endY > 25) { // Swipe up threshold
-                settingsApp.classList.remove('open');
+            if (startY - endY > 25 && activeApp) {
+                activeApp.classList.remove('open');
+                activeApp = null;
             }
         }, { passive: true });
 
-        // Mouse support for desktop testing (Click & Drag up)
+        // Mouse Support for Desktop Simulation
         gestureBar.addEventListener('mousedown', (e) => {
             startY = e.clientY;
 
             const onMouseUp = (upEvent) => {
                 let endY = upEvent.clientY;
-                if (startY - endY > 20) {
-                    settingsApp.classList.remove('open');
+                if (startY - endY > 20 && activeApp) {
+                    activeApp.classList.remove('open');
+                    activeApp = null;
                 }
                 window.removeEventListener('mouseup', onMouseUp);
             };
 
             window.addEventListener('mouseup', onMouseUp);
         });
+
+        // Interactive Mini Game Logic
+        let score = 0;
+        function incrementScore() {
+            score++;
+            document.getElementById('gameScore').innerText = score;
+        }
+
+        // Simple Calculator Logic
+        let calcValue = "0";
+        function appendCalc(val) {
+            if (calcValue === "0") calcValue = val;
+            else calcValue += val;
+            document.getElementById('calcDisplay').innerText = calcValue;
+        }
+        function clearCalc() {
+            calcValue = "0";
+            document.getElementById('calcDisplay').innerText = calcValue;
+        }
     </script>
 </body>
 </html>
