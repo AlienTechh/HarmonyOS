@@ -241,13 +241,13 @@
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     touch-action: manipulation;
-    font-size: 26px;
+    overflow: hidden;
   }
 
   .app-icon img {
-    width: 34px;
-    height: 34px;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     pointer-events: none;
   }
 
@@ -491,28 +491,36 @@
           
           <div class="app-container">
             <div class="app-icon" id="btn-settings" data-target="app-settings">
-              <img src="https://www.freeiconspng.com/uploads/settings-icon-3.png" alt="Settings">
+              <img src="https://www.freeiconspng.com/uploads/settings-icon-3.png" alt="Settings" style="width: 34px; height: 34px; object-fit: contain;">
             </div>
             <div class="app-label">Settings</div>
           </div>
 
           <div class="app-container">
-            <div class="app-icon" id="btn-messages" data-target="app-messages" style="background: #34c759; color: white;">💬</div>
+            <div class="app-icon" id="btn-messages" data-target="app-messages">
+              <img src="https://toppng.com/uploads/preview/android-messages-app-icon-11549837477wvl3xhvztn.png" alt="Messages">
+            </div>
             <div class="app-label">Messages</div>
           </div>
 
           <div class="app-container">
-            <div class="app-icon" id="btn-camera" data-target="app-camera" style="background: #007aff; color: white;">📷</div>
+            <div class="app-icon" id="btn-camera" data-target="app-camera">
+              <img src="https://static.vecteezy.com/system/resources/thumbnails/077/016/061/small/modern-flat-camera-device-symbol-minimalist-style-icon-graphic-vector.jpg" alt="Camera">
+            </div>
             <div class="app-label">Camera</div>
           </div>
 
           <div class="app-container">
-            <div class="app-icon" id="btn-photos" data-target="app-photos" style="background: #ff9500; color: white;">🖼️</div>
+            <div class="app-icon" id="btn-photos" data-target="app-photos">
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRE5VvfZKcCda2NL0oB9Uwzv8MYeUrb5eGgiHS-nJDLg&s=10" alt="Photos">
+            </div>
             <div class="app-label">Photos</div>
           </div>
 
           <div class="app-container">
-            <div class="app-icon" id="btn-music" data-target="app-music" style="background: #ff2d55; color: white;">🎵</div>
+            <div class="app-icon" id="btn-music" data-target="app-music">
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTKdpVk6adnDq15f6eTnMOOyQB5oh_pXI0CVd0EzfLf2Q&s=10" alt="Music">
+            </div>
             <div class="app-label">Music</div>
           </div>
 
@@ -558,7 +566,7 @@
         <div class="app-content">
           <div class="app-header">Messages</div>
           <div class="chat-bubble">Hey! Welcome to ZonOS!</div>
-          <div class="chat-bubble" style="background: #e5e5ea; color: #000; align-self: flex-end;">All apps open now! 🎉</div>
+          <div class="chat-bubble" style="background: #e5e5ea; color: #000; align-self: flex-end;">Icons updated seamlessly! 🚀</div>
         </div>
       </div>
 
