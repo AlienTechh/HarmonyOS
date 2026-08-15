@@ -122,6 +122,7 @@
     display: none;
     opacity: 0;
     overflow: hidden;
+    will-change: transform, opacity;
   }
 
   /* Inner Content Container for Scale Effect */
@@ -313,14 +314,14 @@
         <div class="settings-card">Display & Brightness</div>
         <div class="settings-card">About ZonOS</div>
         
-        <!-- Navigation System moved down -->
+        <!-- Navigation System Sub-Page Link -->
         <div class="settings-card clickable-card" id="btn-open-nav-page">
           <span>Navigation System</span>
           <span id="current-nav-label" style="color: #8e8e93; font-size: 14px;">3-Button ❯</span>
         </div>
       </div>
 
-      <!-- Navigation System Sub-Page -->
+      <!-- Navigation System Sub-Page View -->
       <div class="page-view" id="page-nav">
         <div class="settings-header">
           <span class="back-btn" id="btn-back-settings">‹</span>
@@ -385,7 +386,7 @@
     settingsApp.style.transformOrigin = `${originX}px ${originY}px`;
   }
 
-  // OPEN APP
+  // OPEN APP (Spam-Friendly Interrupt Handler)
   function openApp() {
     if (animationTimer) clearTimeout(animationTimer);
     isOpen = true;
@@ -393,13 +394,16 @@
     setOriginToIcon();
 
     settingsApp.style.display = 'block';
+    
+    // Immediate state reset for spam tapping
     settingsApp.style.transition = 'none';
     settingsApp.style.transform = 'scale(0.05)';
     settingsApp.style.opacity = '0';
     settingsApp.style.borderRadius = '30px';
     
-    settingsApp.offsetHeight; // Reflow
+    settingsApp.offsetHeight; // Force instant reflow
 
+    // Smooth animation trigger
     settingsApp.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease, border-radius 0.6s ease';
     settingsApp.style.transform = 'scale(1)';
     settingsApp.style.opacity = '1';
@@ -408,7 +412,7 @@
     phone.classList.add('app-open');
   }
 
-  // CLOSE APP
+  // CLOSE APP (Spam-Friendly Interrupt Handler)
   function closeApp() {
     if (animationTimer) clearTimeout(animationTimer);
     isOpen = false;
@@ -425,22 +429,22 @@
     animationTimer = setTimeout(() => {
       if (!isOpen) {
         settingsApp.style.display = 'none';
-        pageNav.classList.remove('active'); // Reset sub-page on close
+        pageNav.classList.remove('active');
       }
     }, 600);
   }
 
-  // NAVIGATION SUB-PAGE ROUTING
-  btnOpenNavPage.addEventListener('click', () => {
+  // NAVIGATION SUB-PAGE
+  btnOpenNavPage.onclick = () => {
     pageNav.classList.add('active');
-  });
+  };
 
-  btnBackSettings.addEventListener('click', () => {
+  btnBackSettings.onclick = () => {
     pageNav.classList.remove('active');
-  });
+  };
 
   // MODE SWITCHING
-  optButtons.addEventListener('click', () => {
+  optButtons.onclick = () => {
     navMode = 'buttons';
     optButtons.classList.add('active');
     optGestures.classList.remove('active');
@@ -450,9 +454,9 @@
 
     navBar.style.display = 'flex';
     gestureBar.style.display = 'none';
-  });
+  };
 
-  optGestures.addEventListener('click', () => {
+  optGestures.onclick = () => {
     navMode = 'gestures';
     optGestures.classList.add('active');
     optButtons.classList.remove('active');
@@ -462,9 +466,9 @@
 
     navBar.style.display = 'none';
     gestureBar.style.display = 'flex';
-  });
+  };
 
-  // STRICT SWIPE UP ON THE GESTURE LINE
+  // STRICT SWIPE UP ON THE LINE TO CLOSE
   let startY = 0;
   let isTracking = false;
 
@@ -492,7 +496,7 @@
   gestureLine.addEventListener('touchstart', handleGestureStart);
   document.addEventListener('touchend', handleGestureEnd);
 
-  // LISTENERS
+  // BUTTON LISTENERS
   settingsBtn.onclick = openApp;
   navHome.onclick = closeApp;
   navBack.onclick = () => {
