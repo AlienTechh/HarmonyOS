@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- Viewport settings to completely disable scaling and double-tap zoom -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ZonOS Emulator</title>
   <style>
@@ -10,14 +9,13 @@
     html, body {
       width: 100%;
       height: 100%;
-      overflow: hidden; /* Removes all page scrolling */
-      touch-action: manipulation; /* Disables double-tap zoom */
-      -webkit-tap-highlight-color: transparent; /* Removes blue/grey tap highlights */
-      user-select: none; /* Prevents text and element highlighting */
+      overflow: hidden;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
       -webkit-user-select: none;
     }
 
-    /* Reset & Center Container */
     * { 
       box-sizing: border-box; 
       margin: 0; 
@@ -66,6 +64,14 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 20px;
+      transform-origin: center center;
+      transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+    }
+
+    /* Quick background scale from center */
+    .home-screen.scaled {
+      transform: scale(0.95);
+      opacity: 0.7;
     }
 
     .app-icon {
@@ -73,6 +79,10 @@
       flex-direction: column;
       align-items: center;
       cursor: pointer;
+    }
+
+    .app-icon:active {
+      transform: scale(0.92);
     }
 
     .icon-box {
@@ -92,7 +102,7 @@
       font-size: 11px;
     }
 
-    /* Settings App Window */
+    /* Instant App Window Opening from Middle */
     .app-window {
       position: absolute;
       top: 0;
@@ -100,14 +110,21 @@
       width: 100%;
       height: 100%;
       background: #121212;
-      transform: translateY(100%);
-      transition: transform 0.3s ease-in-out;
+      opacity: 0;
+      transform: scale(0.96);
+      transform-origin: center center; /* Centered transform */
+      pointer-events: none;
+      /* Extremely quick opening transition (0.1s) */
+      transition: transform 0.1s ease-out, opacity 0.1s ease-out;
       display: flex;
       flex-direction: column;
+      z-index: 5;
     }
 
     .app-window.active {
-      transform: translateY(0);
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
     }
 
     .app-header {
@@ -146,12 +163,11 @@
 </head>
 <body>
 
-  <!-- Phone Frame -->
   <div class="phone-frame">
     <div class="screen" id="screen">
 
       <!-- Home Screen -->
-      <div class="home-screen">
+      <div class="home-screen" id="homeScreen">
         <div class="app-icon" id="settingsApp">
           <div class="icon-box" style="background: #4a4e69;">⚙️</div>
           <span class="app-name">Settings</span>
@@ -177,17 +193,25 @@
   <script>
     const settingsApp = document.getElementById('settingsApp');
     const settingsWindow = document.getElementById('settingsWindow');
+    const homeScreen = document.getElementById('homeScreen');
     const homeBar = document.getElementById('homeBar');
 
-    // Prevent default touch behaviors (like page bounce/drag gestures)
+    // Prevent default screen scrolling
     document.addEventListener('touchmove', (e) => {
       e.preventDefault();
     }, { passive: false });
 
-    // Open Settings App
+    // Fast Open Settings App
     settingsApp.addEventListener('click', () => {
       settingsWindow.classList.add('active');
+      homeScreen.classList.add('scaled');
     });
+
+    // Close Settings App
+    function closeApp() {
+      settingsWindow.classList.remove('active');
+      homeScreen.classList.remove('scaled');
+    }
 
     // Swipe Up Detection on Bottom Home Line
     let startY = 0;
@@ -198,8 +222,8 @@
 
     homeBar.addEventListener('touchend', (e) => {
       let endY = e.changedTouches[0].clientY;
-      if (startY - endY > 20) { // Detect upward drag
-        settingsWindow.classList.remove('active');
+      if (startY - endY > 20) {
+        closeApp();
       }
     });
 
@@ -215,7 +239,7 @@
       if (isDragging) {
         let endY = e.clientY;
         if (startY - endY > 20) {
-          settingsWindow.classList.remove('active');
+          closeApp();
         }
         isDragging = false;
       }
