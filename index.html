@@ -27,7 +27,7 @@
     }
 
     body {
-      background: #1e1e24;
+      background: #ffffff; /* White background for the main page */
       display: flex;
       justify-content: center;
       align-items: center;
@@ -37,33 +37,74 @@
 
     /* Phone Outer Frame */
     .phone-frame {
-      width: 320px;
-      height: 640px;
+      width: 360px;
+      height: 720px;
       background: #000;
-      border-radius: 40px;
-      border: 12px solid #333;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      border-radius: 44px;
+      border: 12px solid #000000; /* Deep black bezels */
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15); /* Softer shadow against light backdrop */
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
     }
 
-    /* Screen Area */
+    /* Centered Teardrop Notch & Camera */
+    .teardrop-notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 28px;
+      height: 22px;
+      background: #000;
+      border-bottom-left-radius: 14px;
+      border-bottom-right-radius: 14px;
+      z-index: 20;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .camera-lens {
+      width: 8px;
+      height: 8px;
+      background: #0f172a;
+      border: 1.5px solid #1e293b;
+      border-radius: 50%;
+      box-shadow: inset 0 0 2px rgba(255,255,255,0.3);
+    }
+
+    /* Screen Area with Custom Wallpaper */
     .screen {
       flex: 1;
-      background: linear-gradient(135deg, #2b5876, #4e4376);
+      background: url('https://i.pinimg.com/736x/ee/e5/02/eee502b83886728ab3e0c3a7a4612a82.jpg') center/cover no-repeat;
       position: relative;
       overflow: hidden;
       color: #fff;
     }
 
-    /* Home Screen Grid - Completely Static Layout */
+    /* Status Bar */
+    .status-bar {
+      height: 32px;
+      padding: 0 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+      z-index: 10;
+      position: relative;
+    }
+
+    /* Home Screen App Grid */
     .home-screen {
-      padding: 30px 20px;
+      padding: 20px 16px;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
+      gap: 20px 12px;
     }
 
     .app-icon {
@@ -74,23 +115,24 @@
     }
 
     .icon-box {
-      width: 54px;
-      height: 54px;
-      background: #6c757d;
-      border-radius: 14px;
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 24px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      font-size: 26px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
     }
 
     .app-name {
       margin-top: 6px;
       font-size: 11px;
+      font-weight: 500;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
     }
 
-    /* Fast App Window Opening from Middle */
+    /* App Window */
     .app-window {
       position: absolute;
       top: 0;
@@ -105,7 +147,7 @@
       transition: transform 0.1s ease-out, opacity 0.1s ease-out;
       display: flex;
       flex-direction: column;
-      z-index: 5;
+      z-index: 15;
     }
 
     .app-window.active {
@@ -115,7 +157,7 @@
     }
 
     .app-header {
-      padding: 20px;
+      padding: 40px 20px 16px;
       font-size: 20px;
       font-weight: bold;
       border-bottom: 1px solid #222;
@@ -132,41 +174,90 @@
       position: absolute;
       bottom: 0;
       width: 100%;
-      height: 30px;
+      height: 28px;
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 10;
+      z-index: 25;
       cursor: pointer;
     }
 
     .home-bar {
-      width: 120px;
+      width: 130px;
       height: 5px;
-      background: rgba(255, 255, 255, 0.7);
+      background: rgba(255, 255, 255, 0.85);
       border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
     }
   </style>
 </head>
 <body>
 
   <div class="phone-frame">
-    <div class="screen" id="screen">
+    <!-- Centered Camera Teardrop Notch -->
+    <div class="teardrop-notch">
+      <div class="camera-lens"></div>
+    </div>
 
-      <!-- Home Screen -->
+    <div class="screen" id="screen">
+      <!-- Status Bar -->
+      <div class="status-bar">
+        <span>9:41</span>
+        <span>5G 🔋</span>
+      </div>
+
+      <!-- Home Screen Apps Grid -->
       <div class="home-screen" id="homeScreen">
-        <div class="app-icon" id="settingsApp">
-          <div class="icon-box" style="background: #4a4e69;">⚙️</div>
+        <div class="app-icon" data-app="phone">
+          <div class="icon-box" style="background: #25D366;">📞</div>
+          <span class="app-name">Phone</span>
+        </div>
+        <div class="app-icon" data-app="messages">
+          <div class="icon-box" style="background: #007AFF;">💬</div>
+          <span class="app-name">Messages</span>
+        </div>
+        <div class="app-icon" data-app="camera">
+          <div class="icon-box" style="background: #343a40;">📷</div>
+          <span class="app-name">Camera</span>
+        </div>
+        <div class="app-icon" data-app="photos">
+          <div class="icon-box" style="background: #FF9500;">🖼️</div>
+          <span class="app-name">Photos</span>
+        </div>
+        <div class="app-icon" data-app="music">
+          <div class="icon-box" style="background: #FF2D55;">🎵</div>
+          <span class="app-name">Music</span>
+        </div>
+        <div class="app-icon" data-app="clock">
+          <div class="icon-box" style="background: #111; border: 1px solid #333;">⏰</div>
+          <span class="app-name">Clock</span>
+        </div>
+        <div class="app-icon" data-app="notes">
+          <div class="icon-box" style="background: #FFCC00; color: #000;">📝</div>
+          <span class="app-name">Notes</span>
+        </div>
+        <div class="app-icon" data-app="weather">
+          <div class="icon-box" style="background: #5AC8FA;">🌤️</div>
+          <span class="app-name">Weather</span>
+        </div>
+        <div class="app-icon" data-app="files">
+          <div class="icon-box" style="background: #5856D6;">📁</div>
+          <span class="app-name">Files</span>
+        </div>
+        <div class="app-icon" data-app="store">
+          <div class="icon-box" style="background: #AF52DE;">🛍️</div>
+          <span class="app-name">Store</span>
+        </div>
+        <div class="app-icon" data-app="settings">
+          <div class="icon-box" style="background: #636366;">⚙️</div>
           <span class="app-name">Settings</span>
         </div>
       </div>
 
-      <!-- Settings Window -->
-      <div class="app-window" id="settingsWindow">
-        <div class="app-header">Settings</div>
-        <div class="app-content">
-          <p>Welcome to ZonOS v1.0</p>
-        </div>
+      <!-- App Window -->
+      <div class="app-window" id="appWindow">
+        <div class="app-header" id="appTitle">App Name</div>
+        <div class="app-content" id="appContent">App Content</div>
       </div>
 
       <!-- Swipe Bar -->
@@ -178,8 +269,10 @@
   </div>
 
   <script>
-    const settingsApp = document.getElementById('settingsApp');
-    const settingsWindow = document.getElementById('settingsWindow');
+    const appIcons = document.querySelectorAll('.app-icon');
+    const appWindow = document.getElementById('appWindow');
+    const appTitle = document.getElementById('appTitle');
+    const appContent = document.getElementById('appContent');
     const homeBar = document.getElementById('homeBar');
 
     // Prevent default screen scrolling
@@ -187,17 +280,28 @@
       e.preventDefault();
     }, { passive: false });
 
-    // Open Settings App
-    settingsApp.addEventListener('click', () => {
-      settingsWindow.classList.add('active');
+    // Open App Logic
+    appIcons.forEach(icon => {
+      icon.addEventListener('click', () => {
+        const appName = icon.getAttribute('data-app');
+        appTitle.textContent = appName.charAt(0).toUpperCase() + appName.slice(1);
+        
+        if (appName === 'settings') {
+          appContent.innerHTML = '<p>ZonOS Version 1.0<br>Storage: 64GB Available</p>';
+        } else {
+          appContent.textContent = `Welcome to the ${appTitle.textContent} app.`;
+        }
+
+        appWindow.classList.add('active');
+      });
     });
 
-    // Close Settings App
+    // Close App Logic
     function closeApp() {
-      settingsWindow.classList.remove('active');
+      appWindow.classList.remove('active');
     }
 
-    // Swipe Up Detection on Bottom Home Line
+    // Swipe Up Detection
     let startY = 0;
 
     homeBar.addEventListener('touchstart', (e) => {
@@ -211,7 +315,7 @@
       }
     });
 
-    // Mouse drag support for desktop testing
+    // Mouse drag support for desktop
     let isDragging = false;
 
     homeBar.addEventListener('mousedown', (e) => {
