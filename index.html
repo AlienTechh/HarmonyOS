@@ -27,26 +27,29 @@
     }
 
     body {
-      background: #ffffff; /* White background for the main page */
+      background: #ffffff; /* White background */
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      justify-content: flex-start; /* Aligns content toward top for mobile clearance */
       align-items: center;
       min-height: 100vh;
+      padding-top: 20px; /* Slight offset from top edge */
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    /* Phone Outer Frame */
+    /* Slightly Smaller Phone Outer Frame */
     .phone-frame {
-      width: 360px;
-      height: 720px;
+      width: 320px; /* Reduced width for better fit on small mobile screens */
+      height: 640px; /* Scaled height proportionally */
       background: #000;
-      border-radius: 44px;
-      border: 12px solid #000000; /* Deep black bezels */
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15); /* Softer shadow against light backdrop */
+      border-radius: 40px;
+      border: 10px solid #000000; /* Deep black bezels */
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      flex-shrink: 0;
     }
 
     /* Centered Teardrop Notch & Camera */
@@ -55,11 +58,11 @@
       top: 0;
       left: 50%;
       transform: translateX(-50%);
-      width: 28px;
-      height: 22px;
+      width: 26px;
+      height: 20px;
       background: #000;
-      border-bottom-left-radius: 14px;
-      border-bottom-right-radius: 14px;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
       z-index: 20;
       display: flex;
       justify-content: center;
@@ -67,8 +70,8 @@
     }
 
     .camera-lens {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       background: #0f172a;
       border: 1.5px solid #1e293b;
       border-radius: 50%;
@@ -86,12 +89,12 @@
 
     /* Status Bar */
     .status-bar {
-      height: 32px;
-      padding: 0 16px;
+      height: 30px;
+      padding: 0 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       color: #fff;
       text-shadow: 0 1px 3px rgba(0,0,0,0.6);
@@ -101,10 +104,10 @@
 
     /* Home Screen App Grid */
     .home-screen {
-      padding: 20px 16px;
+      padding: 16px 12px;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 20px 12px;
+      gap: 16px 10px;
     }
 
     .app-icon {
@@ -115,19 +118,19 @@
     }
 
     .icon-box {
-      width: 58px;
-      height: 58px;
-      border-radius: 16px;
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 26px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+      font-size: 24px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.35);
     }
 
     .app-name {
-      margin-top: 6px;
-      font-size: 11px;
+      margin-top: 5px;
+      font-size: 10px;
       font-weight: 500;
       text-shadow: 0 1px 3px rgba(0,0,0,0.8);
     }
@@ -157,15 +160,15 @@
     }
 
     .app-header {
-      padding: 40px 20px 16px;
-      font-size: 20px;
+      padding: 36px 18px 14px;
+      font-size: 18px;
       font-weight: bold;
       border-bottom: 1px solid #222;
     }
 
     .app-content {
-      padding: 20px;
-      font-size: 14px;
+      padding: 18px;
+      font-size: 13px;
       color: #aaa;
     }
 
@@ -174,7 +177,7 @@
       position: absolute;
       bottom: 0;
       width: 100%;
-      height: 28px;
+      height: 26px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -183,11 +186,21 @@
     }
 
     .home-bar {
-      width: 130px;
-      height: 5px;
+      width: 110px;
+      height: 4px;
       background: rgba(255, 255, 255, 0.85);
       border-radius: 10px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+
+    /* Footer Label Below Phone */
+    .footer-text {
+      margin-top: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+      letter-spacing: 0.5px;
+      text-align: center;
     }
   </style>
 </head>
@@ -268,6 +281,9 @@
     </div>
   </div>
 
+  <!-- Bottom Centered Text -->
+  <div class="footer-text">ZonOS 0.1.0 alpha</div>
+
   <script>
     const appIcons = document.querySelectorAll('.app-icon');
     const appWindow = document.getElementById('appWindow');
@@ -287,7 +303,7 @@
         appTitle.textContent = appName.charAt(0).toUpperCase() + appName.slice(1);
         
         if (appName === 'settings') {
-          appContent.innerHTML = '<p>ZonOS Version 1.0<br>Storage: 64GB Available</p>';
+          appContent.innerHTML = '<p>ZonOS Version 0.1.0 alpha<br>Storage: 64GB Available</p>';
         } else {
           appContent.textContent = `Welcome to the ${appTitle.textContent} app.`;
         }
