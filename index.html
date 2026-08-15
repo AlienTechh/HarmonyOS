@@ -30,20 +30,20 @@
       background: #ffffff; /* White background */
       display: flex;
       flex-direction: column;
-      justify-content: flex-start; /* Aligns content toward top for mobile clearance */
+      justify-content: flex-start;
       align-items: center;
       min-height: 100vh;
-      padding-top: 20px; /* Slight offset from top edge */
+      padding-top: 20px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    /* Slightly Smaller Phone Outer Frame */
+    /* Phone Frame */
     .phone-frame {
-      width: 320px; /* Reduced width for better fit on small mobile screens */
-      height: 640px; /* Scaled height proportionally */
+      width: 320px;
+      height: 640px;
       background: #000;
       border-radius: 40px;
-      border: 10px solid #000000; /* Deep black bezels */
+      border: 10px solid #000000;
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
       position: relative;
       overflow: hidden;
@@ -52,7 +52,7 @@
       flex-shrink: 0;
     }
 
-    /* Centered Teardrop Notch & Camera */
+    /* Teardrop Notch & Camera */
     .teardrop-notch {
       position: absolute;
       top: 0;
@@ -78,7 +78,7 @@
       box-shadow: inset 0 0 2px rgba(255,255,255,0.3);
     }
 
-    /* Screen Area with Custom Wallpaper */
+    /* Screen Area */
     .screen {
       flex: 1;
       background: url('https://i.pinimg.com/736x/ee/e5/02/eee502b83886728ab3e0c3a7a4612a82.jpg') center/cover no-repeat;
@@ -144,10 +144,11 @@
       height: 100%;
       background: #121212;
       opacity: 0;
-      transform: scale(0.96);
+      transform: scale(0.08);
       transform-origin: center center;
       pointer-events: none;
-      transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+      /* Smooth, premium closing zoom animation */
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-in;
       display: flex;
       flex-direction: column;
       z-index: 15;
@@ -157,6 +158,8 @@
       opacity: 1;
       transform: scale(1);
       pointer-events: auto;
+      /* Ultra-fast snappy open transition */
+      transition: transform 0.05s linear, opacity 0.04s linear;
     }
 
     .app-header {
@@ -172,7 +175,7 @@
       color: #aaa;
     }
 
-    /* Bottom Home Indicator Bar */
+    /* Home Indicator Bar */
     .home-bar-container {
       position: absolute;
       bottom: 0;
@@ -193,7 +196,7 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.4);
     }
 
-    /* Footer Label Below Phone */
+    /* Footer Text */
     .footer-text {
       margin-top: 14px;
       font-size: 13px;
@@ -207,7 +210,7 @@
 <body>
 
   <div class="phone-frame">
-    <!-- Centered Camera Teardrop Notch -->
+    <!-- Teardrop Notch -->
     <div class="teardrop-notch">
       <div class="camera-lens"></div>
     </div>
@@ -281,7 +284,6 @@
     </div>
   </div>
 
-  <!-- Bottom Centered Text -->
   <div class="footer-text">ZonOS 0.1.0 alpha</div>
 
   <script>
@@ -290,8 +292,9 @@
     const appTitle = document.getElementById('appTitle');
     const appContent = document.getElementById('appContent');
     const homeBar = document.getElementById('homeBar');
+    const screen = document.getElementById('screen');
 
-    // Prevent default screen scrolling
+    // Prevent scrolling default
     document.addEventListener('touchmove', (e) => {
       e.preventDefault();
     }, { passive: false });
@@ -299,6 +302,15 @@
     // Open App Logic
     appIcons.forEach(icon => {
       icon.addEventListener('click', () => {
+        const screenRect = screen.getBoundingClientRect();
+        const iconRect = icon.getBoundingClientRect();
+
+        // Position scale transform origin right over the tapped app icon
+        const originX = (iconRect.left + iconRect.width / 2) - screenRect.left;
+        const originY = (iconRect.top + iconRect.height / 2) - screenRect.top;
+
+        appWindow.style.transformOrigin = `${originX}px ${originY}px`;
+
         const appName = icon.getAttribute('data-app');
         appTitle.textContent = appName.charAt(0).toUpperCase() + appName.slice(1);
         
