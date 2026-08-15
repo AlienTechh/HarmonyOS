@@ -10,53 +10,72 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-user-select: none; /* Disable text highlight */
+            -webkit-user-select: none;
             user-select: none;
             -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: #121212;
+            background: #09090b;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            overflow: hidden; /* Disable website scroll */
-            touch-action: none; /* Prevent pinch-to-zoom and unwanted gestures */
+            overflow: hidden;
+            touch-action: none;
         }
 
         /* Phone Frame */
         .phone-frame {
             width: 320px;
             height: 640px;
-            background-color: #000;
-            border-radius: 40px;
-            border: 12px solid #333;
+            background-color: #111;
+            border-radius: 44px;
+            border: 10px solid #222;
             position: relative;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.85), inset 0 0 12px rgba(255,255,255,0.06);
             overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
-        /* Speaker / Notch */
+        /* Dynamic Notch */
         .phone-notch {
             position: absolute;
-            top: 0;
+            top: 8px;
             left: 50%;
             transform: translateX(-50%);
-            width: 120px;
-            height: 20px;
-            background-color: #333;
-            border-bottom-left-radius: 12px;
-            border-bottom-right-radius: 12px;
+            width: 90px;
+            height: 24px;
+            background-color: #000;
+            border-radius: 12px;
             z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
         }
 
-        /* Screen Area */
+        .phone-notch::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            width: 10px;
+            height: 10px;
+            background-color: #111;
+            border-radius: 50%;
+        }
+
+        /* Screen Area with iOS Style Fluid Wallpaper */
         .phone-screen {
             flex: 1;
-            background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+            background: 
+                radial-gradient(circle at 0% 0%, #ff5277, transparent 50%),
+                radial-gradient(circle at 100% 0%, #4a00e0, transparent 50%),
+                radial-gradient(circle at 100% 100%, #00d2ff, transparent 50%),
+                radial-gradient(circle at 0% 100%, #ff8c00, transparent 50%),
+                #1a0b2e;
             position: relative;
             overflow: hidden;
             display: flex;
@@ -67,7 +86,7 @@
         /* Home Screen */
         .home-screen {
             flex: 1;
-            padding: 40px 20px 20px 20px;
+            padding: 50px 20px 20px 20px;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             grid-auto-rows: 70px;
@@ -79,59 +98,71 @@
             flex-direction: column;
             align-items: center;
             cursor: pointer;
-            transition: transform 0.15s ease;
+            transition: opacity 0.2s ease;
+            outline: none;
         }
 
         .app-icon:active {
-            transform: scale(0.90);
+            opacity: 0.5;
         }
 
         .app-icon-img {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #ff758c, #ff7eb3);
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #a1a1aa, #52525b);
             border-radius: 14px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            font-size: 28px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
         .app-icon span {
             font-size: 11px;
-            margin-top: 5px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            margin-top: 6px;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+            letter-spacing: 0.2px;
         }
 
-        /* Settings App - Smooth spring/bounce opening animation */
+        /* Settings App - Smooth Origin Zoom (No Bounce) */
         .settings-app {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #121212;
+            background-color: #f2f2f7;
+            color: #000;
             z-index: 50;
             display: flex;
             flex-direction: column;
-            transform: scale(0.85) translateY(40px);
+            
+            /* Transform Origin precisely at the center of the first icon */
+            /* Padding Left: 20px + Half Icon (28px) = 48px */
+            /* Padding Top: 50px + Half Icon (28px) = 78px */
+            transform-origin: 48px 78px;
+            transform: scale(0);
             opacity: 0;
             pointer-events: none;
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+            
+            /* Clean ease-out curve without bounce */
+            transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease;
         }
 
         .settings-app.open {
-            transform: scale(1) translateY(0);
+            transform: scale(1);
             opacity: 1;
             pointer-events: auto;
         }
 
         .settings-header {
-            padding: 45px 20px 15px 20px;
-            font-size: 22px;
+            padding: 55px 20px 15px 20px;
+            font-size: 28px;
             font-weight: 700;
-            border-bottom: 1px solid #222;
+            border-bottom: 1px solid #d1d1d6;
+            background-color: #f2f2f7;
         }
 
         .settings-content {
@@ -141,19 +172,20 @@
         }
 
         .settings-item {
-            background-color: #1e1e1e;
-            padding: 15px;
+            background-color: #ffffff;
+            padding: 16px;
             border-radius: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 14px;
+            font-size: 15px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
         /* Gesture Bar */
         .gesture-bar-container {
-            height: 24px;
+            height: 28px;
             width: 100%;
             background-color: transparent;
             display: flex;
@@ -166,16 +198,22 @@
             cursor: pointer;
         }
 
+        /* Dynamic Gesture Bar Color */
         .gesture-line {
-            width: 100px;
-            height: 4px;
-            background-color: rgba(255, 255, 255, 0.5);
-            border-radius: 2px;
-            transition: background-color 0.2s;
+            width: 130px;
+            height: 5px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 3px;
+            transition: background-color 0.25s ease, width 0.2s ease;
+        }
+
+        .settings-app.open ~ .gesture-bar-container .gesture-line {
+            background-color: #000; /* Dark line when app is open */
         }
 
         .gesture-bar-container:active .gesture-line {
-            background-color: rgba(255, 255, 255, 0.9);
+            width: 110px;
+            background-color: rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
@@ -187,7 +225,7 @@
             
             <!-- Home Screen Layout -->
             <div class="home-screen">
-                <div class="app-icon" id="openSettings">
+                <div class="app-icon" id="openSettings" tabindex="0">
                     <div class="app-icon-img">⚙️</div>
                     <span>Settings</span>
                 </div>
@@ -199,15 +237,15 @@
                 <div class="settings-content">
                     <div class="settings-item">
                         <span>ZonOS Version</span>
-                        <span style="color: #888;">1.1.0</span>
+                        <span style="color: #007aff;">3.0</span>
                     </div>
                     <div class="settings-item">
-                        <span>Fluid Animations</span>
-                        <span style="color: #ff758c;">Active</span>
+                        <span>Animation</span>
+                        <span style="color: #8e8e93;">Linear Seamless</span>
                     </div>
                     <div class="settings-item">
-                        <span>Storage</span>
-                        <span style="color: #888;">14.2GB / 64GB</span>
+                        <span>Wallpaper</span>
+                        <span style="color: #8e8e93;">iOS Fluid</span>
                     </div>
                 </div>
             </div>
@@ -225,7 +263,7 @@
         const settingsApp = document.getElementById('settingsApp');
         const gestureBar = document.getElementById('gestureBar');
 
-        // Open Settings App with custom scale-up effect
+        // Open Settings App directly from origin without bounce
         openSettingsBtn.addEventListener('click', () => {
             settingsApp.classList.add('open');
         });
@@ -239,7 +277,7 @@
 
         gestureBar.addEventListener('touchend', (e) => {
             let endY = e.changedTouches[0].clientY;
-            if (startY - endY > 25) { // Threshold for swipe up
+            if (startY - endY > 25) { // Swipe up threshold
                 settingsApp.classList.remove('open');
             }
         }, { passive: true });
