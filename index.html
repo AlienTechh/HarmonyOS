@@ -78,13 +78,30 @@
       box-shadow: inset 0 0 2px rgba(255,255,255,0.3);
     }
 
-    /* Screen Area */
+    /* Screen Area Container */
     .screen {
       flex: 1;
-      background: url('https://i.pinimg.com/736x/ee/e5/02/eee502b83886728ab3e0c3a7a4612a82.jpg') center/cover no-repeat;
       position: relative;
       overflow: hidden;
       color: #fff;
+    }
+
+    /* Dedicated Wallpaper Layer for Zoom Animation */
+    .wallpaper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('https://i.pinimg.com/736x/ee/e5/02/eee502b83886728ab3e0c3a7a4612a82.jpg') center/cover no-repeat;
+      transform: scale(1);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 0;
+    }
+
+    /* Wallpaper Zooms In Slightly When App is Open */
+    .screen.app-open .wallpaper {
+      transform: scale(1.08);
     }
 
     /* Status Bar */
@@ -104,6 +121,8 @@
 
     /* Home Screen App Grid */
     .home-screen {
+      position: relative;
+      z-index: 5;
       padding: 16px 12px;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -241,6 +260,9 @@
     </div>
 
     <div class="screen" id="screen">
+      <!-- Wallpaper Layer -->
+      <div class="wallpaper"></div>
+
       <!-- Status Bar -->
       <div class="status-bar">
         <span>9:41</span>
@@ -353,6 +375,9 @@
           appContent.textContent = `Welcome to the ${appTitle.textContent} app.`;
         }
 
+        // Trigger wallpaper zoom-in effect
+        screen.classList.add('app-open');
+
         // Force animation restart cleanly
         appWindow.classList.remove('closing', 'active');
         void appWindow.offsetWidth; // Trigger reflow
@@ -363,6 +388,9 @@
     // Close App Logic
     function closeApp() {
       if (!appWindow.classList.contains('active')) return;
+
+      // Trigger wallpaper zoom-out back to normal
+      screen.classList.remove('app-open');
 
       appWindow.classList.remove('active');
       appWindow.classList.add('closing');
