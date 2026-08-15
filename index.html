@@ -143,23 +143,36 @@
       width: 100%;
       height: 100%;
       background: #121212;
+      display: none; /* Instant hide to prevent parallel animations */
       opacity: 0;
       transform: scale(0.08);
       transform-origin: center center;
       pointer-events: none;
-      /* Smooth, premium closing zoom animation */
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-in;
-      display: flex;
-      flex-direction: column;
       z-index: 15;
+      flex-direction: column;
     }
 
+    /* Active State for Normal Opening */
     .app-window.active {
+      display: flex;
       opacity: 1;
       transform: scale(1);
       pointer-events: auto;
-      /* Ultra-fast snappy open transition */
       transition: transform 0.05s linear, opacity 0.04s linear;
+    }
+
+    /* Closing Zoom Animation State */
+    .app-window.closing {
+      display: flex;
+      opacity: 0;
+      transform: scale(0.08);
+      pointer-events: none;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-in;
+    }
+
+    /* Budget Cut Mode (Instant Switch with NO animation) */
+    .app-window.no-anim {
+      transition: none !important;
     }
 
     .app-header {
@@ -294,21 +307,32 @@
     const homeBar = document.getElementById('homeBar');
     const screen = document.getElementById('screen');
 
+    let closeTimeout = null;
+
     // Prevent scrolling default
     document.addEventListener('touchmove', (e) => {
       e.preventDefault();
     }, { passive: false });
 
-    // Open App Logic
+    // Open App Logic (Budget Cut mode: instant kill on previous state)
     appIcons.forEach(icon => {
       icon.addEventListener('click', () => {
+        // Clear any running closing animation instantly
+        if (closeTimeout) {
+          clearTimeout(closeTimeout);
+          closeTimeout = null;
+        }
+
         const screenRect = screen.getBoundingClientRect();
         const iconRect = icon.getBoundingClientRect();
 
-        // Position scale transform origin right over the tapped app icon
+        // Calculate icon origin point inside screen
         const originX = (iconRect.left + iconRect.width / 2) - screenRect.left;
         const originY = (iconRect.top + iconRect.height / 2) - screenRect.top;
 
+        // Instantly kill transitions to change transform-origin without parallel animation glitch
+        appWindow.classList.add('no-anim');
+        appWindow.classList.remove('active', 'closing');
         appWindow.style.transformOrigin = `${originX}px ${originY}px`;
 
         const appName = icon.getAttribute('data-app');
@@ -320,13 +344,25 @@
           appContent.textContent = `Welcome to the ${appTitle.textContent} app.`;
         }
 
+        // Force browser layout repaint then trigger fast open
+        void appWindow.offsetWidth;
+        appWindow.classList.remove('no-anim');
         appWindow.classList.add('active');
       });
     });
 
-    // Close App Logic
+    // Close App Logic (Smooth zoom back to icon)
     function closeApp() {
+      if (!appWindow.classList.contains('active')) return;
+
       appWindow.classList.remove('active');
+      appWindow.classList.add('closing');
+
+      // Hide window immediately after transition completes
+      closeTimeout = setTimeout(() => {
+        appWindow.classList.remove('closing');
+        closeTimeout = null;
+      }, 350);
     }
 
     // Swipe Up Detection
