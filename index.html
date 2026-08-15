@@ -109,7 +109,7 @@
     }
   }
 
-  /* Physical Punch Hole Camera (Left) */
+  /* Physical Punch Hole Camera */
   .punch-hole {
     position: absolute;
     top: 14px;
@@ -153,7 +153,7 @@
     align-items: center;
     padding: 70px 20px 40px;
     color: white;
-    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease;
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease;
     touch-action: none;
   }
 
@@ -204,15 +204,24 @@
     color: white;
     font-weight: 600;
     font-size: 24px;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
     text-shadow: 0 2px 6px rgba(0,0,0,0.6);
   }
 
+  /* iOS Fly-Down App Grid */
   .app-grid {
     position: relative;
     z-index: 2;
-    display: flex;
-    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px 12px;
+    padding: 0 18px;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+  }
+
+  .phone-frame.is-locked .app-grid {
+    transform: translateY(-80px) scale(0.7);
+    opacity: 0;
   }
 
   .app-container {
@@ -222,21 +231,22 @@
   }
 
   .app-icon {
-    width: 60px;
-    height: 60px;
+    width: 54px;
+    height: 54px;
     background: #ffffff;
-    border-radius: 16px;
+    border-radius: 14px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     touch-action: manipulation;
+    font-size: 26px;
   }
 
   .app-icon img {
-    width: 38px;
-    height: 38px;
+    width: 34px;
+    height: 34px;
     object-fit: contain;
     pointer-events: none;
   }
@@ -246,15 +256,15 @@
   }
 
   .app-label {
-    font-size: 12px;
+    font-size: 11px;
     color: white;
-    margin-top: 6px;
+    margin-top: 5px;
     font-weight: 500;
     text-shadow: 0 1px 4px rgba(0,0,0,0.8);
   }
 
-  /* App Window Container */
-  .settings-app {
+  /* Generic App Window Container */
+  .app-view {
     position: absolute;
     top: 0;
     left: 0;
@@ -270,7 +280,7 @@
     will-change: transform, opacity;
   }
 
-  .settings-content {
+  .app-content {
     width: 100%;
     height: 100%;
     position: relative;
@@ -280,12 +290,12 @@
     transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease;
   }
 
-  .phone-frame.app-open .settings-content {
+  .phone-frame.app-open .app-content {
     transform: scale(1);
     opacity: 1;
   }
 
-  .settings-header {
+  .app-header {
     font-size: 30px;
     font-weight: bold;
     margin-bottom: 20px;
@@ -311,7 +321,7 @@
     cursor: pointer;
   }
 
-  /* Sub-Pages */
+  /* Sub-Pages for Settings */
   .page-view {
     position: absolute;
     top: 60px;
@@ -364,6 +374,30 @@
   .option-btn.active {
     border: 2px solid #007aff;
     color: #007aff;
+  }
+
+  /* Mock App Layouts */
+  .chat-bubble {
+    background: #007aff;
+    color: white;
+    padding: 12px 16px;
+    border-radius: 18px;
+    margin-bottom: 10px;
+    max-width: 80%;
+    font-size: 14px;
+  }
+
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .photo-box {
+    width: 100%;
+    height: 100px;
+    background: #ccc;
+    border-radius: 12px;
   }
 
   /* Navigation Bar */
@@ -430,9 +464,9 @@
   <div class="btn-power" id="btn-power"></div>
 
   <!-- Phone Frame -->
-  <div class="phone-frame" id="phone">
+  <div class="phone-frame is-locked" id="phone">
     
-    <!-- Punch Hole Camera (Left) -->
+    <!-- Punch Hole Camera -->
     <div class="punch-hole"></div>
 
     <!-- Screen Off Overlay -->
@@ -453,22 +487,43 @@
       <!-- Home Screen -->
       <div class="home-screen" id="home-screen">
         <div class="os-title">ZonOS</div>
-        <div class="app-grid">
+        <div class="app-grid" id="app-grid">
+          
           <div class="app-container">
-            <div class="app-icon" id="btn-settings">
+            <div class="app-icon" id="btn-settings" data-target="app-settings">
               <img src="https://www.freeiconspng.com/uploads/settings-icon-3.png" alt="Settings">
             </div>
             <div class="app-label">Settings</div>
           </div>
+
+          <div class="app-container">
+            <div class="app-icon" id="btn-messages" data-target="app-messages" style="background: #34c759; color: white;">💬</div>
+            <div class="app-label">Messages</div>
+          </div>
+
+          <div class="app-container">
+            <div class="app-icon" id="btn-camera" data-target="app-camera" style="background: #007aff; color: white;">📷</div>
+            <div class="app-label">Camera</div>
+          </div>
+
+          <div class="app-container">
+            <div class="app-icon" id="btn-photos" data-target="app-photos" style="background: #ff9500; color: white;">🖼️</div>
+            <div class="app-label">Photos</div>
+          </div>
+
+          <div class="app-container">
+            <div class="app-icon" id="btn-music" data-target="app-music" style="background: #ff2d55; color: white;">🎵</div>
+            <div class="app-label">Music</div>
+          </div>
+
         </div>
       </div>
 
       <!-- Settings App View -->
-      <div class="settings-app" id="app-settings">
-        <div class="settings-content">
-          
+      <div class="app-view" id="app-settings">
+        <div class="app-content">
           <div class="page-view" id="page-main">
-            <div class="settings-header">Settings</div>
+            <div class="app-header">Settings</div>
             <div class="settings-card">Wi-Fi</div>
             <div class="settings-card">Bluetooth</div>
             <div class="settings-card">Display & Brightness</div>
@@ -481,7 +536,7 @@
           </div>
 
           <div class="page-view" id="page-nav">
-            <div class="settings-header">
+            <div class="app-header">
               <span class="back-btn" id="btn-back-settings">‹</span>
               <span>Navigation</span>
             </div>
@@ -495,7 +550,48 @@
               <span class="check-mark"></span>
             </div>
           </div>
+        </div>
+      </div>
 
+      <!-- Messages App View -->
+      <div class="app-view" id="app-messages">
+        <div class="app-content">
+          <div class="app-header">Messages</div>
+          <div class="chat-bubble">Hey! Welcome to ZonOS!</div>
+          <div class="chat-bubble" style="background: #e5e5ea; color: #000; align-self: flex-end;">All apps open now! 🎉</div>
+        </div>
+      </div>
+
+      <!-- Camera App View -->
+      <div class="app-view" id="app-camera" style="background: #000; color: white;">
+        <div class="app-content" style="display: flex; flex-direction: column; justify-content: space-between; align-items: center;">
+          <div class="app-header" style="color: white;">Camera</div>
+          <div style="width: 70px; height: 70px; border-radius: 50%; border: 4px solid white; display: flex; justify-content: center; align-items: center;">
+            <div style="width: 54px; height: 54px; background: white; border-radius: 50%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Photos App View -->
+      <div class="app-view" id="app-photos">
+        <div class="app-content">
+          <div class="app-header">Photos</div>
+          <div class="photo-grid">
+            <div class="photo-box" style="background: linear-gradient(45deg, #ff9a9e, #fecfef);"></div>
+            <div class="photo-box" style="background: linear-gradient(45deg, #a1c4fd, #c2e9fb);"></div>
+            <div class="photo-box" style="background: linear-gradient(45deg, #ffecd2, #fcb69f);"></div>
+            <div class="photo-box" style="background: linear-gradient(45deg, #84fab0, #8fd3f4);"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Music App View -->
+      <div class="app-view" id="app-music">
+        <div class="app-content" style="text-align: center;">
+          <div class="app-header">Music</div>
+          <div style="width: 140px; height: 140px; background: #ff2d55; margin: 20px auto; border-radius: 20px; display: flex; justify-content: center; align-items: center; color: white; font-size: 50px;">🎵</div>
+          <h3>Now Playing</h3>
+          <p style="color: #666;">ZonOS Soundtrack</p>
         </div>
       </div>
 
@@ -522,8 +618,6 @@
   const lockscreen = document.getElementById('lockscreen');
   const lockTime = document.getElementById('lock-time');
   
-  const settingsBtn = document.getElementById('btn-settings');
-  const settingsApp = document.getElementById('app-settings');
   const navBar = document.getElementById('nav-bar');
   const gestureBar = document.getElementById('gesture-bar');
   const gestureLine = document.getElementById('gesture-line');
@@ -537,11 +631,10 @@
   const optButtons = document.getElementById('opt-buttons');
   const optGestures = document.getElementById('opt-gestures');
 
-  // STATE INITIALIZATION FIX
   let isPowerOn = true;
-  let isLocked = true; // Set to true on first load so swipe up works instantly
+  let isLocked = true;
   let navMode = 'buttons';
-  let appIsOpen = false;
+  let activeApp = null;
   let animTimer = null;
 
   // POWER BUTTON LOGIC
@@ -559,6 +652,7 @@
     } else {
       isPowerOn = true;
       isLocked = true;
+      phone.classList.add('is-locked');
       phone.classList.remove('is-off');
       
       lockscreen.style.transform = 'translateY(0)';
@@ -582,7 +676,7 @@
   }
   updateTime();
 
-  // HIGH-SENSITIVITY LOCKSCREEN UNLOCK
+  // LOCKSCREEN UNLOCK
   let unlockStartY = 0;
   let isUnlocking = false;
 
@@ -607,10 +701,11 @@
     const endY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
     const diff = unlockStartY - endY;
 
-    if (diff > 40) { // Reduced threshold for effortless unlock
+    if (diff > 40) {
       isLocked = false;
       lockscreen.style.transform = 'translateY(-100%)';
       lockscreen.style.opacity = '0';
+      phone.classList.remove('is-locked');
       setTimeout(() => { lockscreen.style.display = 'none'; }, 300);
     } else {
       lockscreen.style.transform = 'translateY(0)';
@@ -624,87 +719,83 @@
   window.addEventListener('mouseup', handleUnlockEnd);
   window.addEventListener('touchend', handleUnlockEnd);
 
-  // APP ZOOM ORIGIN SETUP
-  function setOriginToIcon() {
-    const targetRect = settingsBtn.getBoundingClientRect();
-    const phoneRect = phone.getBoundingClientRect();
-    const originX = (targetRect.left + targetRect.width / 2) - phoneRect.left;
-    const originY = (targetRect.top + targetRect.height / 2) - phoneRect.top;
-    settingsApp.style.transformOrigin = `${originX}px ${originY}px`;
-  }
-
-  // APP OPEN / CLOSE LOGIC
-  function openApp(e) {
-    if (e) e.preventDefault();
+  // DYNAMIC APP OPEN / CLOSE FOR ALL APPS
+  function openApp(appEl, iconEl) {
     if (!isPowerOn || isLocked) return;
 
     if (animTimer) clearTimeout(animTimer);
-    appIsOpen = true;
+    activeApp = appEl;
 
-    setOriginToIcon();
+    // Calculate zoom origin based on clicked icon
+    const targetRect = iconEl.getBoundingClientRect();
+    const phoneRect = phone.getBoundingClientRect();
+    const originX = (targetRect.left + targetRect.width / 2) - phoneRect.left;
+    const originY = (targetRect.top + targetRect.height / 2) - phoneRect.top;
+    activeApp.style.transformOrigin = `${originX}px ${originY}px`;
 
-    settingsApp.style.display = 'block';
-    settingsApp.style.transition = 'none';
-    settingsApp.style.transform = 'scale(0.05)';
-    settingsApp.style.opacity = '0';
-    settingsApp.style.borderRadius = '30px';
+    activeApp.style.display = 'block';
+    activeApp.style.transition = 'none';
+    activeApp.style.transform = 'scale(0.05)';
+    activeApp.style.opacity = '0';
+    activeApp.style.borderRadius = '30px';
 
-    settingsApp.offsetHeight;
+    activeApp.offsetHeight; // Force reflow
 
-    settingsApp.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease, border-radius 0.5s ease';
-    settingsApp.style.transform = 'scale(1)';
-    settingsApp.style.opacity = '1';
-    settingsApp.style.borderRadius = '0px';
+    activeApp.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease, border-radius 0.5s ease';
+    activeApp.style.transform = 'scale(1)';
+    activeApp.style.opacity = '1';
+    activeApp.style.borderRadius = '0px';
 
     phone.classList.add('app-open');
   }
 
-  function closeApp(e) {
-    if (e) e.preventDefault();
-    if (!isPowerOn || isLocked) return;
+  function closeApp() {
+    if (!isPowerOn || !isLocked && !activeApp) return;
 
     if (animTimer) clearTimeout(animTimer);
-    appIsOpen = false;
-
-    setOriginToIcon();
-
-    settingsApp.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease, border-radius 0.5s ease';
-    settingsApp.style.transform = 'scale(0.05)';
-    settingsApp.style.opacity = '0';
-    settingsApp.style.borderRadius = '30px';
+    
+    const targetApp = activeApp;
+    targetApp.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease, border-radius 0.5s ease';
+    targetApp.style.transform = 'scale(0.05)';
+    targetApp.style.opacity = '0';
+    targetApp.style.borderRadius = '30px';
 
     phone.classList.remove('app-open');
 
     animTimer = setTimeout(() => {
-      if (!appIsOpen) {
-        settingsApp.style.display = 'none';
-        pageNav.classList.remove('active');
-      }
+      targetApp.style.display = 'none';
+      pageNav.classList.remove('active');
+      activeApp = null;
     }, 500);
   }
 
-  // EVENT LISTENERS
-  settingsBtn.addEventListener('pointerdown', openApp);
-  navHome.addEventListener('pointerdown', closeApp);
+  // BIND EVENT LISTENERS TO ALL APP ICONS
+  document.querySelectorAll('.app-icon').forEach(icon => {
+    icon.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      const targetId = icon.getAttribute('data-target');
+      const targetApp = document.getElementById(targetId);
+      if (targetApp) {
+        openApp(targetApp, icon);
+      }
+    });
+  });
+
+  navHome.addEventListener('pointerdown', (e) => { e.preventDefault(); closeApp(); });
 
   navBack.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     if (pageNav.classList.contains('active')) {
       pageNav.classList.remove('active');
     } else {
-      closeApp(e);
+      closeApp();
     }
   });
 
-  btnOpenNavPage.addEventListener('click', () => {
-    pageNav.classList.add('active');
-  });
+  btnOpenNavPage.addEventListener('click', () => { pageNav.classList.add('active'); });
+  btnBackSettings.addEventListener('click', () => { pageNav.classList.remove('active'); });
 
-  btnBackSettings.addEventListener('click', () => {
-    pageNav.classList.remove('active');
-  });
-
-  // NAVIGATION MODE SWITCHING
+  // NAVIGATION SWITCHING
   optButtons.addEventListener('click', () => {
     navMode = 'buttons';
     optButtons.classList.add('active');
@@ -729,12 +820,12 @@
     gestureBar.style.display = 'flex';
   });
 
-  // HIGH-SENSITIVITY GESTURE SWIPE TO CLOSE APP
+  // SWIPE GESTURE TO CLOSE APP
   let gestureStartY = 0;
   let isGesturing = false;
 
   function handleGestureStart(e) {
-    if (navMode !== 'gestures' || !appIsOpen) return;
+    if (navMode !== 'gestures' || !activeApp) return;
     isGesturing = true;
     gestureStartY = e.touches ? e.touches[0].clientY : e.clientY;
   }
@@ -745,7 +836,7 @@
     const endY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
     const diff = gestureStartY - endY;
 
-    if (diff >= 12) { // Ultra-responsive swipe threshold
+    if (diff >= 12) {
       closeApp();
     }
   }
