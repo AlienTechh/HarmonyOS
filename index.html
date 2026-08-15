@@ -22,24 +22,164 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #121212;
+    background-color: #0d0d0d;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 
-  /* Phone Frame */
+  /* Realistic Phone Body */
+  .phone-outer {
+    position: relative;
+    padding: 12px;
+    background: linear-gradient(135deg, #2c2c2e, #1c1c1e);
+    border-radius: 48px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 2px rgba(255,255,255,0.3);
+  }
+
+  /* Physical Power Button */
+  .btn-power {
+    position: absolute;
+    right: -5px;
+    top: 140px;
+    width: 5px;
+    height: 50px;
+    background: #3a3a3c;
+    border-radius: 0 3px 3px 0;
+    cursor: pointer;
+    box-shadow: inset -1px 0 2px rgba(255,255,255,0.2);
+    z-index: 200;
+  }
+
+  .btn-power:active {
+    background: #555;
+  }
+
+  /* Phone Display Frame */
   .phone-frame {
     width: 320px;
     height: 650px;
     background-color: #000;
-    border-radius: 40px;
-    border: 12px solid #ffffff;
+    border-radius: 38px;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    border: 4px solid #000;
     touch-action: none;
   }
 
-  /* Home Screen & Car Wallpaper */
+  /* Screen Display Wrapper for CRT Effect */
+  .screen-content {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    transform-origin: center center;
+  }
+
+  /* CRT Animation Classes */
+  .screen-content.crt-off {
+    animation: crtTurnOff 0.4s forwards cubic-bezier(0.1, 0.8, 0.3, 1);
+  }
+
+  .screen-content.fade-on {
+    animation: fadeInOn 0.4s forwards ease-out;
+  }
+
+  @keyframes crtTurnOff {
+    0% {
+      transform: scale(1, 1);
+      filter: brightness(1);
+    }
+    50% {
+      transform: scale(1, 0.005);
+      filter: brightness(2);
+    }
+    100% {
+      transform: scale(0, 0);
+      filter: brightness(5);
+    }
+  }
+
+  @keyframes fadeInOn {
+    0% {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Physical Punch Hole Camera (Left) */
+  .punch-hole {
+    position: absolute;
+    top: 14px;
+    left: 20px;
+    width: 13px;
+    height: 13px;
+    background-color: #000;
+    border-radius: 50%;
+    z-index: 100;
+    box-shadow: inset 0 0 3px rgba(255,255,255,0.2);
+  }
+
+  /* Screen Blackout */
+  .screen-off-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    z-index: 90;
+    display: none;
+  }
+
+  .phone-frame.is-off .screen-off-overlay {
+    display: block;
+  }
+
+  /* Lockscreen */
+  .lockscreen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 80;
+    background: url('https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=1000&auto=format&fit=crop') center/cover no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 70px 20px 40px;
+    color: white;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease;
+    touch-action: none;
+  }
+
+  .lock-time {
+    font-size: 54px;
+    font-weight: 200;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    text-align: center;
+  }
+
+  .lock-date {
+    font-size: 16px;
+    font-weight: 400;
+    margin-top: -10px;
+    opacity: 0.9;
+    text-align: center;
+  }
+
+  .unlock-text {
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  }
+
+  /* Home Screen */
   .home-screen {
     width: 100%;
     height: 100%; 
@@ -49,12 +189,12 @@
     display: flex;
     flex-direction: column;
     padding-top: 60px;
-    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
     transform-origin: center center;
   }
 
   .phone-frame.app-open .home-screen {
-    transform: scale(1.15);
+    transform: scale(1.12);
   }
 
   .os-title {
@@ -113,7 +253,7 @@
     text-shadow: 0 1px 4px rgba(0,0,0,0.8);
   }
 
-  /* App Window Container */
+  /* App Window Container with Restored Smooth Animations */
   .settings-app {
     position: absolute;
     top: 0;
@@ -125,10 +265,11 @@
     display: none;
     opacity: 0;
     overflow: hidden;
+    transform: scale(0.05);
+    border-radius: 30px;
     will-change: transform, opacity;
   }
 
-  /* Inner Content Scale Effect */
   .settings-content {
     width: 100%;
     height: 100%;
@@ -136,7 +277,7 @@
     padding: 60px 20px 68px;
     transform: scale(0.94);
     opacity: 0.8;
-    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.6s ease;
+    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease;
   }
 
   .phone-frame.app-open .settings-content {
@@ -170,7 +311,7 @@
     cursor: pointer;
   }
 
-  /* Navigation Page Views */
+  /* Sub-Pages */
   .page-view {
     position: absolute;
     top: 60px;
@@ -178,7 +319,7 @@
     right: 20px;
     bottom: 68px;
     background: #f2f2f7;
-    transition: transform 0.35s ease, opacity 0.35s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease;
   }
 
   #page-main {
@@ -225,7 +366,7 @@
     color: #007aff;
   }
 
-  /* 3-Button Navigation Bar */
+  /* Navigation Bar */
   .nav-bar {
     position: absolute;
     bottom: 0;
@@ -251,16 +392,11 @@
     touch-action: manipulation;
   }
 
-  #nav-recents span {
-    display: inline-block;
-    transform: scale(1.35);
-  }
-
   .phone-frame.app-open .nav-btn {
     color: #333;
   }
 
-  /* Swipe Gestures Indicator Bar */
+  /* Swipe Gesture Bar */
   .gesture-bar-area {
     position: absolute;
     bottom: 0;
@@ -280,7 +416,6 @@
     background-color: #ffffff;
     border-radius: 10px;
     cursor: pointer;
-    transition: background-color 0.3s;
   }
 
   .phone-frame.app-open .gesture-line {
@@ -290,77 +425,103 @@
 </head>
 <body>
 
-<div class="phone-frame" id="phone">
-  
-  <!-- Home Screen -->
-  <div class="home-screen" id="home-screen">
-    <div class="os-title">ZonOS</div>
-    <div class="app-grid">
-      <div class="app-container">
-        <div class="app-icon" id="btn-settings">
-          <img src="https://www.freeiconspng.com/uploads/settings-icon-3.png" alt="Settings">
+<div class="phone-outer">
+  <!-- Power Button -->
+  <div class="btn-power" id="btn-power"></div>
+
+  <!-- Phone Frame -->
+  <div class="phone-frame" id="phone">
+    
+    <!-- Punch Hole Camera (Left) -->
+    <div class="punch-hole"></div>
+
+    <!-- Screen Off Overlay -->
+    <div class="screen-off-overlay" id="screen-off"></div>
+
+    <!-- Screen Content Wrapper -->
+    <div class="screen-content" id="screen-content">
+
+      <!-- Lockscreen (No White Bar) -->
+      <div class="lockscreen" id="lockscreen">
+        <div>
+          <div class="lock-time" id="lock-time">12:00</div>
+          <div class="lock-date" id="lock-date">Monday, August 15</div>
         </div>
-        <div class="app-label">Settings</div>
+        <div class="unlock-text">Swipe up anywhere to unlock</div>
       </div>
+
+      <!-- Home Screen -->
+      <div class="home-screen" id="home-screen">
+        <div class="os-title">ZonOS</div>
+        <div class="app-grid">
+          <div class="app-container">
+            <div class="app-icon" id="btn-settings">
+              <img src="https://www.freeiconspng.com/uploads/settings-icon-3.png" alt="Settings">
+            </div>
+            <div class="app-label">Settings</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings App View -->
+      <div class="settings-app" id="app-settings">
+        <div class="settings-content">
+          
+          <div class="page-view" id="page-main">
+            <div class="settings-header">Settings</div>
+            <div class="settings-card">Wi-Fi</div>
+            <div class="settings-card">Bluetooth</div>
+            <div class="settings-card">Display & Brightness</div>
+            <div class="settings-card">About ZonOS</div>
+            
+            <div class="settings-card clickable-card" id="btn-open-nav-page">
+              <span>Navigation System</span>
+              <span id="current-nav-label" style="color: #8e8e93; font-size: 14px;">3-Button ❯</span>
+            </div>
+          </div>
+
+          <div class="page-view" id="page-nav">
+            <div class="settings-header">
+              <span class="back-btn" id="btn-back-settings">‹</span>
+              <span>Navigation</span>
+            </div>
+
+            <div class="option-btn active" id="opt-buttons">
+              <span>3-Button Navigation</span>
+              <span class="check-mark">✓</span>
+            </div>
+            <div class="option-btn" id="opt-gestures">
+              <span>Swipe Gestures</span>
+              <span class="check-mark"></span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 3-Button Navigation Bar -->
+      <div class="nav-bar" id="nav-bar">
+        <div class="nav-btn" id="nav-back">◁</div>
+        <div class="nav-btn" id="nav-home">○</div>
+        <div class="nav-btn" id="nav-recents">□</div>
+      </div>
+
+      <!-- Swipe Gesture Bar -->
+      <div class="gesture-bar-area" id="gesture-bar">
+        <div class="gesture-line" id="gesture-line"></div>
+      </div>
+
     </div>
   </div>
-
-  <!-- Settings App View -->
-  <div class="settings-app" id="app-settings">
-    <div class="settings-content">
-      
-      <!-- Main Settings Page -->
-      <div class="page-view" id="page-main">
-        <div class="settings-header">Settings</div>
-        
-        <div class="settings-card">Wi-Fi</div>
-        <div class="settings-card">Bluetooth</div>
-        <div class="settings-card">Display & Brightness</div>
-        <div class="settings-card">About ZonOS</div>
-        
-        <!-- Navigation System Option -->
-        <div class="settings-card clickable-card" id="btn-open-nav-page">
-          <span>Navigation System</span>
-          <span id="current-nav-label" style="color: #8e8e93; font-size: 14px;">3-Button ❯</span>
-        </div>
-      </div>
-
-      <!-- Navigation System Sub-Page -->
-      <div class="page-view" id="page-nav">
-        <div class="settings-header">
-          <span class="back-btn" id="btn-back-settings">‹</span>
-          <span>Navigation</span>
-        </div>
-
-        <div class="option-btn active" id="opt-buttons">
-          <span>3-Button Navigation</span>
-          <span class="check-mark">✓</span>
-        </div>
-        <div class="option-btn" id="opt-gestures">
-          <span>Swipe Gestures</span>
-          <span class="check-mark"></span>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- 3-Button Nav Bar -->
-  <div class="nav-bar" id="nav-bar">
-    <div class="nav-btn" id="nav-back">◁</div>
-    <div class="nav-btn" id="nav-home">○</div>
-    <div class="nav-btn" id="nav-recents"><span>□</span></div>
-  </div>
-
-  <!-- Swipe Gesture Indicator Bar -->
-  <div class="gesture-bar-area" id="gesture-bar">
-    <div class="gesture-line" id="gesture-line"></div>
-  </div>
-
 </div>
 
 <script>
   const phone = document.getElementById('phone');
+  const screenContent = document.getElementById('screen-content');
+  const btnPower = document.getElementById('btn-power');
+  const lockscreen = document.getElementById('lockscreen');
+  const lockTime = document.getElementById('lock-time');
+  
   const settingsBtn = document.getElementById('btn-settings');
   const settingsApp = document.getElementById('app-settings');
   const navBar = document.getElementById('nav-bar');
@@ -376,38 +537,115 @@
   const optButtons = document.getElementById('opt-buttons');
   const optGestures = document.getElementById('opt-gestures');
 
+  let isPowerOn = true;
+  let isLocked = false;
   let navMode = 'buttons';
-  let isOpen = false;
-  let animationTimer = null;
+  let appIsOpen = false;
+  let animTimer = null;
 
+  // POWER BUTTON WITH CRT OFF & FADE ON ANIMATIONS
+  btnPower.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    if (isPowerOn) {
+      // CRT Turn Off
+      screenContent.classList.remove('fade-on');
+      screenContent.classList.add('crt-off');
+      
+      setTimeout(() => {
+        isPowerOn = false;
+        phone.classList.add('is-off');
+        screenContent.classList.remove('crt-off');
+      }, 400);
+    } else {
+      // Turn On -> Lockscreen Fade-In
+      isPowerOn = true;
+      isLocked = true;
+      phone.classList.remove('is-off');
+      
+      lockscreen.style.transform = 'translateY(0)';
+      lockscreen.style.opacity = '1';
+      lockscreen.style.display = 'flex';
+      updateTime();
+
+      screenContent.classList.remove('crt-off');
+      screenContent.classList.add('fade-on');
+      setTimeout(() => {
+        screenContent.classList.remove('fade-on');
+      }, 400);
+    }
+  });
+
+  // LOCKSCREEN TIME UPDATE
+  function updateTime() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    lockTime.textContent = `${hours}:${minutes}`;
+  }
+  updateTime();
+
+  // SWIPE UP ANYWHERE ON WALLPAPER TO UNLOCK
+  let unlockStartY = 0;
+  let isUnlocking = false;
+
+  lockscreen.addEventListener('pointerdown', (e) => {
+    if (!isPowerOn || !isLocked) return;
+    isUnlocking = true;
+    unlockStartY = e.clientY;
+  });
+
+  document.addEventListener('pointermove', (e) => {
+    if (!isUnlocking || !isLocked) return;
+    const diff = unlockStartY - e.clientY;
+    if (diff > 0) {
+      lockscreen.style.transform = `translateY(-${diff}px)`;
+    }
+  });
+
+  document.addEventListener('pointerup', (e) => {
+    if (!isUnlocking || !isLocked) return;
+    isUnlocking = false;
+    const diff = unlockStartY - e.clientY;
+    if (diff > 60) {
+      // Unlock Success
+      isLocked = false;
+      lockscreen.style.transform = 'translateY(-100%)';
+      lockscreen.style.opacity = '0';
+      setTimeout(() => { lockscreen.style.display = 'none'; }, 300);
+    } else {
+      // Reset Lockscreen Position
+      lockscreen.style.transform = 'translateY(0)';
+    }
+  });
+
+  // APP ZOOM ORIGIN SETUP
   function setOriginToIcon() {
     const targetRect = settingsBtn.getBoundingClientRect();
     const phoneRect = phone.getBoundingClientRect();
-
     const originX = (targetRect.left + targetRect.width / 2) - phoneRect.left;
     const originY = (targetRect.top + targetRect.height / 2) - phoneRect.top;
-
     settingsApp.style.transformOrigin = `${originX}px ${originY}px`;
   }
 
-  // OPEN APP (Spam-friendly instant reset)
+  // APP OPEN / CLOSE WITH SMOOTH ANIMATIONS & SPAM INTERRUPT HANDLING
   function openApp(e) {
     if (e) e.preventDefault();
-    if (animationTimer) clearTimeout(animationTimer);
-    isOpen = true;
+    if (!isPowerOn || isLocked) return;
+
+    if (animTimer) clearTimeout(animTimer);
+    appIsOpen = true;
 
     setOriginToIcon();
 
     settingsApp.style.display = 'block';
-    
     settingsApp.style.transition = 'none';
     settingsApp.style.transform = 'scale(0.05)';
     settingsApp.style.opacity = '0';
     settingsApp.style.borderRadius = '30px';
-    
-    settingsApp.offsetHeight; // Force reflow
 
-    settingsApp.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease, border-radius 0.6s ease';
+    settingsApp.offsetHeight; // Force Reflow
+
+    settingsApp.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease, border-radius 0.5s ease';
     settingsApp.style.transform = 'scale(1)';
     settingsApp.style.opacity = '1';
     settingsApp.style.borderRadius = '0px';
@@ -415,30 +653,43 @@
     phone.classList.add('app-open');
   }
 
-  // CLOSE APP (Spam-friendly instant reset)
   function closeApp(e) {
     if (e) e.preventDefault();
-    if (animationTimer) clearTimeout(animationTimer);
-    isOpen = false;
+    if (!isPowerOn || isLocked) return;
+
+    if (animTimer) clearTimeout(animTimer);
+    appIsOpen = false;
 
     setOriginToIcon();
 
-    settingsApp.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease, border-radius 0.6s ease';
+    settingsApp.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease, border-radius 0.5s ease';
     settingsApp.style.transform = 'scale(0.05)';
     settingsApp.style.opacity = '0';
     settingsApp.style.borderRadius = '30px';
 
     phone.classList.remove('app-open');
 
-    animationTimer = setTimeout(() => {
-      if (!isOpen) {
+    animTimer = setTimeout(() => {
+      if (!appIsOpen) {
         settingsApp.style.display = 'none';
         pageNav.classList.remove('active');
       }
-    }, 600);
+    }, 500);
   }
 
-  // SUB-PAGE NAVIGATION
+  // EVENT LISTENERS
+  settingsBtn.addEventListener('pointerdown', openApp);
+  navHome.addEventListener('pointerdown', closeApp);
+
+  navBack.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    if (pageNav.classList.contains('active')) {
+      pageNav.classList.remove('active');
+    } else {
+      closeApp(e);
+    }
+  });
+
   btnOpenNavPage.addEventListener('click', () => {
     pageNav.classList.add('active');
   });
@@ -447,7 +698,7 @@
     pageNav.classList.remove('active');
   });
 
-  // NAVIGATION SWITCHING
+  // NAVIGATION MODE SWITCHING
   optButtons.addEventListener('click', () => {
     navMode = 'buttons';
     optButtons.classList.add('active');
@@ -472,43 +723,22 @@
     gestureBar.style.display = 'flex';
   });
 
-  // STRICT SWIPE UP ON THE LINE TO CLOSE
-  let startY = 0;
-  let isTracking = false;
+  // GESTURE BAR SWIPE UP TO CLOSE APP
+  let gestureStartY = 0;
+  let isGesturing = false;
 
-  function handleGestureStart(e) {
-    if (navMode !== 'gestures' || !isOpen) return;
-    isTracking = true;
-    startY = e.touches ? e.touches[0].clientY : e.clientY;
-  }
+  gestureLine.addEventListener('pointerdown', (e) => {
+    if (navMode !== 'gestures') return;
+    isGesturing = true;
+    gestureStartY = e.clientY;
+  });
 
-  function handleGestureEnd(e) {
-    if (!isTracking) return;
-    isTracking = false;
-
-    const endY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
-    const swipeDistance = startY - endY;
-
-    if (swipeDistance >= 25) {
+  document.addEventListener('pointerup', (e) => {
+    if (!isGesturing) return;
+    isGesturing = false;
+    const diff = gestureStartY - e.clientY;
+    if (diff >= 20) {
       closeApp();
-    }
-  }
-
-  gestureLine.addEventListener('mousedown', handleGestureStart);
-  document.addEventListener('mouseup', handleGestureEnd);
-
-  gestureLine.addEventListener('touchstart', handleGestureStart, { passive: true });
-  document.addEventListener('touchend', handleGestureEnd, { passive: true });
-
-  // HIGH-RESPONSIVENESS TOUCH EVENT BINDINGS
-  settingsBtn.addEventListener('pointerdown', openApp);
-  navHome.addEventListener('pointerdown', closeApp);
-  navBack.addEventListener('pointerdown', (e) => {
-    if (pageNav.classList.contains('active')) {
-      e.preventDefault();
-      pageNav.classList.remove('active');
-    } else {
-      closeApp(e);
     }
   });
 </script>
