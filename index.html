@@ -86,7 +86,7 @@
       color: #fff;
     }
 
-    /* Dedicated Wallpaper Layer for Zoom Animation */
+    /* Static Wallpaper */
     .wallpaper {
       position: absolute;
       top: 0;
@@ -94,14 +94,7 @@
       width: 100%;
       height: 100%;
       background: url('https://i.pinimg.com/736x/ee/e5/02/eee502b83886728ab3e0c3a7a4612a82.jpg') center/cover no-repeat;
-      transform: scale(1);
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 0;
-    }
-
-    /* Wallpaper Zooms In Slightly When App is Open */
-    .screen.app-open .wallpaper {
-      transform: scale(1.08);
     }
 
     /* Status Bar */
@@ -119,7 +112,7 @@
       position: relative;
     }
 
-    /* Home Screen App Grid */
+    /* Home Screen App Grid Container */
     .home-screen {
       position: relative;
       z-index: 5;
@@ -127,6 +120,14 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 16px 10px;
+      transform-origin: center center;
+      transition: transform 0.28s cubic-bezier(0.2, 0, 0.2, 1), opacity 0.2s ease;
+    }
+
+    /* Scale up all icons simultaneously when an app is opening */
+    .home-screen.app-opening {
+      transform: scale(1.35);
+      opacity: 0;
     }
 
     .app-icon {
@@ -168,27 +169,31 @@
       flex-direction: column;
     }
 
-    /* Keyframes for Budget Zoom Open */
-    @keyframes budgetOpen {
+    /* Keyframes for Icon-Anchored Zoom Open */
+    @keyframes appOpenFromIcon {
       0% {
-        transform: scale(0.08);
+        transform: scale(0.12);
         opacity: 0;
+        border-radius: 20px;
       }
       100% {
         transform: scale(1);
         opacity: 1;
+        border-radius: 0px;
       }
     }
 
-    /* Keyframes for Smooth Zoom Close */
-    @keyframes budgetClose {
+    /* Keyframes for Icon-Anchored Zoom Close */
+    @keyframes appCloseToIcon {
       0% {
         transform: scale(1);
         opacity: 1;
+        border-radius: 0px;
       }
       100% {
-        transform: scale(0.08);
+        transform: scale(0.12);
         opacity: 0;
+        border-radius: 20px;
       }
     }
 
@@ -196,14 +201,14 @@
     .app-window.active {
       display: flex !important;
       pointer-events: auto;
-      animation: budgetOpen 0.18s cubic-bezier(0, 0, 0.2, 1) forwards;
+      animation: appOpenFromIcon 0.28s cubic-bezier(0, 0, 0.2, 1) forwards;
     }
 
     /* Closing State */
     .app-window.closing {
       display: flex !important;
       pointer-events: none;
-      animation: budgetClose 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: appCloseToIcon 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
 
     .app-header {
@@ -260,7 +265,7 @@
     </div>
 
     <div class="screen" id="screen">
-      <!-- Wallpaper Layer -->
+      <!-- Static Wallpaper -->
       <div class="wallpaper"></div>
 
       <!-- Status Bar -->
@@ -335,6 +340,7 @@
 
   <script>
     const appIcons = document.querySelectorAll('.app-icon');
+    const homeScreen = document.getElementById('homeScreen');
     const appWindow = document.getElementById('appWindow');
     const appTitle = document.getElementById('appTitle');
     const appContent = document.getElementById('appContent');
@@ -358,13 +364,17 @@
         const screenRect = screen.getBoundingClientRect();
         const iconRect = icon.getBoundingClientRect();
 
-        // Calculate icon position relative to screen container
+        // Calculate origin using the clicked app icon's center position
         const originX = (iconRect.left + (iconRect.width / 2)) - screenRect.left;
         const originY = (iconRect.top + (iconRect.height / 2)) - screenRect.top;
 
-        // Reset visibility display and apply dynamic transform origin
+        // Anchor window scaling directly to the tapped icon
         appWindow.style.display = 'flex';
         appWindow.style.transformOrigin = `${originX}px ${originY}px`;
+
+        // Scale up the entire grid of app icons simultaneously
+        homeScreen.style.transformOrigin = `${originX}px ${originY}px`;
+        homeScreen.classList.add('app-opening');
 
         const appName = icon.getAttribute('data-app');
         appTitle.textContent = appName.charAt(0).toUpperCase() + appName.slice(1);
@@ -375,12 +385,9 @@
           appContent.textContent = `Welcome to the ${appTitle.textContent} app.`;
         }
 
-        // Trigger wallpaper zoom-in effect
-        screen.classList.add('app-open');
-
-        // Force animation restart cleanly
+        // Trigger app opening transition
         appWindow.classList.remove('closing', 'active');
-        void appWindow.offsetWidth; // Trigger reflow
+        void appWindow.offsetWidth; // Force reflow
         appWindow.classList.add('active');
       });
     });
@@ -389,17 +396,17 @@
     function closeApp() {
       if (!appWindow.classList.contains('active')) return;
 
-      // Trigger wallpaper zoom-out back to normal
-      screen.classList.remove('app-open');
-
       appWindow.classList.remove('active');
       appWindow.classList.add('closing');
+
+      // Return all app icons back to default scale
+      homeScreen.classList.remove('app-opening');
 
       closeTimeout = setTimeout(() => {
         appWindow.classList.remove('closing');
         appWindow.style.display = 'none';
         closeTimeout = null;
-      }, 350);
+      }, 280);
     }
 
     // Swipe Up Detection
