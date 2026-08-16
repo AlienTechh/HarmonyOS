@@ -37,6 +37,62 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
+    /* Phone Frame Container */
+    .phone-container {
+      position: relative;
+    }
+
+    /* Hardware Buttons Placement */
+    
+    /* Volume Up Button (Upper-Left) */
+    .volume-up-btn {
+      position: absolute;
+      left: -4px;
+      top: 110px;
+      width: 4px;
+      height: 44px;
+      background: #1a1a1a;
+      border-top-left-radius: 3px;
+      border-bottom-left-radius: 3px;
+      cursor: pointer;
+      z-index: 50;
+      box-shadow: -1px 0 3px rgba(0,0,0,0.4);
+    }
+
+    /* Volume Down Button (Mid-Left) */
+    .volume-down-btn {
+      position: absolute;
+      left: -4px;
+      top: 165px;
+      width: 4px;
+      height: 44px;
+      background: #1a1a1a;
+      border-top-left-radius: 3px;
+      border-bottom-left-radius: 3px;
+      cursor: pointer;
+      z-index: 50;
+      box-shadow: -1px 0 3px rgba(0,0,0,0.4);
+    }
+
+    /* Hardware Power Button (Restored to Right Side) */
+    .power-btn {
+      position: absolute;
+      right: -4px;
+      top: 130px;
+      width: 4px;
+      height: 52px;
+      background: #1a1a1a;
+      border-top-right-radius: 3px;
+      border-bottom-right-radius: 3px;
+      cursor: pointer;
+      z-index: 50;
+      box-shadow: 1px 0 3px rgba(0,0,0,0.4);
+    }
+
+    .volume-up-btn:active, .volume-down-btn:active, .power-btn:active {
+      background: #333;
+    }
+
     /* Phone Frame */
     .phone-frame {
       width: 320px;
@@ -63,7 +119,7 @@
       background: #000;
       border-bottom-left-radius: 12px;
       border-bottom-right-radius: 12px;
-      z-index: 20;
+      z-index: 30;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -86,15 +142,87 @@
       color: #fff;
     }
 
-    /* Static Wallpaper */
+    /* Green Leaves Wallpaper */
     .wallpaper {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: url('https://i.pinimg.com/736x/ee/e5/02/eee502b83886728ab3e0c3a7a4612a82.jpg') center/cover no-repeat;
+      background: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
       z-index: 0;
+    }
+
+    /* Blackout Overlay for Power Off */
+    .screen-off-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      z-index: 40;
+      display: none;
+    }
+
+    .screen-off-overlay.active {
+      display: block;
+    }
+
+    /* Lock Screen Layer */
+    .lock-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 60px 20px 40px;
+      cursor: pointer;
+      backdrop-filter: blur(0px);
+      transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.2s ease;
+    }
+
+    .lock-screen.hidden {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .lock-clock {
+      text-align: center;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+    }
+
+    .lock-time {
+      font-size: 54px;
+      font-weight: 200;
+      letter-spacing: -1px;
+    }
+
+    .lock-date {
+      font-size: 13px;
+      font-weight: 500;
+      margin-top: -4px;
+      opacity: 0.9;
+    }
+
+    .lock-hint {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      opacity: 0.85;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+      animation: pulseHint 2s infinite;
+    }
+
+    @keyframes pulseHint {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.9; }
     }
 
     /* Status Bar */
@@ -124,7 +252,12 @@
       transition: transform 0.28s cubic-bezier(0.05, 0.7, 0.1, 1), opacity 0.18s ease;
     }
 
-    /* Scale up all icons simultaneously when an app is opening */
+    /* Hide Home Screen Apps when Locked */
+    .home-screen.locked {
+      display: none !important;
+    }
+
+    /* Scale up icons when an app opens */
     .home-screen.app-opening {
       transform: scale(1.35);
       opacity: 0;
@@ -168,7 +301,7 @@
       z-index: 15;
       flex-direction: column;
       overflow: hidden;
-      border-radius: 0px !important; /* Sharp corners throughout */
+      border-radius: 0px !important;
     }
 
     /* Sharp Open Animation */
@@ -256,81 +389,100 @@
 </head>
 <body>
 
-  <div class="phone-frame">
-    <!-- Teardrop Notch -->
-    <div class="teardrop-notch">
-      <div class="camera-lens"></div>
-    </div>
+  <div class="phone-container">
+    <!-- Hardware Volume Buttons on Left Edge, Power Button on Right Edge -->
+    <div class="volume-up-btn" id="volumeUpBtn" title="Volume Up"></div>
+    <div class="volume-down-btn" id="volumeDownBtn" title="Volume Down"></div>
+    <div class="power-btn" id="powerBtn" title="Power Button"></div>
 
-    <div class="screen" id="screen">
-      <!-- Static Wallpaper -->
-      <div class="wallpaper"></div>
-
-      <!-- Status Bar -->
-      <div class="status-bar">
-        <span>9:41</span>
-        <span>5G 🔋</span>
+    <div class="phone-frame">
+      <!-- Teardrop Notch -->
+      <div class="teardrop-notch">
+        <div class="camera-lens"></div>
       </div>
 
-      <!-- Home Screen Apps Grid -->
-      <div class="home-screen" id="homeScreen">
-        <div class="app-icon" data-app="phone">
-          <div class="icon-box" style="background: #25D366;">📞</div>
-          <span class="app-name">Phone</span>
-        </div>
-        <div class="app-icon" data-app="messages">
-          <div class="icon-box" style="background: #007AFF;">💬</div>
-          <span class="app-name">Messages</span>
-        </div>
-        <div class="app-icon" data-app="camera">
-          <div class="icon-box" style="background: #343a40;">📷</div>
-          <span class="app-name">Camera</span>
-        </div>
-        <div class="app-icon" data-app="photos">
-          <div class="icon-box" style="background: #FF9500;">🖼️</div>
-          <span class="app-name">Photos</span>
-        </div>
-        <div class="app-icon" data-app="music">
-          <div class="icon-box" style="background: #FF2D55;">🎵</div>
-          <span class="app-name">Music</span>
-        </div>
-        <div class="app-icon" data-app="clock">
-          <div class="icon-box" style="background: #111; border: 1px solid #333;">⏰</div>
-          <span class="app-name">Clock</span>
-        </div>
-        <div class="app-icon" data-app="notes">
-          <div class="icon-box" style="background: #FFCC00; color: #000;">📝</div>
-          <span class="app-name">Notes</span>
-        </div>
-        <div class="app-icon" data-app="weather">
-          <div class="icon-box" style="background: #5AC8FA;">🌤️</div>
-          <span class="app-name">Weather</span>
-        </div>
-        <div class="app-icon" data-app="files">
-          <div class="icon-box" style="background: #5856D6;">📁</div>
-          <span class="app-name">Files</span>
-        </div>
-        <div class="app-icon" data-app="store">
-          <div class="icon-box" style="background: #AF52DE;">🛍️</div>
-          <span class="app-name">Store</span>
-        </div>
-        <div class="app-icon" data-app="settings">
-          <div class="icon-box" style="background: #636366;">⚙️</div>
-          <span class="app-name">Settings</span>
-        </div>
-      </div>
+      <div class="screen" id="screen">
+        <!-- Leaves Wallpaper -->
+        <div class="wallpaper"></div>
 
-      <!-- App Window -->
-      <div class="app-window" id="appWindow">
-        <div class="app-header" id="appTitle">App Name</div>
-        <div class="app-content" id="appContent">App Content</div>
-      </div>
+        <!-- Blackout Overlay for Power Off -->
+        <div class="screen-off-overlay" id="screenOffOverlay"></div>
 
-      <!-- Swipe Bar -->
-      <div class="home-bar-container" id="homeBar">
-        <div class="home-bar"></div>
-      </div>
+        <!-- Lock Screen Layer -->
+        <div class="lock-screen hidden" id="lockScreen">
+          <div class="lock-clock">
+            <div class="lock-time" id="lockTime">9:41</div>
+            <div class="lock-date" id="lockDate">Sunday, August 16</div>
+          </div>
+          <div class="lock-hint">Swipe up to unlock</div>
+        </div>
 
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span id="statusBarTime">9:41</span>
+          <span>5G 🔋</span>
+        </div>
+
+        <!-- Home Screen Apps Grid (Hidden on Lock Screen) -->
+        <div class="home-screen" id="homeScreen">
+          <div class="app-icon" data-app="phone">
+            <div class="icon-box" style="background: #25D366;">📞</div>
+            <span class="app-name">Phone</span>
+          </div>
+          <div class="app-icon" data-app="messages">
+            <div class="icon-box" style="background: #007AFF;">💬</div>
+            <span class="app-name">Messages</span>
+          </div>
+          <div class="app-icon" data-app="camera">
+            <div class="icon-box" style="background: #343a40;">📷</div>
+            <span class="app-name">Camera</span>
+          </div>
+          <div class="app-icon" data-app="photos">
+            <div class="icon-box" style="background: #FF9500;">🖼️</div>
+            <span class="app-name">Photos</span>
+          </div>
+          <div class="app-icon" data-app="music">
+            <div class="icon-box" style="background: #FF2D55;">🎵</div>
+            <span class="app-name">Music</span>
+          </div>
+          <div class="app-icon" data-app="clock">
+            <div class="icon-box" style="background: #111; border: 1px solid #333;">⏰</div>
+            <span class="app-name">Clock</span>
+          </div>
+          <div class="app-icon" data-app="notes">
+            <div class="icon-box" style="background: #FFCC00; color: #000;">📝</div>
+            <span class="app-name">Notes</span>
+          </div>
+          <div class="app-icon" data-app="weather">
+            <div class="icon-box" style="background: #5AC8FA;">🌤️</div>
+            <span class="app-name">Weather</span>
+          </div>
+          <div class="app-icon" data-app="files">
+            <div class="icon-box" style="background: #5856D6;">📁</div>
+            <span class="app-name">Files</span>
+          </div>
+          <div class="app-icon" data-app="store">
+            <div class="icon-box" style="background: #AF52DE;">🛍️</div>
+            <span class="app-name">Store</span>
+          </div>
+          <div class="app-icon" data-app="settings">
+            <div class="icon-box" style="background: #636366;">⚙️</div>
+            <span class="app-name">Settings</span>
+          </div>
+        </div>
+
+        <!-- App Window -->
+        <div class="app-window" id="appWindow">
+          <div class="app-header" id="appTitle">App Name</div>
+          <div class="app-content" id="appContent">App Content</div>
+        </div>
+
+        <!-- Swipe Bar -->
+        <div class="home-bar-container" id="homeBar">
+          <div class="home-bar"></div>
+        </div>
+
+      </div>
     </div>
   </div>
 
@@ -344,16 +496,88 @@
     const appContent = document.getElementById('appContent');
     const homeBar = document.getElementById('homeBar');
     const screen = document.getElementById('screen');
+    const powerBtn = document.getElementById('powerBtn');
+    const screenOffOverlay = document.getElementById('screenOffOverlay');
+    const lockScreen = document.getElementById('lockScreen');
 
+    let isPoweredOn = true;
+    let isLocked = false;
     let closeTimeout = null;
 
     document.addEventListener('touchmove', (e) => {
       e.preventDefault();
     }, { passive: false });
 
-    // Open App Logic
+    // Instantly close any active app
+    function forceCloseAppInstant() {
+      if (closeTimeout) {
+        clearTimeout(closeTimeout);
+        closeTimeout = null;
+      }
+      appWindow.classList.remove('active', 'closing');
+      appWindow.style.display = 'none';
+      homeScreen.classList.remove('app-opening');
+    }
+
+    // Hardware Power Button Action
+    powerBtn.addEventListener('click', () => {
+      if (isPoweredOn) {
+        // Power off phone
+        isPoweredOn = false;
+        forceCloseAppInstant();
+        screenOffOverlay.classList.add('active');
+      } else {
+        // Power on phone to lock screen
+        isPoweredOn = true;
+        isLocked = true;
+        screenOffOverlay.classList.remove('active');
+        lockScreen.classList.remove('hidden');
+        homeScreen.classList.add('locked');
+      }
+    });
+
+    // Lock Screen Swipe Up to Unlock
+    let lockStartY = 0;
+
+    lockScreen.addEventListener('touchstart', (e) => {
+      lockStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    lockScreen.addEventListener('touchend', (e) => {
+      let lockEndY = e.changedTouches[0].clientY;
+      if (lockStartY - lockEndY > 30) {
+        unlockPhone();
+      }
+    });
+
+    let lockIsDragging = false;
+    lockScreen.addEventListener('mousedown', (e) => {
+      lockIsDragging = true;
+      lockStartY = e.clientY;
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (lockIsDragging) {
+        let lockEndY = e.clientY;
+        if (lockStartY - lockEndY > 30) {
+          unlockPhone();
+        }
+        lockIsDragging = false;
+      }
+    });
+
+    function unlockPhone() {
+      if (!isLocked) return;
+      isLocked = false;
+      lockScreen.classList.add('hidden');
+      homeScreen.classList.remove('locked');
+    }
+
+    // App Open Handler
     appIcons.forEach(icon => {
       icon.addEventListener('click', () => {
+        if (!isPoweredOn || isLocked) return;
+
         if (closeTimeout) {
           clearTimeout(closeTimeout);
           closeTimeout = null;
@@ -362,7 +586,6 @@
         const screenRect = screen.getBoundingClientRect();
         const iconRect = icon.getBoundingClientRect();
 
-        // Position origin directly over clicked app icon
         const originX = (iconRect.left + (iconRect.width / 2)) - screenRect.left;
         const originY = (iconRect.top + (iconRect.height / 2)) - screenRect.top;
 
@@ -381,14 +604,13 @@
           appContent.textContent = `Welcome to the ${appTitle.textContent} app.`;
         }
 
-        // Trigger sharp opening transition
         appWindow.classList.remove('closing', 'active');
         void appWindow.offsetWidth; // Force reflow
         appWindow.classList.add('active');
       });
     });
 
-    // Sharp Close App Logic
+    // App Close Handler
     function closeApp() {
       if (!appWindow.classList.contains('active')) return;
 
@@ -404,7 +626,7 @@
       }, 180);
     }
 
-    // Swipe Up Detection
+    // Home Bar Swipe Up Detection
     let startY = 0;
 
     homeBar.addEventListener('touchstart', (e) => {
@@ -418,7 +640,6 @@
       }
     });
 
-    // Mouse drag support for desktop
     let isDragging = false;
 
     homeBar.addEventListener('mousedown', (e) => {
