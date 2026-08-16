@@ -140,7 +140,7 @@
     .icon-box {
       width: 52px;
       height: 52px;
-      border-radius: 18px; /* Extra rounded One UI 7 squircle style */
+      border-radius: 18px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -168,39 +168,30 @@
       z-index: 15;
       flex-direction: column;
       overflow: hidden;
+      border-radius: 0px !important; /* Sharp corners throughout */
     }
 
-    /* Keyframes: Stays fully rounded (36px) through the whole zoom and goes sharp (0px) at 100% */
-    @keyframes appOpenOneUI7 {
+    /* Sharp Open Animation */
+    @keyframes appOpenSharp {
       0% {
         transform: scale(0.12);
         opacity: 0;
-        border-radius: 36px;
-      }
-      99% {
-        border-radius: 36px;
       }
       100% {
         transform: scale(1);
         opacity: 1;
-        border-radius: 0px;
       }
     }
 
-    /* Keyframes: Starts sharp, turns rounded immediately, and zooms back down fast */
-    @keyframes appCloseFast {
+    /* Sharp Fast Close Animation */
+    @keyframes appCloseSharp {
       0% {
         transform: scale(1);
         opacity: 1;
-        border-radius: 0px;
-      }
-      1% {
-        border-radius: 36px;
       }
       100% {
         transform: scale(0.12);
         opacity: 0;
-        border-radius: 36px;
       }
     }
 
@@ -208,15 +199,14 @@
     .app-window.active {
       display: flex !important;
       pointer-events: auto;
-      border-radius: 0px;
-      animation: appOpenOneUI7 0.28s cubic-bezier(0.05, 0.7, 0.1, 1) forwards;
+      animation: appOpenSharp 0.28s cubic-bezier(0.05, 0.7, 0.1, 1) forwards;
     }
 
     /* Fast Closing State */
     .app-window.closing {
       display: flex !important;
       pointer-events: none;
-      animation: appCloseFast 0.18s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+      animation: appCloseSharp 0.18s cubic-bezier(0.4, 0, 0.6, 1) forwards;
     }
 
     .app-header {
@@ -391,14 +381,14 @@
           appContent.textContent = `Welcome to the ${appTitle.textContent} app.`;
         }
 
-        // Trigger opening transition
+        // Trigger sharp opening transition
         appWindow.classList.remove('closing', 'active');
         void appWindow.offsetWidth; // Force reflow
         appWindow.classList.add('active');
       });
     });
 
-    // Fast Close App Logic
+    // Sharp Close App Logic
     function closeApp() {
       if (!appWindow.classList.contains('active')) return;
 
@@ -407,7 +397,6 @@
 
       homeScreen.classList.remove('app-opening');
 
-      // Match timeout to the 0.18s animation duration
       closeTimeout = setTimeout(() => {
         appWindow.classList.remove('closing');
         appWindow.style.display = 'none';
