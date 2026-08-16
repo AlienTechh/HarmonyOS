@@ -246,7 +246,7 @@
       50% { opacity: 0.9; }
     }
 
-    /* Status Bar Elevated to z-index 35 so it sits on top of open app windows */
+    /* Status Bar Elevated to z-index 35 */
     .status-bar {
       height: 30px;
       padding: 0 14px;
@@ -260,6 +260,59 @@
       z-index: 35;
       position: relative;
       pointer-events: none;
+    }
+
+    /* Left-side Volume HUD Slider UI */
+    .volume-hud {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%) translateX(-40px);
+      width: 28px;
+      height: 130px;
+      background: rgba(30, 30, 30, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 14px;
+      z-index: 45;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 10px 0;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease;
+    }
+
+    .volume-hud.visible {
+      transform: translateY(-50%) translateX(0);
+      opacity: 1;
+    }
+
+    .volume-hud-track {
+      width: 6px;
+      height: 90px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .volume-hud-fill {
+      width: 100%;
+      height: 50%; /* Dynamic fill height */
+      background: #ffffff;
+      border-radius: 3px;
+      transition: height 0.05s linear;
+    }
+
+    .volume-hud-icon {
+      font-size: 11px;
+      margin-top: 6px;
     }
 
     /* Home Screen App Grid Container */
@@ -379,7 +432,6 @@
       animation: appCloseSharp 0.18s cubic-bezier(0.4, 0, 0.6, 1) forwards;
     }
 
-    /* Adjusted app header padding so text doesn't overlap the status bar */
     .app-header {
       padding: 42px 18px 14px;
       font-size: 18px;
@@ -450,10 +502,17 @@
           <div class="lock-hint">Swipe up to unlock</div>
         </div>
 
-        <!-- Status Bar placed at higher layer so it remains visible inside apps -->
         <div class="status-bar">
           <span id="statusBarTime">9:41</span>
           <span>5G 🔋</span>
+        </div>
+
+        <!-- Volume HUD Slider Indicator -->
+        <div class="volume-hud" id="volumeHud">
+          <div class="volume-hud-track">
+            <div class="volume-hud-fill" id="volumeHudFill" style="height: 50%;"></div>
+          </div>
+          <div class="volume-hud-icon" id="volumeHudIcon">🔊</div>
         </div>
 
         <div class="home-screen" id="homeScreen">
@@ -527,12 +586,21 @@
     const homeBar = document.getElementById('homeBar');
     const screen = document.getElementById('screen');
     const powerBtn = document.getElementById('powerBtn');
+    const volumeUpBtn = document.getElementById('volumeUpBtn');
+    const volumeDownBtn = document.getElementById('volumeDownBtn');
+    const volumeHud = document.getElementById('volumeHud');
+    const volumeHudFill = document.getElementById('volumeHudFill');
+    const volumeHudIcon = document.getElementById('volumeHudIcon');
     const screenOffOverlay = document.getElementById('screenOffOverlay');
     const lockScreen = document.getElementById('lockScreen');
 
     let isPoweredOn = true;
     let isLocked = false;
     let closeTimeout = null;
+    let currentVolume = 50; // percentage
+    let volumeHudTimeout = null;
+    let volumeHoldInterval = null;
+    let volumeHoldDelay = null;
 
     document.addEventListener('touchmove', (e) => {
       e.preventDefault();
@@ -549,11 +617,82 @@
       screen.classList.remove('locked');
     }
 
+    function showVolumeHud() {
+      if (!isPoweredOn) return;
+      
+      volumeHudFill.style.height = currentVolume + '%';
+      if (currentVolume === 0) {
+        volumeHudIcon.textContent = '🔇';
+      } else if (currentVolume < 50) {
+        volumeHudIcon.textContent = '🔉';
+      } else {
+        volumeHudIcon.textContent = '🔊';
+      }
+
+      volumeHud.classList.add('visible');
+
+      if (volumeHudTimeout) {
+        clearTimeout(volumeHudTimeout);
+      }
+
+      volumeHudTimeout = setTimeout(() => {
+        volumeHud.classList.remove('visible');
+        volumeHudTimeout = null;
+      }, 1200);
+    }
+
+    function changeVolume(delta) {
+      if (!isPoweredOn) return;
+      currentVolume = Math.min(100, Math.max(0, currentVolume + delta));
+      showVolumeHud();
+    }
+
+    function startVolumeHold(delta) {
+      changeVolume(delta);
+      
+      // Delay before continuous hold scrolling starts
+      volumeHoldDelay = setTimeout(() => {
+        volumeHoldInterval = setInterval(() => {
+          changeVolume(delta);
+        }, 50); // Updates every 50ms for smooth continuous sliding
+      }, 250);
+    }
+
+    function stopVolumeHold() {
+      if (volumeHoldDelay) {
+        clearTimeout(volumeHoldDelay);
+        volumeHoldDelay = null;
+      }
+      if (volumeHoldInterval) {
+        clearInterval(volumeHoldInterval);
+        volumeHoldInterval = null;
+      }
+    }
+
+    // Volume Up Hold/Click Events
+    volumeUpBtn.addEventListener('mousedown', () => startVolumeHold(5));
+    volumeUpBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      startVolumeHold(5);
+    });
+
+    // Volume Down Hold/Click Events
+    volumeDownBtn.addEventListener('mousedown', () => startVolumeHold(-5));
+    volumeDownBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      startVolumeHold(-5);
+    });
+
+    // Global release listeners to stop continuous hold sliding
+    window.addEventListener('mouseup', stopVolumeHold);
+    window.addEventListener('touchend', stopVolumeHold);
+    window.addEventListener('touchcancel', stopVolumeHold);
+
     powerBtn.addEventListener('click', () => {
       if (screen.classList.contains('crt-animating')) return;
 
       if (isPoweredOn) {
-        // CRT Turn Off Sequence
+        volumeHud.classList.remove('visible');
         screen.classList.add('crt-animating');
         
         setTimeout(() => {
@@ -564,7 +703,6 @@
           screen.classList.remove('crt-animating');
         }, 350);
       } else {
-        // Power On Sequence
         isPoweredOn = true;
         isLocked = true;
         screenOffOverlay.classList.remove('active');
