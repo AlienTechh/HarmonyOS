@@ -43,8 +43,6 @@
     }
 
     /* Hardware Buttons Placement */
-    
-    /* Volume Up Button (Upper-Left) */
     .volume-up-btn {
       position: absolute;
       left: -4px;
@@ -59,7 +57,6 @@
       box-shadow: -1px 0 3px rgba(0,0,0,0.4);
     }
 
-    /* Volume Down Button (Mid-Left) */
     .volume-down-btn {
       position: absolute;
       left: -4px;
@@ -74,7 +71,6 @@
       box-shadow: -1px 0 3px rgba(0,0,0,0.4);
     }
 
-    /* Hardware Power Button (Right Side) */
     .power-btn {
       position: absolute;
       right: -4px;
@@ -119,7 +115,7 @@
       background: #000;
       border-bottom-left-radius: 12px;
       border-bottom-right-radius: 12px;
-      z-index: 30;
+      z-index: 40;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -142,6 +138,26 @@
       color: #fff;
     }
 
+    /* CRT Turn Off Animation applied directly to screen content */
+    @keyframes crtOff {
+      0% {
+        transform: scale(1, 1);
+        filter: brightness(1);
+      }
+      40% {
+        transform: scale(1, 0.005);
+        filter: brightness(2);
+      }
+      100% {
+        transform: scale(0, 0);
+        filter: brightness(10);
+      }
+    }
+
+    .screen.crt-animating {
+      animation: crtOff 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    }
+
     /* Green Leaves Wallpaper */
     .wallpaper {
       position: absolute;
@@ -151,7 +167,7 @@
       height: 100%;
       background: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
       z-index: 0;
-      transition: transform 0.4s cubic-bezier(0.15, 0.85, 0.35, 1);
+      transition: transform 0.45s cubic-bezier(0.15, 0.85, 0.35, 1);
     }
 
     .screen.locked .wallpaper {
@@ -166,7 +182,7 @@
       width: 100%;
       height: 100%;
       background: #000;
-      z-index: 40;
+      z-index: 50;
       display: none;
     }
 
@@ -230,7 +246,7 @@
       50% { opacity: 0.9; }
     }
 
-    /* Status Bar */
+    /* Status Bar Elevated to z-index 35 so it sits on top of open app windows */
     .status-bar {
       height: 30px;
       padding: 0 14px;
@@ -241,8 +257,9 @@
       font-weight: 600;
       color: #fff;
       text-shadow: 0 1px 3px rgba(0,0,0,0.6);
-      z-index: 10;
+      z-index: 35;
       position: relative;
+      pointer-events: none;
     }
 
     /* Home Screen App Grid Container */
@@ -254,9 +271,9 @@
       grid-template-columns: repeat(4, 1fr);
       gap: 16px 10px;
       transform-origin: center 40%;
-      transform: scale(1);
+      transform: translateY(0);
       opacity: 1;
-      transition: transform 0.45s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.35s ease;
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
     }
 
     /* Hide Home Screen Apps when Powered Off */
@@ -264,11 +281,18 @@
       display: none !important;
     }
 
-    /* Samsung One UI Unlock Animation - App icons start oversized and transparent, then zoom down into place */
+    /* Unlock Slide State: Apps start translated down below screen */
     .home-screen.unlock-start {
+      transform: translateY(60px);
+      opacity: 0;
+      transition: none;
+    }
+
+    /* App opening scale transition */
+    .home-screen.app-opening {
       transform: scale(1.35);
       opacity: 0;
-      transition: none; /* Instant snap to oversized state */
+      transition: transform 0.28s cubic-bezier(0.05, 0.7, 0.1, 1), opacity 0.18s ease;
     }
 
     .app-icon {
@@ -317,31 +341,27 @@
       border-radius: 0px !important;
     }
 
-    /* One UI App Open Animation */
-    @keyframes oneUiAppOpen {
+    /* Sharp Open Animation */
+    @keyframes appOpenSharp {
       0% {
-        transform: scale(0.82);
+        transform: scale(0.12);
         opacity: 0;
-        border-radius: 36px;
       }
       100% {
         transform: scale(1);
         opacity: 1;
-        border-radius: 0px;
       }
     }
 
-    /* One UI App Close Animation */
-    @keyframes oneUiAppClose {
+    /* Sharp Fast Close Animation */
+    @keyframes appCloseSharp {
       0% {
         transform: scale(1);
         opacity: 1;
-        border-radius: 0px;
       }
       100% {
-        transform: scale(0.82);
+        transform: scale(0.12);
         opacity: 0;
-        border-radius: 36px;
       }
     }
 
@@ -349,18 +369,19 @@
     .app-window.active {
       display: flex !important;
       pointer-events: auto;
-      animation: oneUiAppOpen 0.3s cubic-bezier(0.15, 0.85, 0.35, 1) forwards;
+      animation: appOpenSharp 0.28s cubic-bezier(0.05, 0.7, 0.1, 1) forwards;
     }
 
     /* Fast Closing State */
     .app-window.closing {
       display: flex !important;
       pointer-events: none;
-      animation: oneUiAppClose 0.25s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+      animation: appCloseSharp 0.18s cubic-bezier(0.4, 0, 0.6, 1) forwards;
     }
 
+    /* Adjusted app header padding so text doesn't overlap the status bar */
     .app-header {
-      padding: 36px 18px 14px;
+      padding: 42px 18px 14px;
       font-size: 18px;
       font-weight: bold;
       border-bottom: 1px solid #222;
@@ -381,7 +402,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 25;
+      z-index: 30;
       cursor: pointer;
     }
 
@@ -407,25 +428,20 @@
 <body>
 
   <div class="phone-container">
-    <!-- Hardware Volume Buttons on Left Edge, Power Button on Right Edge -->
     <div class="volume-up-btn" id="volumeUpBtn" title="Volume Up"></div>
     <div class="volume-down-btn" id="volumeDownBtn" title="Volume Down"></div>
     <div class="power-btn" id="powerBtn" title="Power Button"></div>
 
     <div class="phone-frame">
-      <!-- Teardrop Notch -->
       <div class="teardrop-notch">
         <div class="camera-lens"></div>
       </div>
 
       <div class="screen" id="screen">
-        <!-- Leaves Wallpaper -->
         <div class="wallpaper"></div>
 
-        <!-- Blackout Overlay for Power Off -->
         <div class="screen-off-overlay" id="screenOffOverlay"></div>
 
-        <!-- Lock Screen Layer -->
         <div class="lock-screen hidden" id="lockScreen">
           <div class="lock-clock">
             <div class="lock-time" id="lockTime">9:41</div>
@@ -434,13 +450,12 @@
           <div class="lock-hint">Swipe up to unlock</div>
         </div>
 
-        <!-- Status Bar -->
+        <!-- Status Bar placed at higher layer so it remains visible inside apps -->
         <div class="status-bar">
           <span id="statusBarTime">9:41</span>
           <span>5G 🔋</span>
         </div>
 
-        <!-- Home Screen Apps Grid -->
         <div class="home-screen" id="homeScreen">
           <div class="app-icon" data-app="phone">
             <div class="icon-box" style="background: #25D366;">📞</div>
@@ -488,13 +503,11 @@
           </div>
         </div>
 
-        <!-- App Window -->
         <div class="app-window" id="appWindow">
           <div class="app-header" id="appTitle">App Name</div>
           <div class="app-content" id="appContent">App Content</div>
         </div>
 
-        <!-- Swipe Bar -->
         <div class="home-bar-container" id="homeBar">
           <div class="home-bar"></div>
         </div>
@@ -525,7 +538,6 @@
       e.preventDefault();
     }, { passive: false });
 
-    // Instantly close any active app
     function forceCloseAppInstant() {
       if (closeTimeout) {
         clearTimeout(closeTimeout);
@@ -533,33 +545,37 @@
       }
       appWindow.classList.remove('active', 'closing');
       appWindow.style.display = 'none';
-      homeScreen.classList.remove('unlock-start');
+      homeScreen.classList.remove('app-opening', 'unlock-start');
       screen.classList.remove('locked');
     }
 
-    // Hardware Power Button Action
     powerBtn.addEventListener('click', () => {
+      if (screen.classList.contains('crt-animating')) return;
+
       if (isPoweredOn) {
-        // Power off phone
-        isPoweredOn = false;
-        forceCloseAppInstant();
-        screenOffOverlay.classList.add('active');
-        homeScreen.classList.add('off');
+        // CRT Turn Off Sequence
+        screen.classList.add('crt-animating');
+        
+        setTimeout(() => {
+          isPoweredOn = false;
+          forceCloseAppInstant();
+          screenOffOverlay.classList.add('active');
+          homeScreen.classList.add('off');
+          screen.classList.remove('crt-animating');
+        }, 350);
       } else {
-        // Power on phone to lock screen
+        // Power On Sequence
         isPoweredOn = true;
         isLocked = true;
         screenOffOverlay.classList.remove('active');
         lockScreen.classList.remove('hidden');
         screen.classList.add('locked');
         
-        // Prepare oversized home screen for unlock
         homeScreen.classList.remove('off');
         homeScreen.classList.add('unlock-start');
       }
     });
 
-    // Lock Screen Swipe Up to Unlock
     let lockStartY = 0;
 
     lockScreen.addEventListener('touchstart', (e) => {
@@ -589,14 +605,12 @@
       }
     });
 
-    // Samsung One UI Unlock Effect: Slide away lock screen and zoom apps down to 100% scale
     function unlockPhone() {
       if (!isLocked) return;
       isLocked = false;
       lockScreen.classList.add('hidden');
       screen.classList.remove('locked');
 
-      // Trigger the zoom down transition into place
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           homeScreen.classList.remove('unlock-start');
@@ -604,7 +618,6 @@
       });
     }
 
-    // App Open Handler
     appIcons.forEach(icon => {
       icon.addEventListener('click', () => {
         if (!isPoweredOn || isLocked) return;
@@ -623,6 +636,9 @@
         appWindow.style.display = 'flex';
         appWindow.style.transformOrigin = `${originX}px ${originY}px`;
 
+        homeScreen.style.transformOrigin = `${originX}px ${originY}px`;
+        homeScreen.classList.add('app-opening');
+
         const appName = icon.getAttribute('data-app');
         appTitle.textContent = appName.charAt(0).toUpperCase() + appName.slice(1);
         
@@ -633,26 +649,26 @@
         }
 
         appWindow.classList.remove('closing', 'active');
-        void appWindow.offsetWidth; // Force reflow
+        void appWindow.offsetWidth;
         appWindow.classList.add('active');
       });
     });
 
-    // App Close Handler
     function closeApp() {
       if (!appWindow.classList.contains('active')) return;
 
       appWindow.classList.remove('active');
       appWindow.classList.add('closing');
 
+      homeScreen.classList.remove('app-opening');
+
       closeTimeout = setTimeout(() => {
         appWindow.classList.remove('closing');
         appWindow.style.display = 'none';
         closeTimeout = null;
-      }, 250);
+      }, 180);
     }
 
-    // Home Bar Swipe Up Detection
     let startY = 0;
 
     homeBar.addEventListener('touchstart', (e) => {
