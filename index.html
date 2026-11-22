@@ -1,0 +1,787 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>HarmonyOS Emulator</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #17191e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    touch-action: none;
+}
+
+.phone {
+    width: 340px;
+    height: 690px;
+    max-height: 94dvh;
+    aspect-ratio: 340 / 690;
+    background: #080808;
+    border: 5px solid #393939;
+    border-radius: 43px;
+    padding: 7px;
+    position: relative;
+    box-shadow: 0 20px 70px #000a;
+}
+
+.power-button {
+    position: absolute;
+    right: -9px;
+    top: 145px;
+    width: 5px;
+    height: 65px;
+    background: #777;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+    z-index: 100;
+}
+
+.screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 32px;
+    overflow: hidden;
+    position: relative;
+    background: #dbe7f5;
+}
+
+.wallpaper {
+    position: absolute;
+    inset: 0;
+    background:
+    radial-gradient(ellipse at 25% 25%, #e7f4ff 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 70%, #557bb8 0%, transparent 55%),
+    linear-gradient(145deg, #9bc9eb, #627db7 55%, #263c70);
+}
+
+.status {
+    position: absolute;
+    z-index: 20;
+    top: 13px;
+    left: 18px;
+    right: 18px;
+    display: flex;
+    justify-content: space-between;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.camera {
+    position: absolute;
+    z-index: 30;
+    width: 75px;
+    height: 20px;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #080808;
+    border-radius: 20px;
+}
+
+.home-screen {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+}
+
+.clock {
+    position: absolute;
+    top: 85px;
+    width: 100%;
+    text-align: center;
+    color: white;
+    font-size: 65px;
+    font-weight: 300;
+    letter-spacing: -3px;
+}
+
+.date {
+    position: absolute;
+    top: 155px;
+    width: 100%;
+    text-align: center;
+    color: white;
+    font-size: 15px;
+}
+
+.weather {
+    position: absolute;
+    top: 205px;
+    left: 22px;
+    color: white;
+    font-size: 14px;
+    background: #ffffff25;
+    padding: 12px 16px;
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+}
+
+.apps {
+    position: absolute;
+    bottom: 105px;
+    left: 18px;
+    right: 18px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px 10px;
+    justify-items: center;
+}
+
+.app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: white;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.app-icon {
+    width: 53px;
+    height: 53px;
+    border-radius: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 27px;
+    background: #ffffffd9;
+    box-shadow: 0 4px 12px #0002;
+}
+
+.settings-icon {
+    background: linear-gradient(145deg, #e9edf3, #aeb9c9);
+}
+
+.phone-icon { background: #32c878; }
+.gallery-icon { background: #f2d45d; }
+.camera-icon { background: #b8c6d9; }
+.browser-icon { background: #e9f3ff; }
+.messages-icon { background: #42ce9a; }
+
+.dock {
+    position: absolute;
+    bottom: 33px;
+    left: 15px;
+    right: 15px;
+    height: 70px;
+    border-radius: 23px;
+    background: #ffffff30;
+    backdrop-filter: blur(18px);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.dock .app-icon {
+    width: 48px;
+    height: 48px;
+}
+
+.home-indicator {
+    position: absolute;
+    z-index: 60;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 105px;
+    height: 5px;
+    border-radius: 10px;
+    background: white;
+    cursor: grab;
+}
+
+/* SETTINGS */
+
+.settings {
+    position: absolute;
+    z-index: 10;
+    inset: 0;
+    background: #f3f4f8;
+    color: #17191f;
+    transform: translateY(100%);
+    transition: transform .35s cubic-bezier(.2,.8,.2,1);
+    display: flex;
+    flex-direction: column;
+}
+
+.settings.open {
+    transform: translateY(0);
+}
+
+.settings-header {
+    padding: 48px 20px 15px;
+    background: #f3f4f8;
+}
+
+.settings-header h1 {
+    font-size: 31px;
+    margin-bottom: 15px;
+}
+
+.search {
+    background: #e5e7ed;
+    border-radius: 12px;
+    padding: 13px;
+    font-size: 14px;
+    color: #777;
+}
+
+.profile {
+    margin: 10px 15px;
+    padding: 15px;
+    border-radius: 17px;
+    background: white;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #9bc9ee, #596cbd);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 22px;
+}
+
+.profile-name {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.profile-sub {
+    font-size: 12px;
+    color: #888;
+    margin-top: 4px;
+}
+
+.settings-list {
+    margin: 5px 15px;
+    background: white;
+    border-radius: 17px;
+    overflow: hidden;
+}
+
+.setting-row {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 13px;
+    font-size: 14px;
+    border-bottom: 1px solid #eeeeef;
+}
+
+.setting-row:last-child {
+    border: none;
+}
+
+.setting-symbol {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 17px;
+}
+
+.arrow {
+    margin-left: auto;
+    color: #aaa;
+    font-size: 19px;
+}
+
+.settings-bottom {
+    margin-top: auto;
+    height: 35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* LOCK SCREEN */
+
+.lockscreen {
+    position: absolute;
+    z-index: 40;
+    inset: 0;
+    display: none;
+    color: white;
+    background:
+    radial-gradient(ellipse at 70% 75%, #7e9bcf 0%, transparent 48%),
+    linear-gradient(145deg, #b6d9ec, #627db9 55%, #263b70);
+}
+
+.lock-clock {
+    position: absolute;
+    top: 150px;
+    width: 100%;
+    text-align: center;
+    font-size: 76px;
+    font-weight: 300;
+    letter-spacing: -4px;
+}
+
+.lock-date {
+    position: absolute;
+    top: 230px;
+    width: 100%;
+    text-align: center;
+    font-size: 15px;
+}
+
+.lock-bottom {
+    position: absolute;
+    bottom: 60px;
+    width: 100%;
+    text-align: center;
+    font-size: 12px;
+    color: #ffffffbb;
+}
+
+.powered-off {
+    position: absolute;
+    z-index: 50;
+    inset: 0;
+    background: black;
+    display: none;
+    border-radius: 32px;
+}
+
+@media(max-height: 720px) {
+    .phone {
+        height: 94dvh;
+        width: auto;
+        aspect-ratio: 340 / 690;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="phone">
+
+    <div class="power-button" id="powerButton"></div>
+
+    <div class="screen" id="screen">
+
+        <div class="wallpaper"></div>
+
+        <div class="status">
+            <span>16:28</span>
+            <span>●  Wi-Fi  ▰</span>
+        </div>
+
+        <div class="camera"></div>
+
+        <!-- HOME SCREEN -->
+
+        <div class="home-screen" id="homeScreen">
+
+            <div class="clock" id="homeClock">16:28</div>
+            <div class="date" id="homeDate">Sunday, November 22</div>
+
+            <div class="weather">☀️ &nbsp; 21° &nbsp; Sunny</div>
+
+            <div class="apps">
+
+                <div class="app">
+                    <div class="app-icon phone-icon">☎</div>
+                    Phone
+                </div>
+
+                <div class="app">
+                    <div class="app-icon messages-icon">●</div>
+                    Messages
+                </div>
+
+                <div class="app">
+                    <div class="app-icon gallery-icon">🌄</div>
+                    Gallery
+                </div>
+
+                <div class="app">
+                    <div class="app-icon camera-icon">📷</div>
+                    Camera
+                </div>
+
+                <div class="app">
+                    <div class="app-icon browser-icon">🌐</div>
+                    Browser
+                </div>
+
+                <div class="app" id="settingsButton">
+                    <div class="app-icon settings-icon">⚙️</div>
+                    Settings
+                </div>
+
+            </div>
+
+            <div class="dock">
+
+                <div class="app-icon phone-icon">☎</div>
+                <div class="app-icon messages-icon">●</div>
+                <div class="app-icon gallery-icon">🌄</div>
+                <div class="app-icon browser-icon">🌐</div>
+
+            </div>
+
+        </div>
+
+        <!-- SETTINGS APP -->
+
+        <div class="settings" id="settingsApp">
+
+            <div class="settings-header">
+                <h1>Settings</h1>
+                <div class="search">⌕ &nbsp; Search settings</div>
+            </div>
+
+            <div class="profile">
+                <div class="avatar">G</div>
+                <div>
+                    <div class="profile-name">HarmonyOS User</div>
+                    <div class="profile-sub">Huawei ID</div>
+                </div>
+                <div class="arrow">›</div>
+            </div>
+
+            <div class="settings-list">
+
+                <div class="setting-row">
+                    <div class="setting-symbol" style="background:#4a9be7">📶</div>
+                    Wi-Fi
+                    <span class="arrow">›</span>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-symbol" style="background:#48b9d0">ᛒ</div>
+                    Bluetooth
+                    <span class="arrow">›</span>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-symbol" style="background:#e5a44b">📱</div>
+                    Mobile network
+                    <span class="arrow">›</span>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-symbol" style="background:#8c78d9">🔔</div>
+                    Notifications
+                    <span class="arrow">›</span>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-symbol" style="background:#4dbd91">🔊</div>
+                    Sounds and vibration
+                    <span class="arrow">›</span>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-symbol" style="background:#6999dc">🖥</div>
+                    Display and brightness
+                    <span class="arrow">›</span>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-symbol" style="background:#df8e72">🔋</div>
+                    Battery
+                    <span class="arrow">›</span>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-symbol" style="background:#9299a8">🔒</div>
+                    Security and privacy
+                    <span class="arrow">›</span>
+                </div>
+
+            </div>
+
+            <div class="settings-bottom">
+                <div style="width:105px;height:5px;border-radius:10px;background:#222"></div>
+            </div>
+
+        </div>
+
+        <!-- LOCKSCREEN -->
+
+        <div class="lockscreen" id="lockScreen">
+
+            <div class="lock-clock" id="lockClock">16:28</div>
+            <div class="lock-date" id="lockDate">Sunday, November 22</div>
+
+            <div class="lock-bottom">
+                Swipe up to unlock
+            </div>
+
+            <div class="home-indicator" id="lockIndicator"></div>
+
+        </div>
+
+        <!-- POWER OFF -->
+
+        <div class="powered-off" id="poweredOff"></div>
+
+        <!-- HOME INDICATOR -->
+
+        <div class="home-indicator" id="homeIndicator"></div>
+
+    </div>
+</div>
+
+<script>
+const settingsButton = document.getElementById("settingsButton");
+const settingsApp = document.getElementById("settingsApp");
+const powerButton = document.getElementById("powerButton");
+const poweredOff = document.getElementById("poweredOff");
+const lockScreen = document.getElementById("lockScreen");
+const homeScreen = document.getElementById("homeScreen");
+const homeIndicator = document.getElementById("homeIndicator");
+const lockIndicator = document.getElementById("lockIndicator");
+const screen = document.getElementById("screen");
+
+let phoneOn = true;
+let screenMode = "home";
+
+function openSettings() {
+    if (!phoneOn || screenMode !== "home") return;
+
+    screenMode = "settings";
+    settingsApp.classList.add("open");
+    homeIndicator.style.display = "block";
+}
+
+function closeSettings() {
+    if (screenMode !== "settings") return;
+
+    settingsApp.classList.remove("open");
+
+    setTimeout(() => {
+        if (screenMode === "settings") {
+            screenMode = "home";
+        }
+    }, 350);
+}
+
+settingsButton.addEventListener("click", openSettings);
+
+/* POWER BUTTON */
+
+function powerToggle() {
+
+    if (phoneOn) {
+
+        phoneOn = false;
+        screenMode = "off";
+
+        settingsApp.classList.remove("open");
+        lockScreen.style.display = "none";
+        poweredOff.style.display = "block";
+        homeIndicator.style.display = "none";
+
+    } else {
+
+        phoneOn = true;
+        screenMode = "lock";
+
+        poweredOff.style.display = "none";
+        lockScreen.style.display = "block";
+        homeIndicator.style.display = "none";
+
+    }
+}
+
+powerButton.addEventListener("click", powerToggle);
+
+/* SWIPE GESTURES */
+
+let startY = 0;
+let startX = 0;
+let gestureActive = false;
+
+screen.addEventListener("touchstart", (e) => {
+
+    if (!phoneOn) return;
+
+    const touch = e.touches[0];
+
+    startY = touch.clientY;
+    startX = touch.clientX;
+    gestureActive = true;
+
+}, {passive: true});
+
+screen.addEventListener("touchend", (e) => {
+
+    if (!gestureActive || !phoneOn) return;
+
+    gestureActive = false;
+
+    const touch = e.changedTouches[0];
+
+    const deltaY = touch.clientY - startY;
+    const deltaX = Math.abs(touch.clientX - startX);
+
+    if (deltaY > -55 || deltaX > 70) return;
+
+    const bounds = screen.getBoundingClientRect();
+
+    const startPosition = startY - bounds.top;
+    const screenHeight = bounds.height;
+
+    /* UNLOCK: SWIPE UP ANYWHERE */
+
+    if (screenMode === "lock") {
+
+        lockScreen.style.display = "none";
+        screenMode = "home";
+        return;
+
+    }
+
+    /* CLOSE SETTINGS ONLY FROM BOTTOM MIDDLE LINE */
+
+    if (screenMode === "settings") {
+
+        const bottomZone = startPosition > screenHeight - 65;
+        const middleZone = startX > bounds.left + bounds.width * 0.30 &&
+                           startX < bounds.left + bounds.width * 0.70;
+
+        if (bottomZone && middleZone) {
+            closeSettings();
+        }
+
+    }
+
+}, {passive: true});
+
+/* MOUSE SWIPE SUPPORT */
+
+let mouseDown = false;
+let mouseStartY = 0;
+let mouseStartX = 0;
+
+screen.addEventListener("mousedown", (e) => {
+
+    if (e.target === powerButton) return;
+
+    mouseDown = true;
+    mouseStartY = e.clientY;
+    mouseStartX = e.clientX;
+
+});
+
+window.addEventListener("mouseup", (e) => {
+
+    if (!mouseDown) return;
+
+    mouseDown = false;
+
+    if (!phoneOn) return;
+
+    const deltaY = e.clientY - mouseStartY;
+    const deltaX = Math.abs(e.clientX - mouseStartX);
+
+    if (deltaY > -55 || deltaX > 70) return;
+
+    const bounds = screen.getBoundingClientRect();
+    const startPosition = mouseStartY - bounds.top;
+    const screenHeight = bounds.height;
+
+    if (screenMode === "lock") {
+
+        lockScreen.style.display = "none";
+        screenMode = "home";
+        return;
+
+    }
+
+    if (screenMode === "settings") {
+
+        const bottomZone = startPosition > screenHeight - 65;
+        const middleZone = mouseStartX > bounds.left + bounds.width * 0.30 &&
+                           mouseStartX < bounds.left + bounds.width * 0.70;
+
+        if (bottomZone && middleZone) {
+            closeSettings();
+        }
+
+    }
+
+});
+
+/* CLOCK */
+
+function updateClock() {
+
+    const now = new Date();
+
+    const time = now.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+    });
+
+    const date = now.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric"
+    });
+
+    document.getElementById("homeClock").textContent = time;
+    document.getElementById("lockClock").textContent = time;
+
+    document.getElementById("homeDate").textContent = date;
+    document.getElementById("lockDate").textContent = date;
+}
+
+updateClock();
+setInterval(updateClock, 1000);
+
+/* PREVENT BROWSER GESTURES */
+
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+document.addEventListener("dblclick", e => {
+    e.preventDefault();
+});
+
+document.addEventListener("selectstart", e => {
+    e.preventDefault();
+});
+
+document.addEventListener("gesturestart", e => {
+    e.preventDefault();
+});
+
+</script>
+
+</body>
+</html>
