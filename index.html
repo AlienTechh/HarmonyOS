@@ -39,7 +39,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#17191e;display:flex
 .setting-row:last-child{border:0}
 .setting-symbol{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;font-size:17px}
 .arrow{margin-left:auto;color:#aaa;font-size:19px}
-.settings-bottom{margin-top:auto;height:35px;display:flex;justify-content:center;align-items:center}
+
 /* LOCK SCREEN */
 .lockscreen{position:absolute;z-index:40;inset:0;display:none;color:white;background:radial-gradient(ellipse at 70% 75%,#7e9bcf 0%,transparent 48%),linear-gradient(145deg,#b6d9ec,#627db9 55%,#263b70)}
 .lock-clock{position:absolute;top:150px;width:100%;text-align:center;font-size:76px;font-weight:300;letter-spacing:-4px}
@@ -57,6 +57,23 @@ html,body{width:100%;height:100%;overflow:hidden;background:#17191e;display:flex
 .boot-video{width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;background:#000}
 .home-widgets{position:absolute;top:29%;left:8px;right:8px;height:21%;display:grid;grid-template-columns:1fr 1fr;gap:9px}.widget{border-radius:13px;background:#ffffffed;color:#333;padding:9px;font-size:10px;box-shadow:0 3px 12px #0002;overflow:hidden}.widget strong{font-size:14px;display:block;margin-bottom:5px}.widget small{color:#888}.widget-art{font-size:24px;margin-top:8px}.app-window{position:absolute;z-index:26;inset:0;background:#f6f7fa;color:#20232a;opacity:0;pointer-events:none;transform:scale(.12);transform-origin:var(--origin-x,50%) var(--origin-y,50%);transition:transform .34s cubic-bezier(.2,.8,.2,1),opacity .22s;overflow:hidden;border-radius:28px}.app-window.open{opacity:1;pointer-events:auto;transform:scale(1);border-radius:0}.app-window-head{height:90px;padding:48px 18px 12px;font-size:24px;font-weight:600;background:#fff}.app-window-content{padding:20px;font-size:15px}.app-window-back{float:right;border:0;background:#eee;border-radius:20px;padding:6px 12px;font-size:14px}.app-card{background:white;border-radius:15px;padding:17px;margin:10px 0}.home-page-dots{position:absolute;bottom:69px;left:0;right:0;text-align:center;color:#fff;font-size:10px;letter-spacing:4px;text-shadow:0 1px 3px #333}.app:active .app-icon,.dock .app-icon:active{transform:scale(.9)}
 @media(max-height:720px){.phone{height:94dvh;width:auto;aspect-ratio:340/690}}
+
+/* Smooth single-tap app launch and layered unlock */
+.app{touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.lockscreen{transform:scale(1);opacity:1;transition:transform .48s cubic-bezier(.18,.75,.25,1),opacity .38s ease}
+.lockscreen.unlocking{transform:scale(1.22);opacity:0;pointer-events:none}
+.home-screen.unlocking .home-widgets{animation:layerIn .42s .08s both cubic-bezier(.2,.8,.2,1)}
+.home-screen.unlocking .app{animation:layerIn .42s both cubic-bezier(.2,.8,.2,1)}
+.home-screen.unlocking .app:nth-child(1){animation-delay:.12s}
+.home-screen.unlocking .app:nth-child(2){animation-delay:.16s}
+.home-screen.unlocking .app:nth-child(3){animation-delay:.20s}
+.home-screen.unlocking .app:nth-child(4){animation-delay:.24s}
+.home-screen.unlocking .app:nth-child(5){animation-delay:.28s}
+.home-screen.unlocking .app:nth-child(6){animation-delay:.32s}
+.home-screen.unlocking .app:nth-child(7){animation-delay:.36s}
+.home-screen.unlocking .app:nth-child(8){animation-delay:.40s}
+.home-screen.unlocking .dock{animation:layerIn .42s .43s both cubic-bezier(.2,.8,.2,1)}
+@keyframes layerIn{from{opacity:0;transform:translateY(18px) scale(.88)}to{opacity:1;transform:translateY(0) scale(1)}}
 </style>
 </head>
 <body>
@@ -68,16 +85,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#17191e;display:flex
 <div class="camera"></div>
 
 <div class="home-screen" id="homeScreen">
-<div class="home-widgets"><div class="widget"><strong>欢迎使用<br>小艺建议</strong><small>常用服务，一步直达</small><div class="widget-art">🌿 📘 🟡</div></div><div class="widget"><strong>0°　☀️</strong><small>天气与快捷服务</small><div class="widget-art">▶</div></div></div>
+<div class="home-widgets"><div class="widget"><strong>Welcome<br>Smart Suggestions</strong><small>Quick access to your favorite services</small><div class="widget-art">🌿 📘 🟡</div></div><div class="widget"><strong>0°　☀️</strong><small>Weather and quick services</small><div class="widget-art">▶</div></div></div>
 <div class="apps">
-<div class="app" data-app="Music"><div class="app-icon" style="color:#267bdc">♫</div>音乐</div>
-<div class="app" data-app="Video"><div class="app-icon" style="color:#ed5c55">▶</div>视频</div>
-<div class="app" data-app="Themes"><div class="app-icon" style="color:#27b7c9">🎨</div>主题</div>
+<div class="app" data-app="Music"><div class="app-icon" style="color:#267bdc">♫</div>Music</div>
+<div class="app" data-app="Video"><div class="app-icon" style="color:#ed5c55">▶</div>Video</div>
+<div class="app" data-app="Themes"><div class="app-icon" style="color:#27b7c9">🎨</div>Themes</div>
 <div class="app" data-app="VMall"><div class="app-icon" style="color:#d84b50">V</div>VMALL</div>
-<div class="app" data-app="AppGallery"><div class="app-icon" style="background:#ed5260;color:white">H</div>应用市场</div>
-<div class="app" data-app="Email"><div class="app-icon" style="background:#24c77b;color:white">✉</div>邮件</div>
-<div class="app" id="settingsButton" data-app="Settings"><div class="app-icon settings-icon">⚙</div>设置</div>
-<div class="app" data-app="Gallery"><div class="app-icon" style="background:linear-gradient(135deg,#38c6d4,#e6c64c,#d85ab2)">✿</div>图库</div>
+<div class="app" data-app="AppGallery"><div class="app-icon" style="background:#ed5260;color:white">H</div>AppGallery</div>
+<div class="app" data-app="Email"><div class="app-icon" style="background:#24c77b;color:white">✉</div>Email</div>
+<div class="app" id="settingsButton" data-app="Settings"><div class="app-icon settings-icon">⚙</div>Settings</div>
+<div class="app" data-app="Gallery"><div class="app-icon" style="background:linear-gradient(135deg,#38c6d4,#e6c64c,#d85ab2)">✿</div>Gallery</div>
 </div>
 <div class="home-page-dots">●　○ ○ ○</div>
 <div class="dock"><div class="app" data-app="Phone"><div class="app-icon phone-icon">☎</div></div><div class="app" data-app="Messages"><div class="app-icon messages-icon">●</div></div><div class="app" data-app="Browser"><div class="app-icon browser-icon">🌐</div></div><div class="app" data-app="Camera"><div class="app-icon camera-icon">📷</div></div></div>
@@ -96,9 +113,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#17191e;display:flex
 <div class="setting-row"><div class="setting-symbol" style="background:#df8e72">🔋</div>Battery<span class="arrow">›</span></div>
 <div class="setting-row"><div class="setting-symbol" style="background:#9299a8">🔒</div>Security and privacy<span class="arrow">›</span></div>
 </div>
-<div class="settings-bottom"><div style="width:105px;height:5px;border-radius:10px;background:#222"></div></div>
+
 </div>
-<div class="app-window" id="appWindow"><div class="app-window-head"><span id="appWindowTitle">App</span><button class="app-window-back" id="appWindowBack">Done</button></div><div class="app-window-content" id="appWindowContent"></div></div>
+<div class="app-window" id="appWindow"><div class="app-window-head"><span id="appWindowTitle">App</span></div><div class="app-window-content" id="appWindowContent"></div></div>
 
 <div class="lockscreen" id="lockScreen">
 <div class="lock-clock" id="lockClock">16:28</div>
@@ -140,15 +157,15 @@ function beginVideoPlayback(){
  bootVideo.pause();
  try{bootVideo.currentTime=0;}catch(e){}
  bootVideo.playsInline=true;bootVideo.volume=1;
- // Start muted so browser autoplay restrictions cannot prevent the animation.
- bootVideo.muted=true;
+ // Request audible playback first. Browsers may block sound until the user interacts with the page.
+ bootVideo.muted=false;bootVideo.defaultMuted=false;bootVideo.volume=1;
  let playAttempt;
  try{playAttempt=bootVideo.play();}catch(e){playAttempt=Promise.reject(e);}
  if(playAttempt&&typeof playAttempt.catch==="function"){
   playAttempt.catch(()=>{
-   // If autoplay is still blocked, retry once after the browser has loaded the media.
+   if(!phoneOn||screenMode!=="boot")return;
    bootVideo.muted=true;
-   setTimeout(()=>{if(phoneOn&&screenMode==="boot")bootVideo.play().catch(()=>finishBoot());},250);
+   bootVideo.play().catch(()=>finishBoot());
   });
  }
  clearTimeout(bootTimerFallback);
@@ -178,7 +195,7 @@ function unlockBootAudio(){
  if(screenMode!=="boot")return;
  bootVideo.muted=false;bootVideo.defaultMuted=false;bootVideo.volume=1;
  // A click/tap during the animation is a valid user gesture for enabling its sound.
- if(bootAnimation.classList.contains("active")&&bootVideo.paused){bootVideo.play().catch(()=>{bootVideo.muted=true;});}
+ if(bootAnimation.classList.contains("active")){if(bootVideo.paused)bootVideo.play().catch(()=>{});}
 }
 document.addEventListener("pointerdown",unlockBootAudio,{capture:true});
 document.addEventListener("keydown",unlockBootAudio,{capture:true});
@@ -190,10 +207,10 @@ const appCopy={Music:"Your music library<br><div class='app-card'>♫　Recently
 function openApp(name,el){if(!phoneOn||screenMode!=="home")return;originFrom(el);if(name==="Settings"){screenMode="settings";settingsApp.style.setProperty("--origin-x",getComputedStyle(screen).getPropertyValue("--origin-x"));settingsApp.style.setProperty("--origin-y",getComputedStyle(screen).getPropertyValue("--origin-y"));settingsApp.classList.add("open");homeIndicator.style.display="block";return;}appWindowTitle.textContent=name;appWindowContent.innerHTML=appCopy[name]||name;appWindow.classList.add("open");screenMode="app";homeIndicator.style.display="block";}
 function closeApp(){if(screenMode==="settings"){settingsApp.classList.remove("open");}else if(screenMode==="app"){appWindow.classList.remove("open");}else return;homeIndicator.style.display="none";setTimeout(()=>{if(screenMode==="settings"||screenMode==="app")screenMode="home";},350);}
 document.querySelectorAll(".app[data-app]").forEach(el=>el.addEventListener("click",()=>openApp(el.dataset.app,el)));
-document.getElementById("appWindowBack").addEventListener("click",closeApp);
+
 function powerToggle(){if(phoneOn){phoneOn=false;screenMode="off";clearTimeout(bootTimer1);clearTimeout(bootTimerFallback);bootVideo.pause();bootScreen.style.display="none";bootAnimation.classList.remove("active");settingsApp.classList.remove("open");appWindow.classList.remove("open");lockScreen.style.display="none";poweredOff.style.display="block";homeIndicator.style.display="none";}else{phoneOn=true;screenMode="lock";poweredOff.style.display="none";bootScreen.style.display="none";lockScreen.style.display="block";homeIndicator.style.display="none";}}
 powerButton.addEventListener("click",powerToggle);
-function handleSwipe(y,x,dy,dx){if(!phoneOn||dy>-55||dx>70)return;const b=screen.getBoundingClientRect(),pos=y-b.top;if(screenMode==="lock"){lockScreen.style.display="none";screenMode="home";return;}if(screenMode==="settings"||screenMode==="app"){if(pos>b.height-65&&x>b.left+b.width*.3&&x<b.left+b.width*.7)closeApp();}}
+function handleSwipe(y,x,dy,dx){if(!phoneOn||dy>-55||dx>70)return;const b=screen.getBoundingClientRect(),pos=y-b.top;if(screenMode==="lock"){const home=document.getElementById("homeScreen");lockScreen.classList.add("unlocking");home.classList.remove("unlocking");void home.offsetWidth;home.classList.add("unlocking");setTimeout(()=>{if(screenMode==="lock"){lockScreen.style.display="none";lockScreen.classList.remove("unlocking");screenMode="home";setTimeout(()=>home.classList.remove("unlocking"),650);}},420);return;}if(screenMode==="settings"||screenMode==="app"){if(pos>b.height-65&&x>b.left+b.width*.3&&x<b.left+b.width*.7)closeApp();}}
 screen.addEventListener("touchstart",e=>{if(!phoneOn)return;startY=e.touches[0].clientY;startX=e.touches[0].clientX;gestureActive=true;},{passive:true});screen.addEventListener("touchend",e=>{if(!gestureActive)return;gestureActive=false;const t=e.changedTouches[0];handleSwipe(startY,startX,t.clientY-startY,Math.abs(t.clientX-startX));},{passive:true});
 screen.addEventListener("mousedown",e=>{mouseDown=true;mouseStartY=e.clientY;mouseStartX=e.clientX;});window.addEventListener("mouseup",e=>{if(!mouseDown)return;mouseDown=false;handleSwipe(mouseStartY,mouseStartX,e.clientY-mouseStartY,Math.abs(e.clientX-mouseStartX));});
 function updateClock(){const n=new Date(),t=n.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",hour12:false}),d=n.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});const homeClock=document.getElementById("homeClock"),homeDate=document.getElementById("homeDate"),lockClockEl=document.getElementById("lockClock"),statusTime=document.getElementById("statusTime"),lockDateEl=document.getElementById("lockDate");if(homeClock)homeClock.textContent=t;if(lockClockEl)lockClockEl.textContent=t;if(statusTime)statusTime.textContent=t;if(homeDate)homeDate.textContent=d;if(lockDateEl)lockDateEl.textContent=d;}
