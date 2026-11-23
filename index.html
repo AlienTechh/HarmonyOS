@@ -12,7 +12,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#17191e;display:flex
 .screen{width:100%;height:100%;border-radius:32px;overflow:hidden;position:relative;background:#dbe7f5}
 .wallpaper{position:absolute;inset:0;background:radial-gradient(ellipse at 48% 8%,#ffd58a 0%,transparent 35%),radial-gradient(ellipse at 15% 42%,#ff9a38 0%,transparent 42%),radial-gradient(ellipse at 85% 58%,#ed5a45 0%,transparent 45%),linear-gradient(155deg,#ffc46d 0%,#f58b38 35%,#e85d55 62%,#395a9d 100%)}
 .status{position:absolute;z-index:20;top:13px;left:18px;right:18px;display:flex;justify-content:space-between;color:white;font-size:12px;font-weight:bold}
-.camera{position:absolute;z-index:30;width:75px;height:20px;top:5px;left:50%;transform:translateX(-50%);background:#080808;border-radius:20px}
+.camera{position:absolute;z-index:95;width:15px;height:15px;top:8px;left:50%;transform:translateX(-50%);background:#030407;border:2px solid #17191d;border-radius:50%;box-shadow:0 0 0 1px #000, inset 0 0 3px #34445a;pointer-events:none}
 .home-screen{position:absolute;inset:0;z-index:2}
 .clock{display:none}
 .date{display:none}
@@ -41,7 +41,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#17191e;display:flex
 .arrow{margin-left:auto;color:#aaa;font-size:19px}
 
 /* LOCK SCREEN */
-.lockscreen{position:absolute;z-index:40;inset:0;display:none;color:white;background:radial-gradient(ellipse at 70% 75%,#7e9bcf 0%,transparent 48%),linear-gradient(145deg,#b6d9ec,#627db9 55%,#263b70)}
+.lockscreen{position:absolute;z-index:40;inset:0;display:none;color:white;background:transparent}
 .lock-clock{position:absolute;top:150px;width:100%;text-align:center;font-size:76px;font-weight:300;letter-spacing:-4px}
 .lock-date{position:absolute;top:230px;width:100%;text-align:center;font-size:15px}
 .lock-bottom{position:absolute;bottom:60px;width:100%;text-align:center;font-size:12px;color:#ffffffbb}
@@ -54,8 +54,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#17191e;display:flex
 .boot-logo{font-size:28px;font-weight:600;letter-spacing:2px;font-family:Arial,sans-serif}
 .boot-animation{display:none;position:absolute;inset:0;background:#000;align-items:center;justify-content:center}
 .boot-animation.active{display:flex}
-.boot-video{width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;background:#000}
+.boot-video{width:110%;height:110%;max-width:none;max-height:none;object-fit:contain;background:#000}
 .home-widgets{position:absolute;top:29%;left:8px;right:8px;height:21%;display:grid;grid-template-columns:1fr 1fr;gap:9px}.widget{border-radius:13px;background:#ffffffed;color:#333;padding:9px;font-size:10px;box-shadow:0 3px 12px #0002;overflow:hidden}.widget strong{font-size:14px;display:block;margin-bottom:5px}.widget small{color:#888}.widget-art{font-size:24px;margin-top:8px}.app-window{position:absolute;z-index:26;inset:0;background:#f6f7fa;color:#20232a;opacity:0;pointer-events:none;transform:scale(.12);transform-origin:var(--origin-x,50%) var(--origin-y,50%);transition:transform .34s cubic-bezier(.2,.8,.2,1),opacity .22s;overflow:hidden;border-radius:28px}.app-window.open{opacity:1;pointer-events:auto;transform:scale(1);border-radius:0}.app-window-head{height:90px;padding:48px 18px 12px;font-size:24px;font-weight:600;background:#fff}.app-window-content{padding:20px;font-size:15px}.app-window-back{float:right;border:0;background:#eee;border-radius:20px;padding:6px 12px;font-size:14px}.app-card{background:white;border-radius:15px;padding:17px;margin:10px 0}.home-page-dots{position:absolute;bottom:69px;left:0;right:0;text-align:center;color:#fff;font-size:10px;letter-spacing:4px;text-shadow:0 1px 3px #333}.app:active .app-icon,.dock .app-icon:active{transform:scale(.9)}
+/* Shared wallpaper, punch-hole camera, and app transition polish */
+.wallpaper{transform:scale(1);transition:transform .42s cubic-bezier(.2,.8,.2,1)}
+.home-screen,.wallpaper{transform-origin:center center}
+.home-screen.app-active{transform:scale(.91);transition:transform .34s cubic-bezier(.2,.8,.2,1)}
+.home-screen.app-active .app-icon{transform:scale(.82);transition:transform .34s cubic-bezier(.2,.8,.2,1)}
+.screen:has(.app-window.open) .wallpaper,.screen:has(.settings.open) .wallpaper{transform:scale(1.13)}
+.app-window{touch-action:pan-y}
+.app-window:not(.open){pointer-events:none}
+.app,.app-icon,.dock{touch-action:manipulation}
+.app{cursor:pointer;-webkit-user-select:none;user-select:none}
+.boot-animation{overflow:hidden}
 @media(max-height:720px){.phone{height:94dvh;width:auto;aspect-ratio:340/690}}
 
 /* Smooth single-tap app launch and layered unlock */
@@ -204,8 +215,8 @@ bootVideo.addEventListener("error",()=>{if(phoneOn&&screenMode==="boot")finishBo
 bootVideo.addEventListener("timeupdate",()=>{if(phoneOn&&screenMode==="boot"&&Number.isFinite(bootVideo.duration)&&bootVideo.duration>0&&bootVideo.currentTime>=bootVideo.duration-.12)finishBoot();});
 function originFrom(el){const r=el.getBoundingClientRect(),s=screen.getBoundingClientRect();screen.style.setProperty("--origin-x",((r.left+r.width/2-s.left)/s.width*100)+"%");screen.style.setProperty("--origin-y",((r.top+r.height/2-s.top)/s.height*100)+"%");}
 const appCopy={Music:"Your music library<br><div class='app-card'>♫　Recently played</div><div class='app-card'>♫　Favorites</div>",Video:"Discover videos<br><div class='app-card'>▶　Featured videos</div>",Themes:"Personalize your phone<br><div class='app-card'>🎨　Themes　　Wallpapers</div>",VMall:"Huawei online store<br><div class='app-card'>Featured devices and accessories</div>",AppGallery:"Explore apps and games<br><div class='app-card'>Recommended apps</div>",Email:"Inbox<br><div class='app-card'>✉　No new messages</div>",Gallery:"Albums<br><div class='app-card'>🌄　All photos</div>",Phone:"Keypad<br><div class='app-card'>☎　Contacts　　Recents</div>",Messages:"Messages<br><div class='app-card'>No conversations yet</div>",Browser:"Search or enter website<br><div class='app-card'>🌐　Web browser</div>",Camera:"Camera<br><div class='app-card'>📷　Camera preview</div>"};
-function openApp(name,el){if(!phoneOn||screenMode!=="home")return;originFrom(el);if(name==="Settings"){screenMode="settings";settingsApp.style.setProperty("--origin-x",getComputedStyle(screen).getPropertyValue("--origin-x"));settingsApp.style.setProperty("--origin-y",getComputedStyle(screen).getPropertyValue("--origin-y"));settingsApp.classList.add("open");homeIndicator.style.display="block";return;}appWindowTitle.textContent=name;appWindowContent.innerHTML=appCopy[name]||name;appWindow.classList.add("open");screenMode="app";homeIndicator.style.display="block";}
-function closeApp(){if(screenMode==="settings"){settingsApp.classList.remove("open");}else if(screenMode==="app"){appWindow.classList.remove("open");}else return;homeIndicator.style.display="none";setTimeout(()=>{if(screenMode==="settings"||screenMode==="app")screenMode="home";},350);}
+function openApp(name,el){if(!phoneOn||screenMode!=="home")return;originFrom(el);document.getElementById("homeScreen").classList.add("app-active");if(name==="Settings"){screenMode="settings";settingsApp.style.setProperty("--origin-x",getComputedStyle(screen).getPropertyValue("--origin-x"));settingsApp.style.setProperty("--origin-y",getComputedStyle(screen).getPropertyValue("--origin-y"));settingsApp.classList.add("open");homeIndicator.style.display="block";return;}appWindowTitle.textContent=name;appWindowContent.innerHTML=appCopy[name]||name;appWindow.classList.add("open");screenMode="app";homeIndicator.style.display="block";}
+function closeApp(){if(screenMode!=="settings"&&screenMode!=="app")return;const wasSettings=screenMode==="settings";screenMode="home";homeIndicator.style.display="none";document.getElementById("homeScreen").classList.remove("app-active");if(wasSettings)settingsApp.classList.remove("open");else appWindow.classList.remove("open");}
 document.querySelectorAll(".app[data-app]").forEach(el=>el.addEventListener("click",()=>openApp(el.dataset.app,el)));
 
 function powerToggle(){if(phoneOn){phoneOn=false;screenMode="off";clearTimeout(bootTimer1);clearTimeout(bootTimerFallback);bootVideo.pause();bootScreen.style.display="none";bootAnimation.classList.remove("active");settingsApp.classList.remove("open");appWindow.classList.remove("open");lockScreen.style.display="none";poweredOff.style.display="block";homeIndicator.style.display="none";}else{phoneOn=true;screenMode="lock";poweredOff.style.display="none";bootScreen.style.display="none";lockScreen.style.display="block";homeIndicator.style.display="none";}}
