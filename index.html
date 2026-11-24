@@ -59,6 +59,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#17191e;display:flex
 /* Shared wallpaper, punch-hole camera, and app transition polish */
 .wallpaper{transform:scale(1);transition:transform .42s cubic-bezier(.2,.8,.2,1)}
 .home-screen,.wallpaper{transform-origin:center center}
+.home-screen{transition:transform .38s cubic-bezier(.2,.8,.2,1)}
 .home-screen.app-active{transform:scale(.91);transition:transform .34s cubic-bezier(.2,.8,.2,1)}
 .home-screen.app-active .app-icon{transform:scale(.82);transition:transform .34s cubic-bezier(.2,.8,.2,1)}
 .screen:has(.app-window.open) .wallpaper,.screen:has(.settings.open) .wallpaper{transform:scale(1.13)}
@@ -85,6 +86,25 @@ html,body{width:100%;height:100%;overflow:hidden;background:#17191e;display:flex
 .home-screen.unlocking .app:nth-child(8){animation-delay:.40s}
 .home-screen.unlocking .dock{animation:layerIn .42s .43s both cubic-bezier(.2,.8,.2,1)}
 @keyframes layerIn{from{opacity:0;transform:translateY(18px) scale(.88)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* HarmonyOS lockscreen and home refresh */
+.wallpaper{background:radial-gradient(ellipse at 78% 2%,#ffb3ce 0%,transparent 25%),radial-gradient(ellipse at 12% 15%,#174cff 0%,transparent 36%),radial-gradient(ellipse at 54% 38%,#1268f2 0%,#071c67 58%,#020817 100%);}
+.wallpaper:after{content:"";position:absolute;left:-25%;right:-25%;top:51%;height:23%;border-radius:50%;border-top:8px solid #18e4ff;border-bottom:5px solid #f64acb;box-shadow:0 -5px 8px #ffffffaa,0 5px 12px #6d4dff;transform:rotate(13deg);filter:blur(1px);}
+.apps{top:15%;bottom:112px;align-content:start;grid-template-rows:repeat(2,auto);row-gap:23px;}
+.app{font-size:10px;font-weight:500;text-shadow:0 1px 4px #0009;gap:6px;}
+.app-icon{width:47px;height:47px;border-radius:14px;font-size:25px;border:1px solid #ffffff55;box-shadow:0 5px 13px #0004,inset 0 1px 2px #ffffff66;background:linear-gradient(145deg,#ffffff,#dce7f7);}
+.dock{background:#ffffff20;backdrop-filter:blur(14px);border:1px solid #ffffff22;height:58px;}
+.dock .app-icon{width:42px;height:42px;border-radius:14px;}
+.home-screen.app-active .app-icon{transform:scale(.78);}
+.home-screen .app-icon{transition:transform .38s cubic-bezier(.2,.8,.2,1),box-shadow .2s;}
+.lockscreen{background:transparent;}
+.lock-clock{top:22%;font-size:88px;line-height:.88;font-weight:800;letter-spacing:-5px;text-shadow:0 2px 12px #001b4a55;}
+.lock-date{top:69%;font-size:15px;font-weight:600;text-shadow:0 1px 5px #001b4a;}
+.lock-bottom{bottom:26px;font-size:11px;}
+.lock-shortcuts{position:absolute;left:20px;right:20px;bottom:57px;display:flex;justify-content:space-between;align-items:center;}
+.lock-shortcut{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:25px;color:white;background:#8060e8aa;box-shadow:0 3px 12px #0003;backdrop-filter:blur(10px);}
+.home-widgets{display:none!important;}
+
 </style>
 </head>
 <body>
@@ -96,7 +116,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#17191e;display:flex
 <div class="camera"></div>
 
 <div class="home-screen" id="homeScreen">
-<div class="home-widgets"><div class="widget"><strong>Welcome<br>Smart Suggestions</strong><small>Quick access to your favorite services</small><div class="widget-art">🌿 📘 🟡</div></div><div class="widget"><strong>0°　☀️</strong><small>Weather and quick services</small><div class="widget-art">▶</div></div></div>
+
 <div class="apps">
 <div class="app" data-app="Music"><div class="app-icon" style="color:#267bdc">♫</div>Music</div>
 <div class="app" data-app="Video"><div class="app-icon" style="color:#ed5c55">▶</div>Video</div>
@@ -131,7 +151,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#17191e;display:flex
 <div class="lockscreen" id="lockScreen">
 <div class="lock-clock" id="lockClock">16:28</div>
 <div class="lock-date" id="lockDate">Sunday, November 22</div>
-<div class="lock-bottom">Swipe up to unlock</div>
+<div class="lock-shortcuts"><div class="lock-shortcut">◉</div><div class="lock-shortcut">▣</div></div><div class="lock-bottom">Swipe up to unlock</div>
 </div>
 
 <div class="powered-off" id="poweredOff"></div>
@@ -228,7 +248,7 @@ powerButton.addEventListener("click",powerToggle);
 function handleSwipe(y,x,dy,dx){if(!phoneOn||dy>-55||dx>70)return;const b=screen.getBoundingClientRect(),pos=y-b.top;if(screenMode==="lock"){const home=document.getElementById("homeScreen");home.style.display="block";lockScreen.classList.add("unlocking");home.classList.remove("unlocking");void home.offsetWidth;home.classList.add("unlocking");setTimeout(()=>{if(screenMode==="lock"){lockScreen.style.display="none";lockScreen.classList.remove("unlocking");screenMode="home";setTimeout(()=>home.classList.remove("unlocking"),650);}},420);return;}if(screenMode==="settings"||screenMode==="app"){if(pos>b.height-65&&x>b.left+b.width*.3&&x<b.left+b.width*.7)closeApp();}}
 screen.addEventListener("touchstart",e=>{if(!phoneOn)return;startY=e.touches[0].clientY;startX=e.touches[0].clientX;gestureActive=true;},{passive:true});screen.addEventListener("touchend",e=>{if(!gestureActive)return;gestureActive=false;const t=e.changedTouches[0];handleSwipe(startY,startX,t.clientY-startY,Math.abs(t.clientX-startX));},{passive:true});
 screen.addEventListener("mousedown",e=>{mouseDown=true;mouseStartY=e.clientY;mouseStartX=e.clientX;});window.addEventListener("mouseup",e=>{if(!mouseDown)return;mouseDown=false;handleSwipe(mouseStartY,mouseStartX,e.clientY-mouseStartY,Math.abs(e.clientX-mouseStartX));});
-function updateClock(){const n=new Date(),t=n.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",hour12:false}),d=n.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});const homeClock=document.getElementById("homeClock"),homeDate=document.getElementById("homeDate"),lockClockEl=document.getElementById("lockClock"),statusTime=document.getElementById("statusTime"),lockDateEl=document.getElementById("lockDate");if(homeClock)homeClock.textContent=t;if(lockClockEl)lockClockEl.textContent=t;if(statusTime)statusTime.textContent=t;if(homeDate)homeDate.textContent=d;if(lockDateEl)lockDateEl.textContent=d;}
+function updateClock(){const n=new Date(),t=n.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",hour12:false}),d=n.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});const homeClock=document.getElementById("homeClock"),homeDate=document.getElementById("homeDate"),lockClockEl=document.getElementById("lockClock"),statusTime=document.getElementById("statusTime"),lockDateEl=document.getElementById("lockDate");if(homeClock)homeClock.textContent=t;if(lockClockEl)lockClockEl.innerHTML=t.slice(0,2)+"<br>"+t.slice(3,5);if(statusTime)statusTime.textContent=t;if(homeDate)homeDate.textContent=d;if(lockDateEl)lockDateEl.textContent=d;}
 // Start the boot sequence before optional clock updates, so a missing decorative element cannot stop startup.
 document.getElementById("homeScreen").style.display="none";startInitialBoot();updateClock();setInterval(updateClock,1000);
 document.addEventListener("contextmenu",e=>e.preventDefault());document.addEventListener("dblclick",e=>e.preventDefault());document.addEventListener("selectstart",e=>e.preventDefault());document.addEventListener("gesturestart",e=>e.preventDefault());
